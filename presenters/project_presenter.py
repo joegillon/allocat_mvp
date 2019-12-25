@@ -1,20 +1,23 @@
 import ObjectListView as olv
+import lib.ui_lib as uil
 from models.project import Project
+from views.asn_dlg import AsnDlg
 
 
 class ProjectPresenter(object):
     def __init__(self, model, view, actor, employees):
         self.model = model
         self.view = view
+        self.employees = employees
         self.selectedIdx = 0
         actor.Install(self, view)
         self.isListening = True
-        self.initView(employees)
+        self.initView()
 
-    def initView(self, employees):
+    def initView(self,):
         self.view.setList(self.model)
-        investigators = [rec for rec in employees if rec.investigator]
-        managers = [rec for rec in employees if not rec.investigator]
+        investigators = [rec for rec in self.employees if rec.investigator]
+        managers = [rec for rec in self.employees if not rec.investigator]
         self.view.loadPI(investigators)
         self.view.loadPM(managers)
         self.view.setSelection(0)
@@ -140,9 +143,26 @@ class ProjectPresenter(object):
         self.loadView()
 
     def addAsn(self):
-        from views.project.asn_dlg import PrjAsnDlg
+        prj = self.view.getSelection()
+        owner = 'Project: %s' % prj.nickname
+        assignee = uil.ObjComboBox(self.view,
+                               self.employees,
+                               'name',
+                               'Employee',
+                               style=16)
 
-        dlg = PrjAsnDlg(self.view, -1, 'New Assignment', self.view.getSelectedIdx(), None)
+        dlg = AsnDlg(self.view, -1, 'New Assignment', owner, assignee)
+        dlg.ShowModal()
+
+    def dropAsn(self):
+        pass
+
+    def editAsn(self, asn):
+        prj = self.view.getSelection()
+        owner = 'Project: %s' % prj.nickname
+        assignee = 'Employee: %s' % asn.employee
+        # assignee = uil.getAssigneeLabel(self.view, 'Employee: %s' % asn.employee)
+        dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
         dlg.ShowModal()
 
     def dataFieldUpdated(self):

@@ -66,18 +66,21 @@ def showListHelp():
            "Double click to edit.")
     wx.MessageBox(msg, 'Help', wx.OK | wx.ICON_INFORMATION)
 
+def getAssigneeLabel(dummyParent, text):
+    return wx.StaticText(dummyParent, wx.ID_ANY, '')
+
 
 class ObjComboBox(wx.ComboBox):
     def __init__(self, parent, choices, display_fld, name, style=None):
         wx.ComboBox.__init__(self, parent, wx.ID_ANY, style=style, name=name)
 
-        self.choices = choices
-        self.display_fld = display_fld
+        self.setChoices(choices, display_fld)
+        self.SetLabelText(name + ': ')
 
-    def setChoices(self, choices):
+    def setChoices(self, choices, display_fld):
         self.Clear()
         for choice in choices:
-            self.Append(getattr(choice, self.display_fld))
+            self.Append(getattr(choice, display_fld))
 
     def getSelectionId(self):
         if self.CurrentSelection == -1:

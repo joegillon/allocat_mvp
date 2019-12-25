@@ -1,6 +1,6 @@
 import wx
 import globals as gbl
-from views.project.project_view import ProjectPanel
+from views.project.project_panel import ProjectPanel
 from interactors.project_interactor import ProjectInteractor
 from presenters.project_presenter import ProjectPresenter
 from dal.dao import Dao

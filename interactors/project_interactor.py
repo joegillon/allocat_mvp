@@ -1,5 +1,4 @@
 import wx
-import lib.ui_lib as uil
 
 
 class ProjectInteractor(object):
@@ -25,6 +24,8 @@ class ProjectInteractor(object):
         view.dropBtn.Bind(wx.EVT_BUTTON, self.OnDrop)
 
         view.addAsnBtn.Bind(wx.EVT_BUTTON, self.OnAsnAdd)
+        view.dropAsnBtn.Bind(wx.EVT_BUTTON, self.OnAsnDrop)
+        view.asnListCtrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnAsnListDblClick)
 
     def OnFltr(self, evt):
         self.presenter.applyFilter(evt)
@@ -49,6 +50,12 @@ class ProjectInteractor(object):
 
     def OnAsnAdd(self, evt):
         self.presenter.addAsn()
+
+    def OnAsnDrop(self, evt):
+        self.presenter.dropAsn()
+
+    def OnAsnListDblClick(self, evt):
+        self.presenter.editAsn(evt.EventObject.GetSelectedObject())
 
     def OnDataFieldUpdated(self, evt):
         self.presenter.dataFieldUpdated()
