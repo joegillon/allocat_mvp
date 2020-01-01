@@ -1,15 +1,10 @@
 from collections import namedtuple
 
-# Our dataset
-prjRex = {}
-empRex = {}
 
-# These are to validate uniqueness
-prjNames = {}
-prjNicknames = {}
-empNames = {}
+# DB_PATH = 'c:/bench/allocat/data/allocat.db'
+DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
-DB_PATH = 'c:/bench/allocat/data/allocat.db'
+theDataSet = None
 
 Skin = namedtuple('Skin', [
     'pnlBg', 'tbBg', 'tbFg', 'lstBg', 'lstHdr', 'lstSel',
@@ -164,6 +159,6 @@ SKINS = {
 COLOR_SCHEME = SKINS['Tan']
 
 # Declare these vars globally
-widestEmpName = 0
-widestPrjName = 0
-widestNickname = 0
+# widestEmpName = 0
+# widestPrjName = 0
+# widestFullName = 0

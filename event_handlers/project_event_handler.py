@@ -1,7 +1,8 @@
 import wx
+import lib.ui_lib as uil
 
 
-class ProjectInteractor(object):
+class ProjectEventHandler(object):
 
     def Install(self, presenter, view):
         self.presenter = presenter
@@ -15,7 +16,7 @@ class ProjectInteractor(object):
         view.helpBtn.Bind(wx.EVT_BUTTON, self.OnHelpClick)
 
         view.nameCtrl.Bind(wx.EVT_TEXT, self.OnDataFieldUpdated)
-        view.nicknameCtrl.Bind(wx.EVT_TEXT, self.OnDataFieldUpdated)
+        view.fullNameCtrl.Bind(wx.EVT_TEXT, self.OnDataFieldUpdated)
         view.frumCtrl.Bind(wx.EVT_TEXT, self.OnDataFieldUpdated)
         view.thruCtrl.Bind(wx.EVT_TEXT, self.OnDataFieldUpdated)
 
@@ -28,10 +29,15 @@ class ProjectInteractor(object):
         view.asnListCtrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnAsnListDblClick)
 
     def OnFltr(self, evt):
-        self.presenter.applyFilter(evt)
+        ctrl = evt.EventObject.Parent.Name
+        c = chr(evt.GetUnicodeKey())
+        target = evt.EventObject.GetValue()
+        self.presenter.applyFilter(ctrl, c, target)
+        evt.Skip()
 
     def OnFltrCancel(self, evt):
-        self.presenter.cancelFilter(evt)
+        self.presenter.cancelFilter(evt.EventObject)
+        evt.Skip()
 
     def OnHelpClick(self, evt):
         self.presenter.showHelp()
@@ -43,7 +49,8 @@ class ProjectInteractor(object):
         self.presenter.save()
 
     def OnDrop(self, evt):
-        self.presenter.drop()
+        if uil.confirm(self.view, 'Drop selected project?'):
+            self.presenter.drop()
 
     def OnListSelect(self, evt):
         self.presenter.loadDetails()

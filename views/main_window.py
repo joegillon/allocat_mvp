@@ -1,11 +1,15 @@
 import wx
 import globals as gbl
-from views.project.project_panel import ProjectPanel
-from interactors.project_interactor import ProjectInteractor
-from presenters.project_presenter import ProjectPresenter
 from dal.dao import Dao
-from models.project import Project
+from event_handlers.project_event_handler import ProjectEventHandler
 from models.employee import Employee
+from models.project import Project
+from models.assignment import Assignment
+from presenters.project_presenter import ProjectPresenter
+from views.project_panel import ProjectPanel
+import lib.ui_lib as uil
+
+
 # from views.employees.tab_panel import EmpTabPanel
 # from views.efforts.eff_tab import EffTab
 
@@ -18,19 +22,16 @@ class MainWindow(wx.Frame):
 
         panel.SetBackgroundColour(gbl.COLOR_SCHEME.pnlBg)
         notebook = wx.Notebook(panel)
-
-        dao = Dao(stateful=True)
-        prj_model = Project.get_all(dao)
-        emp_model = Employee.get_all(dao)
-        dao.close()
+        layout.Add(notebook, 0, wx.EXPAND, 5)
 
         prj_view = ProjectPanel(notebook)
-        prj_actor = ProjectInteractor()
-        presenter = ProjectPresenter(prj_model, prj_view, prj_actor, emp_model)
+        prj_actor = ProjectEventHandler()
+        prj_presenter = ProjectPresenter(prj_view, prj_actor)
 
         notebook.AddPage(prj_view, 'Projects')
         # notebook.AddPage(EmpTabPanel(notebook), 'Employees')
         # notebook.AddPage(EffTab(notebook), 'Scoreboard')
-        layout.Add(notebook, 0, wx.EXPAND, 5)
 
         panel.SetSizer(layout)
+
+        prj_presenter.initView()

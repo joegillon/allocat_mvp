@@ -66,8 +66,16 @@ def showListHelp():
            "Double click to edit.")
     wx.MessageBox(msg, 'Help', wx.OK | wx.ICON_INFORMATION)
 
-def getAssigneeLabel(dummyParent, text):
-    return wx.StaticText(dummyParent, wx.ID_ANY, '')
+
+def showError(msg):
+    wx.MessageBox(msg, 'Oops!', wx.OK | wx.ICON_ERROR)
+
+
+def confirm(parent, msg):
+    dlg = wx.MessageDialog(parent, msg, 'Just making sure...',
+                           wx.YES_NO | wx.ICON_QUESTION)
+    reply = dlg.ShowModal()
+    return reply == wx.ID_YES
 
 
 class ObjComboBox(wx.ComboBox):
@@ -79,13 +87,29 @@ class ObjComboBox(wx.ComboBox):
 
     def setChoices(self, choices, display_fld):
         self.Clear()
+        self.Append('')     # Without this can't SetValue to ''
+        i = 1
         for choice in choices:
             self.Append(getattr(choice, display_fld))
+            self.SetClientObject(i, choice)
+            i += 1
 
     def getSelectionId(self):
-        if self.CurrentSelection == -1:
+        selection = self.getSelection()
+        if selection:
+            return selection.id
+        else:
             return None
-        return self.GetClientData(self.GetSelection())['id']
+
+    def setSelection(self, text):
+        x = text if text else ''
+        self.Select(self.GetItems().index(x))
+        self.SetValue(x)
+
+    def getSelection(self):
+        if self.CurrentSelection == 0:
+            return None
+        return self.GetClientData(self.GetSelection())
 
 
 def getWidestTextExtent(font, values):

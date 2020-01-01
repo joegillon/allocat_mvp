@@ -9,7 +9,7 @@ SCALE_100_PATTERN = r"^[0-9][0-9]?$|^100$"
 SCALE_15_PATTERN = r"^[0-9]$|^1[0-5]$"
 
 
-ProjectMatch = namedtuple('ProjectMatch', 'id values ')
+ProjectMatch = namedtuple('ProjectMatch', 'id values')
 EmployeeMatch = namedtuple('EmployeeMatch', 'id names')
 
 
@@ -26,38 +26,38 @@ def validatePrjName(value, match=None):
     return None
 
 
-def validatePrjNickname(value, match=None):
+def validatePrjFullName(value, match=None):
     if value is None or value == '':
-        return 'Project nickname required!'
+        return 'Project full name required!'
 
     if match:
         target = uil.set2compare(value)
         if target in match.values:
             if match.id == 0 or match.values[target] != match.id:
-                return 'Project nickname not unique!'
+                return 'Project full name not unique!'
 
     return None
 
 
-def validateTimeframe(firstMonth, lastMonth):
-    if not re.match(MONTH_PATTERN, firstMonth):
-        return 'First month invalid!'
+def validateTimeframe(frum, thru):
+    if not re.match(MONTH_PATTERN, frum):
+        return 'From date invalid!'
 
-    if not re.match(MONTH_PATTERN, lastMonth):
-        return 'Last month invalid!'
+    if not re.match(MONTH_PATTERN, thru):
+        return 'Thru date invalid!'
 
-    if not ml.isValidSpan(firstMonth, lastMonth):
-        return 'First Month must precede Last Month!'
+    if not ml.isValidSpan(frum, thru):
+        return 'From date must precede thru date!'
 
     return None
 
-def validateAsnTimeframe(firstMonth, lastMonth, prj=None):
-    errMsg = validateTimeframe(firstMonth, lastMonth)
+def validateAsnTimeframe(frum, thru, prj=None):
+    errMsg = validateTimeframe(frum, thru)
     if errMsg:
         return errMsg
 
     if prj:
-        if not ml.isInPrjSpan(prj, firstMonth, lastMonth):
+        if not ml.isInPrjSpan(prj, frum, thru):
             return 'Timeframe outside project timeframe!'
 
     return None
@@ -79,27 +79,12 @@ def validateEmpName(value, match=None):
     return None
 
 
-def validateGrade(value):
-    if not re.match(SCALE_15_PATTERN, value):
-        return 'Grade must be number between 0-15!'
-    return None
-
-
-def validateStep(value):
-    if not re.match(SCALE_15_PATTERN, value):
-        return 'Step must be number between 0-15!'
-    return None
-
-
 def validateFte(value):
+    if value is None or value == '':
+        return 'FTE required!'
+
     if not re.match(SCALE_100_PATTERN, value):
         return 'FTE must be number between 0-100!'
-    return None
-
-
-def validateInvestigator(value, grade):
-    if value == 1 and int(grade) < 13:
-        return 'Investigator grade must be >= 13!'
     return None
 
 

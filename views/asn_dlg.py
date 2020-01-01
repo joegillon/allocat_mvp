@@ -1,6 +1,6 @@
 import wx
 from views.assignment_panel import AssignmentPanel
-from interactors.assignment_interactor import AssignmentInteractor
+from event_handlers.assignment_event_handler import AssignmentInteractor
 from presenters.assignment_presenter import AssignmentPresenter
 
 

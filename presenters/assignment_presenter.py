@@ -19,7 +19,17 @@ class AssignmentPresenter(object):
             self.view.frumCtrl.SetFocus()
 
     def save(self):
-        pass
+        formValues = self.getFormValues()
+        # validate
+
 
     def cancel(self):
         self.view.Parent.Close()
+
+    def getFormValues(self):
+        return {
+            'frum': self.view.getFrum(),
+            'thru': self.view.getThru(),
+            'effort': self.view.getEffort(),
+            'notes': self.view.getNotes()
+        }

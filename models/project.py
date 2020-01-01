@@ -2,7 +2,7 @@ class Project(object):
     def __init__(self, d=None):
         self.id = None
         self.name = ''
-        self.nickname = ''
+        self.full_name = ''
         self.frum = ''
         self.thru = ''
         self.notes = ''
@@ -23,7 +23,7 @@ class Project(object):
                "LEFT JOIN employees i ON p.investigator_id=i.id "
                "LEFT JOIN employees m on p.manager_id=m.id "
                "WHERE p.active "
-               "ORDER BY nickname")
+               "ORDER BY name")
         rex = dao.execute(sql)
         return [Project(rec) for rec in rex] if rex else []
 
@@ -34,14 +34,14 @@ class Project(object):
                "LEFT JOIN employees i ON p.investigator_id=i.id "
                "LEFT JOIN employees m on p.manager_id=m.id "
                "WHERE NOT p.active "
-               "ORDER BY nickname")
+               "ORDER BY name")
         rex = dao.execute(sql)
         return [Project(rec) for rec in rex] if rex else []
 
     def getAsns(self, dao):
         from models.assignment import Assignment
 
-        sql = ("SELECT a.*, e.name AS employee, p.nickname AS project "
+        sql = ("SELECT a.*, e.name AS employee, p.name AS project "
                "FROM assignments a "
                "LEFT JOIN employees e ON a.employee_id=e.id "
                "LEFT JOIN projects p ON a.project_id=p.id "
