@@ -64,12 +64,12 @@ class AssignmentPanel(wx.Panel):
 
         frumLbl = wx.StaticText(panel, wx.ID_ANY, 'From: *')
         intervalLayout.Add(frumLbl, 0, wx.ALL, 5)
-        self.frumCtrl = uil.getMonthCtrl(panel, '')
+        self.frumCtrl = uil.get_month_ctrl(panel, '')
         intervalLayout.Add(self.frumCtrl, 0, wx.ALL, 5)
 
         thruLbl = wx.StaticText(panel, wx.ID_ANY, 'Thru: *')
         intervalLayout.Add(thruLbl, 0, wx.ALL, 5)
-        self.thruCtrl = uil.getMonthCtrl(panel, '')
+        self.thruCtrl = uil.get_month_ctrl(panel, '')
         intervalLayout.Add(self.thruCtrl, 0, wx.ALL, 5)
 
         layout.Add(intervalLayout)

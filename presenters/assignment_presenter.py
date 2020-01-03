@@ -12,10 +12,10 @@ class AssignmentPresenter(object):
 
     def initView(self):
         if self.model:
-            self.view.setFrum(self.model.frum)
-            self.view.setThru(self.model.thru)
+            self.view.set_frum(self.model.frum)
+            self.view.set_thru(self.model.thru)
             self.view.setEffort(self.model.effort)
-            self.view.setNotes(self.model.notes)
+            self.view.set_notes(self.model.notes)
             self.view.frumCtrl.SetFocus()
 
     def save(self):
@@ -28,8 +28,8 @@ class AssignmentPresenter(object):
 
     def getFormValues(self):
         return {
-            'frum': self.view.getFrum(),
-            'thru': self.view.getThru(),
+            'frum': self.view.get_frum(),
+            'thru': self.view.get_thru(),
             'effort': self.view.getEffort(),
-            'notes': self.view.getNotes()
+            'notes': self.view.get_notes()
         }

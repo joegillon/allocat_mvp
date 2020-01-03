@@ -60,7 +60,7 @@ class ProjectPanel(wx.Panel):
         panel.SetBackgroundColour(wx.Colour(gbl.COLOR_SCHEME.tbBg))
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
-        nameFltrLbl = uil.getToolbarLabel(panel, 'Name:')
+        nameFltrLbl = uil.get_toolbar_label(panel, 'Name:')
         nameFltrLbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
         layout.Add(nameFltrLbl, 0, wx.ALL, 5)
         self.nameFltrCtrl = wx.SearchCtrl(panel, wx.ID_ANY, '',
@@ -68,7 +68,7 @@ class ProjectPanel(wx.Panel):
         self.nameFltrCtrl.ShowCancelButton(True)
         layout.Add(self.nameFltrCtrl, 0, wx.ALL, 5)
 
-        notesFltrLbl = uil.getToolbarLabel(panel, 'Notes')
+        notesFltrLbl = uil.get_toolbar_label(panel, 'Notes')
         notesFltrLbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
         layout.Add(notesFltrLbl, 0, wx.ALL, 5)
 
@@ -77,7 +77,7 @@ class ProjectPanel(wx.Panel):
         self.notesFltrCtrl.ShowCancelButton(True)
         layout.Add(self.notesFltrCtrl, 0, wx.ALL, 5)
 
-        self.helpBtn = uil.getHelpBtn(panel)
+        self.helpBtn = uil.get_help_btn(panel)
         layout.Add(self.helpBtn, 0, wx.ALL, 5)
 
         panel.SetSizerAndFit(layout)
@@ -177,12 +177,12 @@ class ProjectPanel(wx.Panel):
 
         intervalLayout = wx.BoxSizer(wx.HORIZONTAL)
         frumLbl = wx.StaticText(panel, wx.ID_ANY, 'From: *')
-        self.frumCtrl = uil.getMonthCtrl(panel, '')
+        self.frumCtrl = uil.get_month_ctrl(panel, '')
         intervalLayout.Add(frumLbl, 0, wx.ALL, 5)
         intervalLayout.Add(self.frumCtrl, 0, wx.ALL, 5)
 
         thruLbl = wx.StaticText(panel, wx.ID_ANY, 'Thru: *')
-        self.thruCtrl = uil.getMonthCtrl(panel, '')
+        self.thruCtrl = uil.get_month_ctrl(panel, '')
         intervalLayout.Add(thruLbl, 0, wx.ALL, 5)
         intervalLayout.Add(self.thruCtrl, 0, wx.ALL, 5)
 
@@ -317,22 +317,22 @@ class ProjectPanel(wx.Panel):
         return value
 
     def loadPI(self, investigators):
-        self.piCtrl.setChoices(investigators, 'name')
+        self.piCtrl.set_choices(investigators, 'name')
 
     def setPI(self, value):
-        self.piCtrl.setSelection(value)
+        self.piCtrl.set_selection(value)
 
     def getPI(self):
-        return self.piCtrl.getSelection()
+        return self.piCtrl.get_selection()
 
     def loadPM(self, managers):
-        self.pmCtrl.setChoices(managers, 'name')
+        self.pmCtrl.set_choices(managers, 'name')
 
     def setPM(self, value):
-        self.pmCtrl.setSelection(value)
+        self.pmCtrl.set_selection(value)
 
     def getPM(self):
-        return self.pmCtrl.getSelection()
+        return self.pmCtrl.get_selection()
 
     def setNotes(self, value):
         self.notesCtrl.SetValue(value)

@@ -7,7 +7,7 @@ ColDef = namedtuple('ColDef', 'hdr just width fldName stringConverter')
 TabDef = namedtuple('TabDef', 'tblName srchFld colDefs dal dlg')
 
 
-def getToolbarLabel(panel, text):
+def get_toolbar_label(panel, text):
     font = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
                    wx.FONTWEIGHT_BOLD)
 
@@ -39,7 +39,7 @@ def toolbar_button(panel, label):
     return btn
 
 
-def getMonthCtrl(panel, value):
+def get_month_ctrl(panel, value):
     import wx.lib.masked as masked
     import lib.month_lib as ml
 
@@ -51,14 +51,14 @@ def getMonthCtrl(panel, value):
     return ctl
 
 
-def getHelpBtn(parent):
+def get_help_btn(parent):
     bmp = wx.Bitmap('images/question.png', wx.BITMAP_TYPE_ANY)
     return wx.BitmapButton(parent, wx.ID_ANY, bitmap=bmp,
                            size=(bmp.GetWidth() + 5,
                                  bmp.GetHeight() + 5))
 
 
-def showListHelp():
+def show_list_help():
     msg = ("Left click to select item.\n"
            "Ctrl-left click to select multiple separate items.\n"
            "Shift-left click to select multiple contiguous items.\n"
@@ -67,7 +67,7 @@ def showListHelp():
     wx.MessageBox(msg, 'Help', wx.OK | wx.ICON_INFORMATION)
 
 
-def showError(msg):
+def show_error(msg):
     wx.MessageBox(msg, 'Oops!', wx.OK | wx.ICON_ERROR)
 
 
@@ -82,10 +82,10 @@ class ObjComboBox(wx.ComboBox):
     def __init__(self, parent, choices, display_fld, name, style=None):
         wx.ComboBox.__init__(self, parent, wx.ID_ANY, style=style, name=name)
 
-        self.setChoices(choices, display_fld)
+        self.set_choices(choices, display_fld)
         self.SetLabelText(name + ': ')
 
-    def setChoices(self, choices, display_fld):
+    def set_choices(self, choices, display_fld):
         self.Clear()
         self.Append('')     # Without this can't SetValue to ''
         i = 1
@@ -94,36 +94,25 @@ class ObjComboBox(wx.ComboBox):
             self.SetClientObject(i, choice)
             i += 1
 
-    def getSelectionId(self):
-        selection = self.getSelection()
+    def get_selection_id(self):
+        selection = self.get_selection()
         if selection:
             return selection.id
         else:
             return None
 
-    def setSelection(self, text):
+    def set_selection(self, text):
         x = text if text else ''
         self.Select(self.GetItems().index(x))
         self.SetValue(x)
 
-    def getSelection(self):
+    def get_selection(self):
         if self.CurrentSelection == 0:
             return None
         return self.GetClientData(self.GetSelection())
 
 
-def getWidestTextExtent(font, values):
-    dc = wx.ScreenDC()
-    dc.SetFont(font)
-    result = 0
-    for value in values:
-        dim = dc.GetTextExtent(value)[0]
-        if dim > result:
-            result = dim
-    return result + (result * .1)
-
-
-def displayValue(obj, attr):
+def display_value(obj, attr):
     if not obj or not obj[attr]:
         return ''
     return obj[attr]
