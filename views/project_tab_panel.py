@@ -10,8 +10,8 @@ class ProjectTabPanel(TabPanel):
     def __init__(self, parent):
         super().__init__(parent, 'Project')
 
-    def set_columns(self, listCtrl):
-        listCtrl.SetColumns([
+    def set_columns(self, list_ctrl):
+        list_ctrl.SetColumns([
             olv.ColumnDefn('Name', 'left', 200, 'name'),
             olv.ColumnDefn('From', 'left', 105, 'frum',
                            stringConverter=ml.prettify),

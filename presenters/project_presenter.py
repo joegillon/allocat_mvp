@@ -7,14 +7,14 @@ from event_handlers.project_event_handler import ProjectEventHandler
 class ProjectPresenter(Presenter):
 
     def __init__(self, frame):
-        model = gbl.theDataSet.prjRex
+        model = gbl.dataset.prj_rex
         view = ProjectTabPanel(frame)
         actor = ProjectEventHandler()
         super().__init__(model, view, actor, 'Project')
 
     def load_combos(self):
-            investigators = [rec for rec in gbl.theDataSet.empRex if rec.investigator]
-            managers = [rec for rec in gbl.theDataSet.empRex if not rec.investigator]
+            investigators = [rec for rec in gbl.dataset.emp_rex if rec.investigator]
+            managers = [rec for rec in gbl.dataset.emp_rex if not rec.investigator]
             self.view.load_pi(investigators)
             self.view.load_pm(managers)
 
@@ -31,7 +31,7 @@ class ProjectPresenter(Presenter):
             self.view.set_pm(item.manager)
             self.view.set_notes(item.notes)
             if not item.asns:
-                item.asns = item.getAsns(Dao())
+                item.asns = item.get_asns(Dao())
             self.view.set_asn_list(item.asns)
             self.view.set_button_label('Update Project')
 
@@ -59,47 +59,47 @@ class ProjectPresenter(Presenter):
 
         values = self.get_form_values()
         prj = self.view.get_selection()
-        prjId = prj.id if prj else 0
+        prj_id = prj.id if prj else 0
 
-        prj_match = vl.ProjectMatch(prjId, gbl.theDataSet.prjNames)
-        errMsg = vl.validatePrjName(values['name'], prj_match)
-        if errMsg:
-            return errMsg
+        prj_match = vl.ProjectMatch(prj_id, gbl.dataset.prj_names)
+        err_msg = vl.validate_prj_name(values['name'], prj_match)
+        if err_msg:
+            return err_msg
 
-        prj_match = vl.ProjectMatch(prjId, gbl.theDataSet.prjFullNames)
-        errMsg = vl.validatePrjFullName(values['full_name'], prj_match)
-        if errMsg:
-            return errMsg
+        prj_match = vl.ProjectMatch(prj_id, gbl.dataset.prj_full_names)
+        err_msg = vl.validate_prj_full_name(values['full_name'], prj_match)
+        if err_msg:
+            return err_msg
 
-        errMsg = vl.validateTimeframe(values['frum'], values['thru'])
-        if errMsg:
-            return errMsg
+        err_msg = vl.validate_timeframe(values['frum'], values['thru'])
+        if err_msg:
+            return err_msg
 
         if prj and prj.asns:
             if values['frum'] < prj.frum or \
                 values['thru'] > prj.thru:
-                min, max = ml.getTimeframeEdges(prj.asns)
+                min, max = ml.get_timeframe_edges(prj.asns)
                 if values['frum'] < min or values['thru'] > max:
-                    errMsg = 'Assignment(s) out of new timeframe!'
-        if errMsg:
-            return errMsg
+                    err_msg = 'Assignment(s) out of new timeframe!'
+        if err_msg:
+            return err_msg
 
         return None
 
-    def get_new_model_values(self, formValues):
-        formValues['investigator_id'] = formValues['pi'].id
-        formValues['investigator'] = formValues['pi'].name
-        del formValues['pi']
-        formValues['manager_id'] = formValues['pm'].id
-        formValues['manager'] = formValues['pm'].name
-        del formValues['pm']
-        return formValues
+    def get_new_model_values(self, form_values):
+        form_values['investigator_id'] = form_values['pi'].id
+        form_values['investigator'] = form_values['pi'].name
+        del form_values['pi']
+        form_values['manager_id'] = form_values['pm'].id
+        form_values['manager'] = form_values['pm'].name
+        del form_values['pm']
+        return form_values
 
-    def update_model_values(self, prj, formValues):
-        prj.full_name = formValues['full_name']
-        prj.frum = formValues['frum']
-        prj.thru = formValues['thru']
-        prj.investigator_id = formValues['pi'].id
-        prj.investigator = formValues['pi'].name
-        prj.manager_id = formValues['pm'].id
-        prj.manager = formValues['pm'].name
+    def update_model_values(self, prj, form_values):
+        prj.full_name = form_values['full_name']
+        prj.frum = form_values['frum']
+        prj.thru = form_values['thru']
+        prj.investigator_id = form_values['pi'].id
+        prj.investigator = form_values['pi'].name
+        prj.manager_id = form_values['pm'].id
+        prj.manager = form_values['pm'].name

@@ -3,41 +3,41 @@ class AllocatDataSet(object):
     def __init__(self, db_path):
         self.db_path = db_path
 
-        self.prjRex = {}
-        self.empRex = {}
-        self.asnRex = {}
+        self.prj_rex = {}
+        self.emp_rex = {}
+        self.asn_rex = {}
 
         # These are to validate uniqueness
-        self.prjNames = {}
-        self.prjFullNames = {}
-        self.empNames = {}
+        self.prj_names = {}
+        self.prj_full_names = {}
+        self.emp_names = {}
 
-        self.buildDataSet()
+        self.build_dataset()
 
-    def getData(self):
+    def get_data(self):
         from dal.dao import Dao
         from models.project import Project
         from models.employee import Employee
         from models.assignment import Assignment
 
         dao = Dao(db_path=self.db_path, stateful=True)
-        self.prjRex = Project.get_all(dao)
-        self.empRex = Employee.get_all(dao)
-        self.asnRex = Assignment.get_all(dao)
+        self.prj_rex = Project.get_all(dao)
+        self.emp_rex = Employee.get_all(dao)
+        self.asn_rex = Assignment.get_all(dao)
         dao.close()
 
-    def buildDataSet(self):
+    def build_dataset(self):
         import lib.ui_lib as uil
 
-        self.getData()
+        self.get_data()
 
-        for prj in self.prjRex:
-            prj.asns = [asn for asn in self.asnRex if asn.project_id==prj.id]
-            self.prjNames[uil.set2compare(prj.name)] = prj.id
-            self.prjFullNames[uil.set2compare(prj.full_name)] = prj.id
+        for prj in self.prj_rex:
+            prj.asns = [asn for asn in self.asn_rex if asn.project_id == prj.id]
+            self.prj_names[uil.set2compare(prj.name)] = prj.id
+            self.prj_full_names[uil.set2compare(prj.full_name)] = prj.id
 
-        for emp in self.empRex:
-            emp.asns = [asn for asn in self.asnRex if asn.employee_id==emp.id]
-            self.empNames[uil.set2compare(emp.name)] = emp.id
+        for emp in self.emp_rex:
+            emp.asns = [asn for asn in self.asn_rex if asn.employee_id == emp.id]
+            self.emp_names[uil.set2compare(emp.name)] = emp.id
 
 

@@ -8,7 +8,7 @@ from presenters.project_presenter import ProjectPresenter
 class TestProjectPresenter(unittest.TestCase):
 
     def setUp(self):
-        gbl.theDataSet = AllocatDataSet(db_path='c:/bench/allocat/tests/allocat.db')
+        gbl.dataset = AllocatDataSet(db_path='c:/bench/allocat/tests/allocat.db')
         self.app = wx.App()
         self.frame = wx.Frame(None)
 
@@ -316,7 +316,6 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '01/20'
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/20'
 
-
     def testPrjNotesFilter(self):
         self.presenter.apply_filter('notes_fltr_ctrl', 'l', 'pau')
         assert self.presenter.view.list_ctrl.GetItemCount() == 1
@@ -440,59 +439,59 @@ class TestProjectPresenter(unittest.TestCase):
         self.presenter.clear()
 
         # No project name entered
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project name required!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project name required!'
 
         # Duplicate project name
         self.presenter.view.set_name('CFIR V2 LIP')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project name not unique!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project name not unique!'
 
         self.presenter.view.set_name('Test Prj 1')
 
         # No full name entered
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project full name required!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project full name required!'
 
         # Duplicate full name
         self.presenter.view.set_full_name('Morphomics (Su)')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project full name not unique!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project full name not unique!'
 
         self.presenter.view.set_full_name('Test Project One')
 
         # No frum date
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date invalid!'
 
         # Bogus from dates (UI always gets 4 digits)
         self.presenter.view.set_frum('0000')       # month 00
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date invalid!'
 
         self.presenter.view.set_frum('0013')       # month 13
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date invalid!'
 
         self.presenter.view.set_frum('2001')
 
         # Bogus thru dates (UI always gets 4 digits)
         self.presenter.view.set_thru('0000')       # month 00
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Thru date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Thru date invalid!'
 
         self.presenter.view.set_thru('0013')       # month 13
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Thru date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Thru date invalid!'
 
         # Frum date later than thru date
         self.presenter.view.set_thru('1912')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date must precede thru date!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date must precede thru date!'
 
         self.presenter.view.set_thru('2001')   # 1 month project
-        errMsg = self.presenter.validate()
-        assert errMsg == None
+        err_msg = self.presenter.validate()
+        assert err_msg == None
 
     def testValidateProjectFormOnUpdate(self):
         self.presenter.set_selection(1)
@@ -500,72 +499,72 @@ class TestProjectPresenter(unittest.TestCase):
 
         # No project name entered
         self.presenter.view.set_name('')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project name required!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project name required!'
 
         # Can't steal name from another project
         self.presenter.view.set_name('LIP 20-121 (Saint)')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project name not unique!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project name not unique!'
 
         # Duplicate project name OK since it's the same project
         self.presenter.view.set_name('CFIR V2 LIP')
-        errMsg = self.presenter.validate()
-        assert errMsg == None
+        err_msg = self.presenter.validate()
+        assert err_msg == None
 
         # Can rename the project with a unique name
         self.presenter.view.set_name('Test Prj 1')
-        errMsg = self.presenter.validate()
-        assert errMsg == None
+        err_msg = self.presenter.validate()
+        assert err_msg == None
 
         # No project full name entered
         self.presenter.view.set_full_name('')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project full name required!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project full name required!'
 
         # Can't steal full name from another project
         self.presenter.view.set_full_name('Morphomics (Su)')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Project full name not unique!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Project full name not unique!'
 
         # Duplicate project frull name OK since it's the same project
         self.presenter.view.set_full_name('Updating the Consolidated Framework for Implementation Research (CFIR V2)')
-        errMsg = self.presenter.validate()
-        assert errMsg == None
+        err_msg = self.presenter.validate()
+        assert err_msg == None
 
         # Can rename the project with a unique name
         self.presenter.view.set_full_name('Test Project One')
-        errMsg = self.presenter.validate()
-        assert errMsg == None
+        err_msg = self.presenter.validate()
+        assert err_msg == None
 
         # No frum date
         self.presenter.view.set_frum('0000')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date invalid!'
 
         self.presenter.view.set_frum('0013')       # month 13
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date invalid!'
 
         self.presenter.view.set_frum('2001')
 
         # Bogus thru dates (UI always gets 4 digits)
         self.presenter.view.set_thru('0000')       # month 00
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Thru date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Thru date invalid!'
 
         self.presenter.view.set_thru('0013')       # month 13
-        errMsg = self.presenter.validate()
-        assert errMsg == 'Thru date invalid!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'Thru date invalid!'
 
         # Frum date later than thru date
         self.presenter.view.set_thru('1912')
-        errMsg = self.presenter.validate()
-        assert errMsg == 'From date must precede thru date!'
+        err_msg = self.presenter.validate()
+        assert err_msg == 'From date must precede thru date!'
 
         self.presenter.view.set_thru('2001')   # 1 month project
-        errMsg = self.presenter.validate()
-        assert errMsg == None
+        err_msg = self.presenter.validate()
+        assert err_msg == None
 
     # This test has all valid data. See above invalid tests
     def testAddUpdatesModelAndView(self):

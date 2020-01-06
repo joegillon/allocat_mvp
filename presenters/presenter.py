@@ -97,18 +97,18 @@ class Presenter(object):
         self.refresh_list()
         self.set_selection(self.model.index(new_model))
 
-    def get_new_model_values(self, formValues):
+    def get_new_model_values(self, form_values):
             raise NotImplementedError("Please Implement this method")
 
-    def update_model(self, formValues):
+    def update_model(self, form_values):
         model = self.model[self.view.get_selected_idx()]
-        model.name = formValues['name']
-        self.update_model_values(model, formValues)
-        model.notes = formValues['notes']
+        model.name = form_values['name']
+        self.update_model_values(model, form_values)
+        model.notes = form_values['notes']
         self.refresh_list()
         self.set_selection(self.model.index(model))
 
-    def update_model_values(self, model, formValues):
+    def update_model_values(self, model, form_values):
             raise NotImplementedError("Please Implement this method")
 
     def drop(self):

@@ -13,7 +13,7 @@ ProjectMatch = namedtuple('ProjectMatch', 'id values')
 EmployeeMatch = namedtuple('EmployeeMatch', 'id names')
 
 
-def validatePrjName(value, match=None):
+def validate_prj_name(value, match=None):
     if value is None or value == '':
         return 'Project name required!'
 
@@ -26,7 +26,7 @@ def validatePrjName(value, match=None):
     return None
 
 
-def validatePrjFullName(value, match=None):
+def validate_prj_full_name(value, match=None):
     if value is None or value == '':
         return 'Project full name required!'
 
@@ -39,31 +39,31 @@ def validatePrjFullName(value, match=None):
     return None
 
 
-def validateTimeframe(frum, thru):
+def validate_timeframe(frum, thru):
     if not re.match(MONTH_PATTERN, frum):
         return 'From date invalid!'
 
     if not re.match(MONTH_PATTERN, thru):
         return 'Thru date invalid!'
 
-    if not ml.isValidSpan(frum, thru):
+    if not ml.is_valid_span(frum, thru):
         return 'From date must precede thru date!'
 
     return None
 
-def validateAsnTimeframe(frum, thru, prj=None):
-    errMsg = validateTimeframe(frum, thru)
+def validate_asn_timeframe(frum, thru, prj=None):
+    errMsg = validate_timeframe(frum, thru)
     if errMsg:
         return errMsg
 
     if prj:
-        if not ml.isInPrjSpan(prj, frum, thru):
+        if not ml.is_in_prj_span(prj, frum, thru):
             return 'Timeframe outside project timeframe!'
 
     return None
 
 
-def validateEmpName(value, match=None):
+def validate_emp_name(value, match=None):
     if value is None or value == '':
         return 'Employee name required!'
 
@@ -79,7 +79,7 @@ def validateEmpName(value, match=None):
     return None
 
 
-def validateFte(value):
+def validate_fte(value):
     if value is None or value == '':
         return 'FTE required!'
 
@@ -88,7 +88,7 @@ def validateFte(value):
     return None
 
 
-def validateEffort(value):
+def validate_effort(value):
     if value is None or value == '':
         return 'Percent effort required!'
 

@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     app = wx.App()
 
-    gbl.theDataSet = AllocatDataSet(gbl.DB_PATH)
+    gbl.dataset = AllocatDataSet(gbl.DB_PATH)
 
     main_window = MainWindow()
     main_window.Show()

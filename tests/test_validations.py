@@ -26,22 +26,22 @@ class ValidationTestSuite(unittest.TestCase):
         prj_match = ProjectMatch(18, self.prjNames)
 
         # Project name cannot be None
-        result = validatePrjName(None, prj_match)
+        result = validate_prj_name(None, prj_match)
         self.assertEqual(result, 'Project name required!')
 
         # Project name cannot be ''
-        result = validatePrjName('', prj_match)
+        result = validate_prj_name('', prj_match)
         self.assertEqual(result, 'Project name required!')
 
         # Project name must be unique
-        result = validatePrjName('test  name 2', prj_match)
+        result = validate_prj_name('test  name 2', prj_match)
         self.assertEqual(result, 'Project name not unique!')
 
         # Now we have a match but it's the current project
-        result = validatePrjName('test  name 3', prj_match)
+        result = validate_prj_name('test  name 3', prj_match)
         self.assertIsNone(result)
 
-        result = validatePrjName('Unused project name', prj_match)
+        result = validate_prj_name('Unused project name', prj_match)
         self.assertIsNone(result)
 
     def testNickname(self):
@@ -64,49 +64,49 @@ class ValidationTestSuite(unittest.TestCase):
         self.assertIsNone(result)
 
     def testTimeframe(self):
-        result = validateTimeframe('', '')
+        result = validate_timeframe('', '')
         self.assertEqual(result, 'First month invalid!')
 
-        result = validateTimeframe('00', '')
+        result = validate_timeframe('00', '')
         self.assertEqual(result, 'First month invalid!')
 
-        result = validateTimeframe('01', '')
+        result = validate_timeframe('01', '')
         self.assertEqual(result, 'First month invalid!')
 
-        result = validateTimeframe('010', '')
+        result = validate_timeframe('010', '')
         self.assertEqual(result, 'First month invalid!')
 
-        result = validateTimeframe('0000', '')
+        result = validate_timeframe('0000', '')
         self.assertEqual(result, 'First month invalid!')
 
-        result = validateTimeframe('0013', '')
+        result = validate_timeframe('0013', '')
         self.assertEqual(result, 'First month invalid!')
 
-        result = validateTimeframe('0001', '')
+        result = validate_timeframe('0001', '')
         self.assertEqual(result, 'Last month invalid!')
 
-        result = validateTimeframe('0001', '00')
+        result = validate_timeframe('0001', '00')
         self.assertEqual(result, 'Last month invalid!')
 
-        result = validateTimeframe('0001', '010')
+        result = validate_timeframe('0001', '010')
         self.assertEqual(result, 'Last month invalid!')
 
-        result = validateTimeframe('0001', '0000')
+        result = validate_timeframe('0001', '0000')
         self.assertEqual(result, 'Last month invalid!')
 
-        result = validateTimeframe('0001', '0013')
+        result = validate_timeframe('0001', '0013')
         self.assertEqual(result, 'Last month invalid!')
 
-        result = validateTimeframe('0001', '00131')
+        result = validate_timeframe('0001', '00131')
         self.assertEqual(result, 'Last month invalid!')
 
-        result = validateTimeframe('1902', '1901')
+        result = validate_timeframe('1902', '1901')
         self.assertEqual(result, 'First Month must precede Last Month!')
 
-        result = validateTimeframe('1901', '1812')
+        result = validate_timeframe('1901', '1812')
         self.assertEqual(result, 'First Month must precede Last Month!')
 
-        result = validateTimeframe('1912', '2001')
+        result = validate_timeframe('1912', '2001')
         self.assertIsNone(result)
 
         prj = {
@@ -115,105 +115,105 @@ class ValidationTestSuite(unittest.TestCase):
             'first_month': '1407',
             'last_month': '1906'
         }
-        result = validateAsnTimeframe('1406', '1906', prj)
+        result = validate_asn_timeframe('1406', '1906', prj)
         self.assertEqual(result, 'Timeframe outside project timeframe!')
 
         prj['first_month'] = '1407'
-        result = validateAsnTimeframe('1407', '1907', prj)
+        result = validate_asn_timeframe('1407', '1907', prj)
         self.assertEqual(result, 'Timeframe outside project timeframe!')
 
         prj['last_month'] = '1906'
-        result = validateAsnTimeframe('1407', '1906', prj)
+        result = validate_asn_timeframe('1407', '1906', prj)
         self.assertIsNone(result)
 
     def testEmpName(self):
         emp_match = EmployeeMatch(1, self.empNames)
 
-        result = validateEmpName(None)
+        result = validate_emp_name(None)
         self.assertEqual(result, 'Employee name required!')
 
-        result = validateEmpName('')
+        result = validate_emp_name('')
         self.assertEqual(result, 'Employee name required!')
 
-        result = validateEmpName('groucho marx', emp_match)
+        result = validate_emp_name('groucho marx', emp_match)
         self.assertEqual(result, 'Employee name invalid!')
 
-        result = validateEmpName('marx', emp_match)
+        result = validate_emp_name('marx', emp_match)
         self.assertEqual(result, 'Employee name invalid!')
 
-        result = validateEmpName('_marx,groucho', emp_match)
+        result = validate_emp_name('_marx,groucho', emp_match)
         self.assertEqual(result, 'Employee name invalid!')
 
-        result = validateEmpName('marx,groucho:', emp_match)
+        result = validate_emp_name('marx,groucho:', emp_match)
         self.assertEqual(result, 'Employee name invalid!')
 
-        result = validateEmpName('marx,  groucho', emp_match)
+        result = validate_emp_name('marx,  groucho', emp_match)
         self.assertIsNone(result)
 
-        result = validateEmpName('marx,harpo', emp_match)
+        result = validate_emp_name('marx,harpo', emp_match)
         self.assertEqual(result, 'Employee name not unique!')
 
-        result = validateEmpName('name-hyphenated,bozo', emp_match)
+        result = validate_emp_name('name-hyphenated,bozo', emp_match)
         self.assertEqual(result, 'Employee name not unique!')
 
-        result = validateEmpName('marx, zeppo', emp_match)
+        result = validate_emp_name('marx, zeppo', emp_match)
         self.assertIsNone(result)
 
-        result = validateEmpName("o'marx, groucho", emp_match)
+        result = validate_emp_name("o'marx, groucho", emp_match)
         self.assertIsNone(result)
 
-        result = validateEmpName("marx, o'groucho", emp_match)
+        result = validate_emp_name("marx, o'groucho", emp_match)
         self.assertIsNone(result)
 
-        result = validateEmpName('marx-karl, groucho', emp_match)
+        result = validate_emp_name('marx-karl, groucho', emp_match)
         self.assertIsNone(result)
 
-        result = validateEmpName('marx, karl-groucho', emp_match)
+        result = validate_emp_name('marx, karl-groucho', emp_match)
         self.assertIsNone(result)
 
     def testFte(self):
-        result = validateFte("")
+        result = validate_fte("")
         self.assertEqual(result, 'FTE required!')
 
-        result = validateFte('x2')
+        result = validate_fte('x2')
         self.assertEqual(result, 'FTE must be number between 0-100!')
 
-        result = validateFte('-1')
+        result = validate_fte('-1')
         self.assertEqual(result, 'FTE must be number between 0-100!')
 
-        result = validateFte('101')
+        result = validate_fte('101')
         self.assertEqual(result, 'FTE must be number between 0-100!')
 
-        result = validateFte('0')
+        result = validate_fte('0')
         self.assertIsNone(result)
 
-        result = validateFte('100')
+        result = validate_fte('100')
         self.assertIsNone(result)
 
-        result = validateFte('22')
+        result = validate_fte('22')
         self.assertIsNone(result)
 
     def testEffort(self):
-        result = validateEffort(None)
+        result = validate_effort(None)
         self.assertEqual(result, 'Percent effort required!')
 
-        result = validateEffort("")
+        result = validate_effort("")
         self.assertEqual(result, 'Percent effort required!')
 
-        result = validateEffort('x2')
+        result = validate_effort('x2')
         self.assertEqual(result, 'Percent effort must be number between 0-100!')
 
-        result = validateEffort('-1')
+        result = validate_effort('-1')
         self.assertEqual(result, 'Percent effort must be number between 0-100!')
 
-        result = validateEffort('101')
+        result = validate_effort('101')
         self.assertEqual(result, 'Percent effort must be number between 0-100!')
 
-        result = validateEffort('0')
+        result = validate_effort('0')
         self.assertIsNone(result)
 
-        result = validateEffort('100')
+        result = validate_effort('100')
         self.assertIsNone(result)
 
-        result = validateEffort('22')
+        result = validate_effort('22')
         self.assertIsNone(result)

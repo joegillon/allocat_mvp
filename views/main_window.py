@@ -1,8 +1,7 @@
 import wx
 import globals as gbl
-from event_handlers.project_event_handler import ProjectEventHandler
 from presenters.project_presenter import ProjectPresenter
-from views.project_tab_panel import ProjectTabPanel
+from presenters.employee_presenter import EmployeePresenter
 
 
 class MainWindow(wx.Frame):
@@ -16,11 +15,13 @@ class MainWindow(wx.Frame):
         layout.Add(notebook, 0, wx.EXPAND, 5)
 
         prj_presenter = ProjectPresenter(notebook)
+        emp_presenter = EmployeePresenter(notebook)
 
         notebook.AddPage(prj_presenter.view, 'Projects')
-        # notebook.AddPage(EmpTabPanel(notebook), 'Employees')
+        notebook.AddPage(emp_presenter.view, 'Employees')
         # notebook.AddPage(EffTab(notebook), 'Scoreboard')
 
         panel.SetSizer(layout)
 
         prj_presenter.init_view()
+        emp_presenter.init_view()

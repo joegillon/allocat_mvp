@@ -38,7 +38,7 @@ class Project(object):
         rex = dao.execute(sql)
         return [Project(rec) for rec in rex] if rex else []
 
-    def getAsns(self, dao):
+    def get_asns(self, dao):
         from models.assignment import Assignment
 
         sql = ("SELECT a.*, e.name AS employee, p.name AS project "

@@ -15,7 +15,7 @@ def uglify(month):
     return month[3:] + month[0:2]
 
 
-def getMonths(startMonth, thruMonth):
+def get_months(startMonth, thruMonth):
     from dateutil.relativedelta import relativedelta as rd
 
     start_date = month2d(startMonth)
@@ -27,7 +27,7 @@ def getMonths(startMonth, thruMonth):
     return months
 
 
-def datePlus(d, nmonths):
+def date_plus(d, nmonths):
     return (d + dt.timedelta(nmonths * 365 / 12)).strftime(MONTH_FORMAT)
 
 
@@ -39,16 +39,16 @@ def month2d(month):
     return dt.datetime.strptime(month, MONTH_FORMAT)
 
 
-def isValidSpan(first, last):
+def is_valid_span(first, last):
     return last >= first
 
 
-def isInPrjSpan(prj, first_month, last_month):
+def is_in_prj_span(prj, first_month, last_month):
     if first_month < prj['first_month']:
         return False
     return last_month <= prj['last_month']
 
-def getTimeframeEdges(list):
+def get_timeframe_edges(list):
     min = '9999'
     max = '0000'
     for item in list:

@@ -4,7 +4,7 @@ from collections import namedtuple
 # DB_PATH = 'c:/bench/allocat/data/allocat.db'
 DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
-theDataSet = None
+dataset = None
 
 Skin = namedtuple('Skin', [
     'pnlBg', 'tbBg', 'tbFg', 'lstBg', 'lstHdr', 'lstSel',
