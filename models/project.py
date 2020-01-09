@@ -140,3 +140,10 @@ class Project(object):
             setattr(self, attr, new_values[attr])
         self.investigator = investigator
         self.manager = manager
+
+    def drop(self, dao):
+        expected = len(self.asns) + 1
+        sql = "UPDATE projects SET active=0 WHERE id=?"
+        result = dao.execute(sql, (self.id,))
+        if result < 1 or result > expected:
+            raise Exception('Expected %d records affected, got %d' % (expected, result))

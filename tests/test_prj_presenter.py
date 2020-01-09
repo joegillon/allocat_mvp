@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import wx
 import globals as gbl
 from models.dataset import AllocatDataSet
@@ -580,7 +580,6 @@ class TestProjectPresenter(unittest.TestCase):
         self.presenter.view.set_notes('This is a comment.')
 
         add_mock.return_value = 317
-
         self.presenter.save()
 
         list_items = self.presenter.view.list_ctrl.GetObjects()
@@ -798,7 +797,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/19'
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/19'
 
-    def testDropUpdatesModelAndView(self):
+    @patch('presenters.presenter.Project.drop')
+    def testDropUpdatesModelAndView(self, drop_mock):
         idx = 6
         self.presenter.set_selection(idx)
         item = self.presenter.view.get_selection()
@@ -840,6 +840,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/19'
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/19'
 
+        drop_mock.return_value = 1
         self.presenter.drop()
 
         idx = self.presenter.view.get_selected_idx()
@@ -882,7 +883,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '03/19'
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/19'
 
-    def testDropLastRecUpdatesModelAndView(self):
+    @patch('presenters.presenter.Project.drop')
+    def testDropLastRecUpdatesModelAndView(self, drop_mock):
         idx = 30
         self.presenter.set_selection(idx)
         item = self.presenter.view.get_selection()
@@ -924,6 +926,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/19'
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '04/19'
 
+        drop_mock.return_value = 1
         self.presenter.drop()
 
         idx = self.presenter.view.get_selected_idx()

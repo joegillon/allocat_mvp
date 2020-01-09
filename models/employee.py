@@ -53,3 +53,57 @@ class Employee(object):
         vals = (self.id,)
         rex = dao.execute(sql, vals)
         return [Assignment(rec) for rec in rex] if rex else []
+
+    def add(self, dao):
+        missing = self.get_missing_flds()
+        if missing:
+            s = ','.join(missing)
+            raise AttributeError('Missing required fields ' + s)
+        flds = 'name,fte,investigator,intern,org,notes,active'
+        sql = "INSERT INTO employees (%s) VALUES (%s)" % (
+            flds, ('?,' * 7)[0:-1]
+        )
+        vals = [
+            self.name, self.fte, self.investigator, self.intern,
+            self.org, self.notes, 1
+        ]
+        try:
+            return dao.execute(sql, vals)
+        except Exception as e:
+            s = str(e)
+            if s.startswith('UNIQUE constraint failed'):
+                raise Exception('Employee %s is not unique!' % s.split('.')[1])
+            else:
+                raise
+
+    def update(self, dao, new_values):
+        nrex = self.do_update(dao, new_values)
+        if nrex != 1:
+            raise Exception('Unexpected update return value: %d' % nrex)
+        self.post_update(new_values)
+
+    def do_update(self, dao, new_values):
+        sql = ("UPDATE employees "
+               "SET %s "
+               "WHERE id=?;") % (
+                  ','.join(f + '=?' for f in new_values.keys()))
+        vals = list(new_values.values()) + [self.id]
+        try:
+            return dao.execute(sql, vals)
+        except Exception as e:
+            s = str(e)
+            if s.startswith('UNIQUE constraint failed'):
+                raise Exception('Employee %s is not unique!' % s.split('.')[1])
+            else:
+                raise
+
+    def post_update(self, new_values):
+        for attr in new_values:
+            setattr(self, attr, new_values[attr])
+
+    def drop(self, dao):
+        expected = len(self.asns) + 1
+        sql = "UPDATE employees SET active=0 WHERE id=?"
+        result = dao.execute(sql, (self.id,))
+        if result < 1 or result > expected:
+            raise Exception('Expected %d records affected, got %d' % (expected, result))

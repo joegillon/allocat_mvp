@@ -1,6 +1,8 @@
 import ObjectListView as olv
 import lib.ui_lib as uil
 from dal.dao import Dao
+
+# These imports are needed for the klass bit
 from models.project import Project
 from models.employee import Employee
 
@@ -116,10 +118,6 @@ class Presenter(object):
         except Exception as ex:
             uil.show_error(str(ex))
             return
-        # model.name = form_values['name']
-        # self.update_model_values(model, form_values)
-        # model.notes = form_values['notes']
-
         self.refresh_list()
         self.set_selection(self.model.index(model))
 
@@ -128,6 +126,13 @@ class Presenter(object):
 
     def drop(self):
         idx = self.view.get_selected_idx()
+
+        try:
+            self.model[idx].drop(Dao())
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+
         del self.model[idx]
         self.refresh_list()
         if idx >= len(self.model):

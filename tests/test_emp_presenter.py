@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 import wx
 import globals as gbl
 from models.dataset import AllocatDataSet
@@ -361,7 +362,8 @@ class TestEmployeePresenter(unittest.TestCase):
         err_msg = self.presenter.validate()
         assert err_msg == 'FTE must be number between 0-100!'
 
-    def testAddUpdatesModelAndView(self):
+    @patch('presenters.presenter.Employee.add')
+    def testAddUpdatesModelAndView(self, add_mock):
         self.presenter.clear()
         self.presenter.view.set_name('MARX,GROUCHO')
         self.presenter.view.set_fte('80')
@@ -370,6 +372,7 @@ class TestEmployeePresenter(unittest.TestCase):
         self.presenter.view.set_org('CCMR')
         self.presenter.view.set_notes('Bla bla bla')
 
+        add_mock.return_value = 306
         self.presenter.save()
 
         list_items = self.presenter.view.list_ctrl.GetObjects()
@@ -379,7 +382,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert self.presenter.view.list_ctrl.GetItemText(idx - 1, 0) == 'MARINEC,NICOLLE A'
         assert self.presenter.view.list_ctrl.GetItemText(idx + 1, 0) == 'MCCARTHY,JOHN'
         item = list_items[idx]
-        # assert item.id == 303
+        assert item.id == 306
         assert item.name == 'MARX,GROUCHO'
         assert item.fte == '80'
         assert item.investigator == True
@@ -390,7 +393,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert item.notes == 'Bla bla bla'
 
         emp_model = self.presenter.model[idx]
-        # assert emp_model.id = 300
+        assert emp_model.id == 306
         assert emp_model.name == 'MARX,GROUCHO'
         assert emp_model.fte == '80'
         assert emp_model.investigator == True
@@ -403,7 +406,8 @@ class TestEmployeePresenter(unittest.TestCase):
         ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
         assert len(ass_items) == 0
 
-    def testUpdateUpdatesModelAndView(self):
+    @patch('presenters.presenter.Employee.do_update')
+    def testUpdateUpdatesModelAndView(self, do_update_mock):
         idx = 6
         self.presenter.set_selection(idx)
         item = self.presenter.view.get_selection()
@@ -441,6 +445,7 @@ class TestEmployeePresenter(unittest.TestCase):
         self.presenter.view.set_org('Some Org')
         self.presenter.view.set_notes('Bla bla bla')
 
+        do_update_mock.return_value = 1
         self.presenter.save()
 
         list_items = self.presenter.view.list_ctrl.GetObjects()
@@ -477,7 +482,8 @@ class TestEmployeePresenter(unittest.TestCase):
         assert asn_items[0].frum == '1906'
         assert asn_items[0].thru == '2009'
 
-    def testDropUpdatesModelAndView(self):
+    @patch('presenters.presenter.Employee.drop')
+    def testDropUpdatesModelAndView(self, drop_mock):
         idx = 6
         self.presenter.set_selection(idx)
         item = self.presenter.view.get_selection()
@@ -508,6 +514,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert asn_items[0].frum == '1906'
         assert asn_items[0].thru == '2009'
 
+        drop_mock.return_value = 1
         self.presenter.drop()
 
         idx = self.presenter.view.get_selected_idx()
@@ -537,7 +544,8 @@ class TestEmployeePresenter(unittest.TestCase):
         ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
         assert len(ass_items) == 0
 
-    def testDropLastRecUpdatesModelAndView(self):
+    @patch('presenters.presenter.Employee.drop')
+    def testDropLastRecUpdatesModelAndView(self, drop_mock):
         idx = 154
         self.presenter.set_selection(idx)
         item = self.presenter.view.get_selection()
@@ -565,6 +573,7 @@ class TestEmployeePresenter(unittest.TestCase):
         ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
         assert len(ass_items) == 0
 
+        drop_mock.return_value = 1
         self.presenter.drop()
 
         idx = self.presenter.view.get_selected_idx()
