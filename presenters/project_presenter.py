@@ -1,7 +1,7 @@
 import globals as gbl
 from presenters.presenter import Presenter
 from views.project_tab_panel import ProjectTabPanel
-from event_handlers.project_event_handler import ProjectEventHandler
+from event_handlers.event_handler import EventHandler
 
 
 class ProjectPresenter(Presenter):
@@ -9,7 +9,7 @@ class ProjectPresenter(Presenter):
     def __init__(self, frame):
         model = gbl.dataset.prj_rex
         view = ProjectTabPanel(frame)
-        actor = ProjectEventHandler()
+        actor = EventHandler()
         super().__init__(model, view, actor, 'Project')
 
     def load_combos(self):

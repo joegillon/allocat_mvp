@@ -52,3 +52,6 @@ class Dao(object):
 
     def close(self):
         self.__db.close()
+
+    def get_param_str(self, lst):
+        return ('?,' * len(lst))[0:-1]

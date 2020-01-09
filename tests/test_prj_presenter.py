@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, MagicMock
 import wx
 import globals as gbl
 from models.dataset import AllocatDataSet
@@ -44,8 +45,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '12/25'
         assert self.presenter.view.get_frum() == '2001'
         assert self.presenter.view.get_thru() == '2512'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'WALJEE,AKBAR, MD'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 67
         assert self.presenter.view.get_pm().name == 'ARASIM,MARIA E'
@@ -87,8 +88,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/20'
         assert self.presenter.view.get_frum() == '1910'
         assert self.presenter.view.get_thru() == '2009'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'DAMSCHRODER,LAURA J'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 57
         assert self.presenter.view.get_pm().name == 'REARDON,CAITLIN M'
@@ -129,8 +130,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/30'
         assert self.presenter.view.get_frum() == '1905'
         assert self.presenter.view.get_thru() == '3009'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi() == None
         assert self.presenter.view.pi_ctrl.get_selection_id() == None
         assert self.presenter.view.get_pm().name == 'YOULES,BRADLEY W'
@@ -171,8 +172,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/20'
         assert self.presenter.view.get_frum() == '1910'
         assert self.presenter.view.get_thru() == '2009'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'SEARS,ERICA, MD.'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 279
         assert self.presenter.view.get_pm() == None
@@ -213,8 +214,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/19'
         assert self.presenter.view.get_frum() == '1901'
         assert self.presenter.view.get_thru() == '1909'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'SAINI,SAMEER, MD'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 63
         assert self.presenter.view.get_pm().name == 'SAFFAR,DARCY A'
@@ -252,8 +253,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/21'
         assert self.presenter.view.get_frum() == '1909'
         assert self.presenter.view.get_thru() == '2109'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi() == None
         assert self.presenter.view.pi_ctrl.get_selection_id() == None
         assert self.presenter.view.get_pm().name == 'FOWLER,KAREN E'
@@ -298,8 +299,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '12/25'
         assert self.presenter.view.get_frum() == '2001'
         assert self.presenter.view.get_thru() == '2512'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'WALJEE,AKBAR, MD'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 67
         assert self.presenter.view.get_pm().name == 'ARASIM,MARIA E'
@@ -343,8 +344,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '12/20'
         assert self.presenter.view.get_frum() == '1901'
         assert self.presenter.view.get_thru() == '2012'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'PFEIFFER,PAUL, MD'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 75
         assert self.presenter.view.get_pm() == None
@@ -389,8 +390,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '12/25'
         assert self.presenter.view.get_frum() == '2001'
         assert self.presenter.view.get_thru() == '2512'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'WALJEE,AKBAR, MD'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 67
         assert self.presenter.view.get_pm().name == 'ARASIM,MARIA E'
@@ -567,7 +568,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert err_msg == None
 
     # This test has all valid data. See above invalid tests
-    def testAddUpdatesModelAndView(self):
+    @patch('presenters.presenter.Project.add')
+    def testAddUpdatesModelAndView(self, add_mock):
         self.presenter.clear()
         self.presenter.view.set_name('Test Prj 5')
         self.presenter.view.set_full_name('Test Project Five')
@@ -577,13 +579,15 @@ class TestProjectPresenter(unittest.TestCase):
         self.presenter.view.set_pm('GILLON,LEAH R')
         self.presenter.view.set_notes('This is a comment.')
 
+        add_mock.return_value = 317
+
         self.presenter.save()
 
         list_items = self.presenter.view.list_ctrl.GetObjects()
         assert len(list_items) == 32
         idx = self.presenter.view.get_selected_idx()
         item = list_items[idx]
-        # assert item.id == 303
+        assert item.id == 317
         assert item.name == 'Test Prj 5'
         assert item.full_name == 'Test Project Five'
         assert item.investigator == 'KERR,EVE,MD'
@@ -594,7 +598,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2004'
 
         prj_model = self.presenter.model[idx]
-        # assert prj_model.id == 300
+        assert prj_model.id == 317
         assert prj_model.name == 'Test Prj 5'
         assert prj_model.full_name == 'Test Project Five'
         assert prj_model.frum == '1911'
@@ -611,7 +615,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert len(ass_items) == 0
 
     # This test has all valid data. See above invalid tests
-    def testUpdateUpdatesModelAndView(self):
+    @patch('presenters.presenter.Project.do_update')
+    def testUpdateUpdatesModelAndView(self, do_update_mock):
         idx = 6
         self.presenter.set_selection(idx)
         item = self.presenter.view.get_selection()
@@ -635,8 +640,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/19'
         assert self.presenter.view.get_frum() == '1904'
         assert self.presenter.view.get_thru() == '1909'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi() == None
         assert self.presenter.view.pi_ctrl.get_selection_id() == None
         assert self.presenter.view.get_pm().name == 'LUGINBILL,KAITLYN A'
@@ -661,6 +666,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.presenter.view.set_pm('GILLON,LEAH R')
         self.presenter.view.set_notes('This is a comment.')
 
+        do_update_mock.return_value = 1
         self.presenter.save()
 
         list_items = self.presenter.view.list_ctrl.GetObjects()
@@ -701,6 +707,97 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/19'
         assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/19'
 
+    # This time update with no name, full name change and no PI or PM
+    @patch('presenters.presenter.Project.do_update')
+    def testUpdateUpdatesModelAndView2(self, do_update_mock):
+        idx = 6
+        self.presenter.set_selection(idx)
+        item = self.presenter.view.get_selection()
+        assert item.id == 279
+        assert item.name == 'LIP 19-111 (Prescott)'
+        assert item.full_name == 'LIP 19-111 Prescott'
+        assert item.investigator == None
+        assert item.manager == 'LUGINBILL,KAITLYN A'
+        assert self.presenter.view.list_ctrl.GetItemText(idx, 1) == '04/19'
+        assert self.presenter.view.list_ctrl.GetItemText(idx, 2) == '09/19'
+        assert item.frum == '1904'
+        assert item.thru == '1909'
+        assert self.presenter.model[idx].frum == '1904'
+        assert self.presenter.model[idx].thru == '1909'
+        assert self.presenter.view.get_button_label() == 'Update Project'
+
+        # Check the details form
+        assert self.presenter.view.get_name() == 'LIP 19-111 (Prescott)'
+        assert self.presenter.view.get_full_name() == 'LIP 19-111 Prescott'
+        assert self.presenter.view.frum_ctrl.GetValue() == '04/19'
+        assert self.presenter.view.thru_ctrl.GetValue() == '09/19'
+        assert self.presenter.view.get_frum() == '1904'
+        assert self.presenter.view.get_thru() == '1909'
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
+        assert self.presenter.view.get_pi() == None
+        assert self.presenter.view.pi_ctrl.get_selection_id() == None
+        assert self.presenter.view.get_pm().name == 'LUGINBILL,KAITLYN A'
+        assert self.presenter.view.pm_ctrl.get_selection_id() == 120
+
+        # Check the assignments list
+        assert len(self.presenter.model[idx].asns) == 1
+        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
+        assert len(ass_items) == 1
+        assert ass_items[0].employee == 'SEEYLE,SARAH'
+        assert ass_items[0].employee_id == 278
+        assert self.presenter.model[idx].asns[0].frum == '1904'
+        assert self.presenter.model[idx].asns[0].thru == '1909'
+        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/19'
+        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/19'
+
+        self.presenter.view.set_frum('1905')
+        self.presenter.view.set_thru('1908')
+        self.presenter.view.set_pi(None)
+        self.presenter.view.set_pm(None)
+        self.presenter.view.set_notes('This is a comment.')
+
+        do_update_mock.return_value = 1
+        self.presenter.save()
+
+        list_items = self.presenter.view.list_ctrl.GetObjects()
+        assert len(list_items) == 31
+        idx = self.presenter.view.get_selected_idx()
+        assert idx == 6
+        item = list_items[idx]
+        assert item.id == 279
+        assert item.name == 'LIP 19-111 (Prescott)'
+        assert item.full_name == 'LIP 19-111 Prescott'
+        assert item.investigator == None
+        assert item.manager == None
+        assert self.presenter.view.list_ctrl.GetItemText(idx, 1) == '05/19'
+        assert self.presenter.view.list_ctrl.GetItemText(idx, 2) == '08/19'
+        assert item.frum == '1905'
+        assert item.thru == '1908'
+
+        prj_model = self.presenter.model[idx]
+        assert prj_model.id == 279
+        assert prj_model.name == 'LIP 19-111 (Prescott)'
+        assert prj_model.full_name == 'LIP 19-111 Prescott'
+        assert prj_model.frum == '1905'
+        assert prj_model.thru == '1908'
+        assert prj_model.investigator == None
+        assert prj_model.investigator_id == None
+        assert prj_model.manager == None
+        assert prj_model.manager_id == None
+        assert prj_model.notes == 'This is a comment.'
+        assert prj_model.active == 1
+
+        assert len(self.presenter.model[idx].asns) == 1
+        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
+        assert len(ass_items) == 1
+        assert ass_items[0].employee == 'SEEYLE,SARAH'
+        assert ass_items[0].employee_id == 278
+        assert self.presenter.model[idx].asns[0].frum == '1904'
+        assert self.presenter.model[idx].asns[0].thru == '1909'
+        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/19'
+        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/19'
+
     def testDropUpdatesModelAndView(self):
         idx = 6
         self.presenter.set_selection(idx)
@@ -725,8 +822,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/19'
         assert self.presenter.view.get_frum() == '1904'
         assert self.presenter.view.get_thru() == '1909'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi() == None
         assert self.presenter.view.pi_ctrl.get_selection_id() == None
         assert self.presenter.view.get_pm().name == 'LUGINBILL,KAITLYN A'
@@ -767,8 +864,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/20'
         assert self.presenter.view.get_frum() == '1903'
         assert self.presenter.view.get_thru() == '2009'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi() == None
         assert self.presenter.view.pi_ctrl.get_selection_id() == None
         assert self.presenter.view.get_pm().name == 'DEWITT,JEFFREY,POSTDOC'
@@ -809,8 +906,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '09/19'
         assert self.presenter.view.get_frum() == '1904'
         assert self.presenter.view.get_thru() == '1909'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi() == None
         assert self.presenter.view.pi_ctrl.get_selection_id() == None
         assert self.presenter.view.get_pm().name == 'SAFFAR,DARCY A'
@@ -851,8 +948,8 @@ class TestProjectPresenter(unittest.TestCase):
         assert self.presenter.view.thru_ctrl.GetValue() == '08/23'
         assert self.presenter.view.get_frum() == '1909'
         assert self.presenter.view.get_thru() == '2308'
-        assert self.presenter.view.pi_ctrl.GetCount() == 27
-        assert self.presenter.view.pm_ctrl.GetCount() == 130
+        assert self.presenter.view.pi_ctrl.GetCount() == 28
+        assert self.presenter.view.pm_ctrl.GetCount() == 129
         assert self.presenter.view.get_pi().name == 'ILGEN,MARK PHD'
         assert self.presenter.view.pi_ctrl.get_selection_id() == 73
         assert self.presenter.view.get_pm().name == 'LEWIS (STINCHOMB),MANDY'

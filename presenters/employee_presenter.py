@@ -1,7 +1,7 @@
 import globals as gbl
 from presenters.presenter import Presenter
 from views.employee_tab_panel import EmployeeTabPanel
-from event_handlers.employee_event_handler import EmployeeEventHandler
+from event_handlers.event_handler import EventHandler
 
 
 class EmployeePresenter(Presenter):
@@ -9,7 +9,7 @@ class EmployeePresenter(Presenter):
     def __init__(self, frame):
         model = gbl.dataset.emp_rex
         view = EmployeeTabPanel(frame)
-        actor = EmployeeEventHandler()
+        actor = EventHandler()
         super().__init__(model, view, actor, 'Employee')
 
     def load_combos(self):

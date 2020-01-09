@@ -1,6 +1,8 @@
 import ObjectListView as olv
 import lib.ui_lib as uil
+from dal.dao import Dao
 from models.project import Project
+from models.employee import Employee
 
 
 class Presenter(object):
@@ -89,8 +91,15 @@ class Presenter(object):
         else:
             self.update_model(form_values)
 
-    def add_model(self, formValues):
-        new_model = Project(self.get_new_model_values(formValues))
+    def add_model(self, form_values):
+        klass = globals()[self.model_name]
+        new_model = klass(self.get_new_model_values(form_values))
+
+        try:
+            new_model.id = new_model.add(Dao())
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
 
         self.model.append(new_model)
         self.model = sorted(self.model, key=lambda i: i.name.lower())
@@ -102,9 +111,15 @@ class Presenter(object):
 
     def update_model(self, form_values):
         model = self.model[self.view.get_selected_idx()]
-        model.name = form_values['name']
-        self.update_model_values(model, form_values)
-        model.notes = form_values['notes']
+        try:
+            model.update(Dao(), form_values)
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+        # model.name = form_values['name']
+        # self.update_model_values(model, form_values)
+        # model.notes = form_values['notes']
+
         self.refresh_list()
         self.set_selection(self.model.index(model))
 
@@ -149,11 +164,6 @@ class Presenter(object):
     #     assignee = 'Employee: %s' % asn.employee
     #     dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
     #     dlg.ShowModal()
-
-    def dataFieldUpdated(self):
-        pass
-        # if self.isListening:
-        #     self.updateWindowTitle()
 
     def show_help(self):
         import lib.ui_lib as uil

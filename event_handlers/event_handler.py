@@ -16,9 +16,6 @@ class EventHandler(object):
         view.notes_fltr_ctrl.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.on_filter_cancel)
         view.help_btn.Bind(wx.EVT_BUTTON, self.on_help_click)
 
-        view.name_ctrl.Bind(wx.EVT_TEXT, self.OnDataFieldUpdated)
-        self.bind_form_events(view)
-
         view.clear_btn.Bind(wx.EVT_BUTTON, self.on_clear)
         view.save_btn.Bind(wx.EVT_BUTTON, self.on_save)
         view.drop_btn.Bind(wx.EVT_BUTTON, self.on_drop)

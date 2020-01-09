@@ -4,17 +4,17 @@ from lib.validator_lib import *
 
 class ValidationTestSuite(unittest.TestCase):
     def setUp(self):
-        self.prjNames = {
+        self.prj_names = {
             'TESTNAME1': 41,
             'TESTNAME2': 23,
             'TESTNAME3': 18
         }
-        self.prjNicknames = {
-            'TESTNICKNAME1': 41,
-            'TESTNICKNAME2': 23,
-            'TESTNICKNAME3': 18
+        self.prj_full_names = {
+            'TESTFULLNAME1': 41,
+            'TESTFULLNAME2': 23,
+            'TESTFULLNAME3': 18
         }
-        self.empNames = {
+        self.emp_names = {
             'MARX,GROUCHO': 1,
             'MARX,CHICO': 2,
             'MARX,HARPO': 3,
@@ -23,7 +23,7 @@ class ValidationTestSuite(unittest.TestCase):
 
     def testName(self):
         # Set current project to ID 18 (Test Name 3)
-        prj_match = ProjectMatch(18, self.prjNames)
+        prj_match = ProjectMatch(18, self.prj_names)
 
         # Project name cannot be None
         result = validate_prj_name(None, prj_match)
@@ -44,67 +44,67 @@ class ValidationTestSuite(unittest.TestCase):
         result = validate_prj_name('Unused project name', prj_match)
         self.assertIsNone(result)
 
-    def testNickname(self):
+    def testFullName(self):
         # Set current project to ID 18 (Test Name 3)
-        prj_match = ProjectMatch(18, self.prjNicknames)
+        prj_match = ProjectMatch(18, self.prj_full_names)
 
-        result = validatePrjNickname(None, prj_match)
-        self.assertEqual(result, 'Project nickname required!')
+        result = validate_prj_full_name(None, prj_match)
+        self.assertEqual(result, 'Project full name required!')
 
-        result = validatePrjNickname('', prj_match)
-        self.assertEqual(result, 'Project nickname required!')
+        result = validate_prj_full_name('', prj_match)
+        self.assertEqual(result, 'Project full name required!')
 
-        result = validatePrjNickname('test  nickname 1', prj_match)
-        self.assertEqual(result, 'Project nickname not unique!')
+        result = validate_prj_full_name('test  fullname 1', prj_match)
+        self.assertEqual(result, 'Project full name not unique!')
 
-        result = validatePrjNickname('test  nickname 3', prj_match)
+        result = validate_prj_full_name('test  fullname 3', prj_match)
         self.assertIsNone(result)
 
-        result = validatePrjNickname('Unused project nickname', prj_match)
+        result = validate_prj_full_name('Unused project full name', prj_match)
         self.assertIsNone(result)
 
     def testTimeframe(self):
         result = validate_timeframe('', '')
-        self.assertEqual(result, 'First month invalid!')
+        self.assertEqual(result, 'From date invalid!')
 
         result = validate_timeframe('00', '')
-        self.assertEqual(result, 'First month invalid!')
+        self.assertEqual(result, 'From date invalid!')
 
         result = validate_timeframe('01', '')
-        self.assertEqual(result, 'First month invalid!')
+        self.assertEqual(result, 'From date invalid!')
 
         result = validate_timeframe('010', '')
-        self.assertEqual(result, 'First month invalid!')
+        self.assertEqual(result, 'From date invalid!')
 
         result = validate_timeframe('0000', '')
-        self.assertEqual(result, 'First month invalid!')
+        self.assertEqual(result, 'From date invalid!')
 
         result = validate_timeframe('0013', '')
-        self.assertEqual(result, 'First month invalid!')
+        self.assertEqual(result, 'From date invalid!')
 
         result = validate_timeframe('0001', '')
-        self.assertEqual(result, 'Last month invalid!')
+        self.assertEqual(result, 'Thru date invalid!')
 
         result = validate_timeframe('0001', '00')
-        self.assertEqual(result, 'Last month invalid!')
+        self.assertEqual(result, 'Thru date invalid!')
 
         result = validate_timeframe('0001', '010')
-        self.assertEqual(result, 'Last month invalid!')
+        self.assertEqual(result, 'Thru date invalid!')
 
         result = validate_timeframe('0001', '0000')
-        self.assertEqual(result, 'Last month invalid!')
+        self.assertEqual(result, 'Thru date invalid!')
 
         result = validate_timeframe('0001', '0013')
-        self.assertEqual(result, 'Last month invalid!')
+        self.assertEqual(result, 'Thru date invalid!')
 
         result = validate_timeframe('0001', '00131')
-        self.assertEqual(result, 'Last month invalid!')
+        self.assertEqual(result, 'Thru date invalid!')
 
         result = validate_timeframe('1902', '1901')
-        self.assertEqual(result, 'First Month must precede Last Month!')
+        self.assertEqual(result, 'From date must precede thru date!')
 
         result = validate_timeframe('1901', '1812')
-        self.assertEqual(result, 'First Month must precede Last Month!')
+        self.assertEqual(result, 'From date must precede thru date!')
 
         result = validate_timeframe('1912', '2001')
         self.assertIsNone(result)
@@ -127,7 +127,7 @@ class ValidationTestSuite(unittest.TestCase):
         self.assertIsNone(result)
 
     def testEmpName(self):
-        emp_match = EmployeeMatch(1, self.empNames)
+        emp_match = EmployeeMatch(1, self.emp_names)
 
         result = validate_emp_name(None)
         self.assertEqual(result, 'Employee name required!')

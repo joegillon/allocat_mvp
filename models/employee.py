@@ -2,15 +2,25 @@ class Employee(object):
     def __init__(self, d=None):
         self.id = None
         self.name = ''
-        self.grade = ''
-        self.step = ''
         self.fte = ''
-        self.notes = ''
         self.investigator = False
+        self.intern = False
+        self.org = ''
+        self.notes = ''
         self.active = 1
+        self.asns = []
         if d:
             for attr in d:
                 setattr(self, attr, d[attr].strip() if isinstance(d[attr], str) else d[attr])
+            missing = self.get_missing_flds()
+            if missing:
+                raise AttributeError('Missing required fields ' + missing)
+
+    def get_missing_flds(self):
+        missing = []
+        if not self.name:
+            missing.append('name')
+        return ','.join(missing) if missing else None
 
     @staticmethod
     def get_all(dao):
