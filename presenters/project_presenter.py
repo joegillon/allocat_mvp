@@ -13,10 +13,10 @@ class ProjectPresenter(Presenter):
         super().__init__(model, view, actor, 'Project')
 
     def load_combos(self):
-            investigators = [rec for rec in gbl.dataset.emp_rex if rec.investigator]
-            managers = [rec for rec in gbl.dataset.emp_rex if not rec.investigator]
-            self.view.load_pi(investigators)
-            self.view.load_pm(managers)
+        investigators = [rec for rec in gbl.dataset.emp_rex if rec.investigator]
+        managers = [rec for rec in gbl.dataset.emp_rex if not rec.investigator]
+        self.view.load_pi(investigators)
+        self.view.load_pm(managers)
 
     def load_details(self):
         from dal.dao import Dao
@@ -77,7 +77,7 @@ class ProjectPresenter(Presenter):
 
         if prj and prj.asns:
             if values['frum'] < prj.frum or \
-                values['thru'] > prj.thru:
+                            values['thru'] > prj.thru:
                 min, max = ml.get_timeframe_edges(prj.asns)
                 if values['frum'] < min or values['thru'] > max:
                     err_msg = 'Assignment(s) out of new timeframe!'
@@ -103,3 +103,15 @@ class ProjectPresenter(Presenter):
         prj.investigator = form_values['pi'].name
         prj.manager_id = form_values['pm'].id
         prj.manager = form_values['pm'].name
+
+    def get_assignee_ctrl(self):
+        import lib.ui_lib as uil
+
+        return uil.ObjComboBox(self.view,
+                               gbl.dataset.emp_rex,
+                               'name',
+                               'Employee',
+                               style=16)
+
+    def get_assignee_str(self, asn):
+        return 'Employee: %s' % asn.employee

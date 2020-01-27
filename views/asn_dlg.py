@@ -1,19 +1,18 @@
 import wx
-from views.assignment_panel import AssignmentPanel
-from event_handlers.assignment_event_handler import AssignmentInteractor
 from presenters.assignment_presenter import AssignmentPresenter
 
 
 class AsnDlg(wx.Dialog):
+
     def __init__(self, parent, winId, title, owner, assignee, asn=None):
         wx.Dialog.__init__(self, parent, winId, title, size=(500, 400))
         layout = wx.BoxSizer(wx.VERTICAL)
 
-        view = AssignmentPanel(self, owner, assignee)
-        actor = AssignmentInteractor()
-        presenter = AssignmentPresenter(asn, view, actor)
-        presenter.go()
+        self.presenter = AssignmentPresenter(self, owner, assignee, asn)
 
-        layout.Add(view, 0, wx.ALL | wx.EXPAND, 5)
+        layout.Add(self.presenter.view, 0, wx.ALL | wx.EXPAND, 5)
 
+        self.Name = 'AsnDlg'
         self.SetSizer(layout)
+
+        self.presenter.go()

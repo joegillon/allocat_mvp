@@ -1,6 +1,8 @@
 import ObjectListView as olv
 import lib.ui_lib as uil
 from dal.dao import Dao
+from views.asn_dlg import AsnDlg
+from models.assignment import Assignment
 
 # These imports are needed for the klass bit
 from models.project import Project
@@ -139,36 +141,51 @@ class Presenter(object):
             idx = len(self.model) - 1
         self.set_selection(idx)
 
-    # def addAsn(self):
-    #     prj = self.view.getSelection()
-    #     owner = 'Project: %s' % prj.name
-    #     assignee = uil.ObjComboBox(self.view,
-    #                            self.employees,
-    #                            'name',
-    #                            'Employee',
-    #                            style=16)
-    #
-    #     dlg = AsnDlg(self.view, -1, 'New Assignment', owner, assignee)
-    #     dlg.ShowModal()
-    #
-    # def dropAsn(self):
-    #     prj = self.view.getSelection()
-    #     selections = self.view.getAsnSelections()
-    #     ids = [x.id for x in selections]
-    #     if not ids:
-    #         uil.showError('No assignments selected!')
-    #         return
-    #     if uil.confirm(self.view, 'Drop selected assignments?'):
-    #         new_list = [asn for asn in prj.asns if asn.id not in ids]
-    #         prj.asns = new_list
-    #         self.view.setAsnList(new_list)
-    #
-    # def editAsn(self, asn):
-    #     prj = self.view.getSelection()
-    #     owner = 'Project: %s' % prj.name
-    #     assignee = 'Employee: %s' % asn.employee
-    #     dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
-    #     dlg.ShowModal()
+    def set_asn_selection(self, idx):
+        self.view.set_selection(idx)
+
+    def get_asn_selection(self):
+        return self.view.get_selection()
+
+    def add_asn(self):
+        model = self.model[self.view.get_selected_idx()]
+        owner = '%s: %s' % (self.model_name, model.name)
+        assignee = self.get_assignee_ctrl()
+        dlg = AsnDlg(self.view, -1, 'New Assignment', owner, assignee)
+        self.asn_presenter = dlg.presenter
+        dlg.ShowModal()
+
+    def get_assignee_ctrl(self):
+            raise NotImplementedError("Please Implement this method")
+
+    def edit_asn(self, asn):
+        model = self.model[self.view.get_selected_idx()]
+        owner = '%s: %s' % (self.model_name, model.name)
+        assignee = self.get_assignee_str(asn)
+        dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
+        self.asn_presenter = dlg.presenter
+        dlg.ShowModal()
+
+    def get_assignee_str(self, asn):
+            raise NotImplementedError("Please Implement this method")
+
+    def drop_asn(self):
+        model = self.model[self.view.get_selected_idx()]
+        selections = self.view.get_selected_asns()
+        ids = [x.id for x in selections]
+        if not ids:
+            uil.show_error('No assignments selected!')
+            return
+        if uil.confirm(self.view, 'Drop selected assignments?'):
+            try:
+                Assignment.drop_many(Dao(), ids)
+            except Exception as ex:
+                uil.show_error(str(ex))
+                return
+
+            new_list = [asn for asn in model.asns if asn.id not in ids]
+            model.asns = new_list
+            self.view.set_asn_list(new_list)
 
     def show_help(self):
         import lib.ui_lib as uil

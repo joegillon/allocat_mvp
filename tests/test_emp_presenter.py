@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-import wx
+from tests.helpers import *
 import globals as gbl
 from models.dataset import AllocatDataSet
 from presenters.employee_presenter import EmployeePresenter
@@ -16,291 +16,274 @@ class TestEmployeePresenter(unittest.TestCase):
         self.presenter = EmployeePresenter(self.frame)
         self.presenter.init_view()
 
+        self.first_item = {
+            'id': 28,
+            'name': 'ABRAHAM,KRISTEN',
+            'fte': 5,
+            'investigator': False,
+            'intern': False,
+            'org': 'SMITREC',
+            'notes': '',
+            'active': True,
+            'asns': []
+        }
+
+        self.first_item_form_vals = {
+            'name': 'ABRAHAM,KRISTEN',
+            'fte': 5,
+            'investigator': False,
+            'intern': False,
+            'org': 'SMITREC',
+            'notes': ''
+        }
+
     def tearDown(self):
         self.frame.Destroy()
         self.app.Destroy()
 
+    def get_vars(self):
+        return self.presenter.view, self.presenter.model, self.presenter.view.list_ctrl, self.presenter.view.asn_list_ctrl
+
     def testViewLoaded(self):
-        idx = 0
-        list_items = self.presenter.view.list_ctrl.GetObjects()
-        assert len(list_items) == 155
-        item = list_items[idx]
-        assert item.id == 28
-        assert item.name == 'ABRAHAM,KRISTEN'
-        assert item.fte == 5
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'SMITREC'
-        assert item.notes == ''
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'ABRAHAM,KRISTEN'
-        assert self.presenter.view.get_fte() == '5'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'SMITREC'
-        assert self.presenter.view.get_notes() == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # No list click made
+        assert view.get_selected_idx() == 0
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check list has model and is sorted
+        list_items = list_ctrl.GetObjects()
+        assert list_items == model
+        assert list_items[0].id == model[0].id == 28
+        assert list_items[-1].id == model[-1].id == 69
+
+        # Check form
+        assert self.presenter.get_form_values() == self.first_item_form_vals
+        assert view.get_button_label() == 'Update Employee'
+
+        # Check assignments
+        assert asn_list_ctrl.GetObjects() == model[0].asns == []
 
     def testEmpListSelectWithAsns(self):
-        idx = 142
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
-        assert item.id == 6
-        assert item.name == 'VISNIC,STEPHANIE G'
-        assert item.fte == 100
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'CCMR'
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'VISNIC,STEPHANIE G'
-        assert self.presenter.view.get_fte() == '100'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Select 143rd employee
+        model_idx = 142
+        click_list_ctrl(list_ctrl, model_idx)
 
-        # Check the assignments list
-        asns = self.presenter.model[idx].asns
-        assert len(asns) == 2
-        assert asns[0].id == 2346
-        assert asns[0].employee_id == 6
-        assert asns[0].project_id == 304
-        assert asns[0].frum == '2004'
-        assert asns[0].thru == '2009'
-        assert asns[0].effort == 15
-        assert asns[0].notes == ''
-        assert asns[0].active == True
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 2
-        assert ass_items[0].project == 'NIA VA Aim _PtCare (Maust)'
-        assert ass_items[0].project_id == 304
-        assert ass_items[0].frum == '2004'
-        assert ass_items[0].thru == '2009'
-        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '04/20'
-        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '09/20'
-        assert ass_items[0].effort == 15
-        assert ass_items[0].notes == ''
+        # Check list
+        item = view.get_selection()
+        assert item == model[model_idx]
+        assert item.id == model[model_idx].id == 6
+
+        # Check form
+        expected_vals = {
+            'name': 'VISNIC,STEPHANIE G',
+            'fte': 100,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+
+        # Check assignments
+        asn_items = asn_list_ctrl.GetObjects()
+        assert [asn.id for asn in asn_items] == [2346, 2348]
+        assert model[model_idx].asns == asn_items
 
     def testSelectEmpListInvestigator(self):
-        idx = 94
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
-        assert item.id == 12
-        assert item.name == 'MCCARTHY,JOHN'
-        assert item.fte == 100
-        assert item.investigator == True
-        assert item.intern == False
-        assert item.org == 'SMITREC'
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'MCCARTHY,JOHN'
-        assert self.presenter.view.get_fte() == '100'
-        assert self.presenter.view.get_investigator() == True
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'SMITREC'
-        assert self.presenter.view.get_notes() == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Select 95th employee
+        model_idx = 94
+        click_list_ctrl(list_ctrl, model_idx)
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check list
+        item = view.get_selection()
+        assert item == model[model_idx]
+        assert item.id == model[model_idx].id == 12
+
+        # Check form
+        expected_vals = {
+            'name': 'MCCARTHY,JOHN',
+            'fte': 100,
+            'investigator': True,
+            'intern': False,
+            'org': 'SMITREC',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
+
+        # Check assignments
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns == []
 
     def testSelectEmpListWithNotes(self):
-        idx = 14
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
-        assert item.id == 297
-        assert item.name == 'BRYANT, COREY'
-        assert item.fte == 100
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'CCMR'
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'BRYANT, COREY'
-        assert self.presenter.view.get_fte() == '100'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == 'Start date is 9/22/19 per Mike Robertson'
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Select 15th employee
+        model_idx = 14
+        click_list_ctrl(list_ctrl, model_idx)
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check list
+        item = view.get_selection()
+        assert item == model[model_idx]
+        assert item.id == model[model_idx].id == 297
+
+        # Check form
+        expected_vals = {
+            'name': 'BRYANT, COREY',
+            'fte': 100,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': 'Start date is 9/22/19 per Mike Robertson',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
+
+        # Check assignments
+        assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
 
     def testEmpNameFilter(self):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Filter text box is empty, 'x' is entered
         self.presenter.apply_filter('name_fltr_ctrl', 'x', '')
-        assert self.presenter.view.list_ctrl.GetItemCount() == 4
-        objs = self.presenter.view.list_ctrl.GetFilteredObjects()
-        assert [obj.id for obj in objs] == [23, 103, 285, 301]
-        assert [obj.name for obj in objs] == [
-            'BOWERSOX,NICHOLAS W',
-            'EXE,CHRISTINE L',
-            'FIDEL,ALEX',
-            'MONAHAN, MAX'
-        ]
-        idx = self.presenter.view.get_selected_idx()
-        assert idx == 0
 
-        item = self.presenter.view.get_selection()
-        assert item.id == 23
-        assert item.name == 'BOWERSOX,NICHOLAS W'
-        assert item.fte == 80
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'CCMR'
-        assert item.notes == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Check filtered list
+        assert list_ctrl.GetItemCount() == 4
+        filtered_items = list_ctrl.GetFilteredObjects()
+        assert [item.id for item in filtered_items] == [23, 103, 285, 301]
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'BOWERSOX,NICHOLAS W'
-        assert self.presenter.view.get_fte() == '80'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == ''
+        # Check that the first item is selected
+        model_idx = view.get_selected_idx()
+        assert model_idx == 0
+        assert view.get_selection() == [x for x in model if x.id==23][0]
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check form
+        expected_vals = {
+            'name': 'BOWERSOX,NICHOLAS W',
+            'fte': 80,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
+
+        # Check assignments
+        assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
 
     def testCancelEmpNameFilter(self):
-        evt = wx.CommandEvent(wx.EVT_SEARCHCTRL_CANCEL_BTN.typeId)
-        obj = self.presenter.view.name_fltr_ctrl
-        evt.SetEventObject(obj)
-        evt.SetId(obj.GetId())
-        obj.GetEventHandler().ProcessEvent(evt)
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        idx = self.presenter.view.get_selected_idx()
-        list_items = self.presenter.view.list_ctrl.GetObjects()
-        assert len(list_items) == 155
-        item = list_items[idx]
-        assert item.id == 28
-        assert item.name == 'ABRAHAM,KRISTEN'
-        assert item.fte == 5
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'SMITREC'
+        click_button(view.name_fltr_ctrl)
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'ABRAHAM,KRISTEN'
-        assert self.presenter.view.get_fte() == '5'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'SMITREC'
-        assert self.presenter.view.get_notes() == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Check list has model, is sorted with first item selected
+        list_items = list_ctrl.GetObjects()
+        assert list_items == model
+        assert list_items[0].id == model[0].id == 28
+        assert list_items[-1].id == model[-1].id == 69
+        assert view.get_selected_idx() == 0
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check form
+        assert self.presenter.get_form_values() == self.first_item_form_vals
+        assert view.get_button_label() == 'Update Employee'
+
+        # Check assignments
+        assert asn_list_ctrl.GetObjects() == model[0].asns == []
 
     def testEmpNotesFilter(self):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Filter text box has 'inte', 'r' is typed
         self.presenter.apply_filter('notes_fltr_ctrl', 'r', 'inte')
-        assert self.presenter.view.list_ctrl.GetItemCount() == 4
-        objs = self.presenter.view.list_ctrl.GetFilteredObjects()
-        assert [obj.id for obj in objs] == [296, 293, 286, 287]
-        assert [obj.name for obj in objs] == [
-            'LIU, DAVID',
-            'SAINII, RYAN',
-            'SHANMUGASUNDARAM, PRIYA',
-            'VUONG, KIM'
-        ]
-        idx = 2
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
+
+        # Check filtered list
+        assert list_ctrl.GetItemCount() == 4
+        filtered_items = list_ctrl.GetFilteredObjects()
+        assert [item.id for item in filtered_items] == [296, 293, 286, 287]
+
+        # Select 3rd item
+        model_idx = 2
+        click_list_ctrl(list_ctrl, model_idx)
+
+        # Check list
+        item = view.get_selection()
         assert item.id == 286
-        assert item.name == 'SHANMUGASUNDARAM, PRIYA'
-        assert item.fte == 0
-        assert item.investigator == False
-        assert item.intern == True
-        assert item.notes == 'Informatics Intern'
-        assert item.org == 'CCMR'
+        assert view.get_selection() == [x for x in model if x.id==286][0]
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'SHANMUGASUNDARAM, PRIYA'
-        assert self.presenter.view.get_fte() == '0'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == True
-        assert self.presenter.view.get_notes() == 'Informatics Intern'
-        assert self.presenter.view.get_org() == 'CCMR'
+        # Check form
+        expected_vals = {
+            'name': 'SHANMUGASUNDARAM, PRIYA',
+            'fte': 0,
+            'investigator': False,
+            'intern': True,
+            'org': 'CCMR',
+            'notes': 'Informatics Intern',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check assignments
+        assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
 
     def testCancelEmpNotesFilter(self):
-        evt = wx.CommandEvent(wx.EVT_SEARCHCTRL_CANCEL_BTN.typeId)
-        obj = self.presenter.view.name_fltr_ctrl
-        evt.SetEventObject(obj)
-        evt.SetId(obj.GetId())
-        obj.GetEventHandler().ProcessEvent(evt)
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        idx = self.presenter.view.get_selected_idx()
-        list_items = self.presenter.view.list_ctrl.GetObjects()
-        assert len(list_items) == 155
-        item = list_items[idx]
-        assert item.id == 28
-        assert item.name == 'ABRAHAM,KRISTEN'
-        assert item.fte == 5
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'SMITREC'
+        click_button(view.notes_fltr_ctrl)
 
-        # Check the details form
-        assert self.presenter.view.get_name() == 'ABRAHAM,KRISTEN'
-        assert self.presenter.view.get_fte() == '5'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'SMITREC'
-        assert self.presenter.view.get_notes() == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Check list has model, is sorted with first item selected
+        list_items = list_ctrl.GetObjects()
+        assert list_items == model
+        assert list_items[0].id == model[0].id == 28
+        assert list_items[-1].id == model[-1].id == 69
+        assert view.get_selected_idx() == 0
 
-        # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check form
+        assert self.presenter.get_form_values() == self.first_item_form_vals
+        assert view.get_button_label() == 'Update Employee'
+
+        # Check assignments
+        assert asn_list_ctrl.GetObjects() == model[0].asns == []
 
     def testClearForm(self):
-        evt = wx.CommandEvent(wx.EVT_BUTTON.typeId)
-        obj = self.presenter.view.clear_btn
-        evt.SetEventObject(obj)
-        evt.SetId(obj.GetId())
-        obj.GetEventHandler().ProcessEvent(evt)
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        assert self.presenter.view.get_selected_idx() == -1
-        assert self.presenter.view.name_ctrl.GetValue() == ''
-        assert self.presenter.view.fte_ctrl.GetValue().strip() == ''
-        assert self.presenter.view.investigator_ctrl.GetValue() == False
-        assert self.presenter.view.intern_ctrl.GetValue() == False
-        assert self.presenter.view.org_ctrl.GetValue() == ''
-        assert self.presenter.view.notes_ctrl.GetValue() == ''
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
-        assert self.presenter.view.get_button_label() == 'Add Employee'
+        click_button(view.clear_btn)
+
+        # Check list has no selections
+        assert view.get_selected_idx() == -1
+
+        # Check form is cleared
+        expected_vals = {
+            'name': '',
+            'fte': None,
+            'investigator': False,
+            'intern': False,
+            'org': '',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Add Employee'
+
+        # Check assignments list is empty
+        assert asn_list_ctrl.GetObjects() == []
 
     def testButtonLabelChange(self):
-        assert self.presenter.view.get_button_label() == 'Update Employee'
-        self.presenter.clear()
-        assert self.presenter.view.get_button_label() == 'Add Employee'
-        self.presenter.set_selection(1)
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        assert view.get_button_label() == 'Update Employee'
+        click_button(view.clear_btn)
+        assert view.get_button_label() == 'Add Employee'
+        click_list_ctrl(list_ctrl, 1)
+        assert view.get_button_label() == 'Update Employee'
 
     def testValidateEmployeeFormOnAdd(self):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
         self.presenter.clear()
 
         # No name entered
@@ -308,305 +291,626 @@ class TestEmployeePresenter(unittest.TestCase):
         assert err_msg == 'Employee name required!'
 
         # Duplicate name
-        self.presenter.view.set_name('GILLON,LEAH R')
+        view.set_name('GILLON,LEAH R')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name not unique!'
 
-        self.presenter.view.set_name('GILLON, LEAHR')
+        view.set_name('GILLON, LEAHR')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name not unique!'
 
         # Invalid name
-        self.presenter.view.set_name('GROUCHO MARX')
+        view.set_name('GROUCHO MARX')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name invalid!'
 
-        self.presenter.view.set_name('MARX')
+        view.set_name('MARX')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name invalid!'
 
-        self.presenter.view.set_name('MARX,GROUCHO:')
+        view.set_name('MARX,GROUCHO:')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name invalid!'
 
-        self.presenter.view.set_name('_MARX,GROUCHO')
+        view.set_name('_MARX,GROUCHO')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name invalid!'
 
-        self.presenter.view.set_name('_MARX,GROUCHO')
+        view.set_name('_MARX,GROUCHO')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name invalid!'
 
-        self.presenter.view.set_name('MARX,GROUCHO')
+        view.set_name('MARX,GROUCHO')
         err_msg = self.presenter.validate()
         assert err_msg == 'FTE required!'
 
-        self.presenter.view.set_fte('101')
+        view.set_fte('101')
         err_msg = self.presenter.validate()
         assert err_msg == 'FTE must be number between 0-100!'
 
     def testValidateEmployeeFormOnUpdate(self):
-        self.presenter.set_selection(0)
-        assert self.presenter.view.get_name() == 'ABRAHAM,KRISTEN'
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        self.presenter.view.set_name('')
+        click_list_ctrl(list_ctrl, 0)
+        assert self.presenter.get_selection().__dict__ == self.first_item
+
+        view.set_name('')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name required!'
 
-        self.presenter.view.set_name('GILLON,LEAH R')
+        view.set_name('GILLON,LEAH R')
         err_msg = self.presenter.validate()
         assert err_msg == 'Employee name not unique!'
 
-        self.presenter.view.set_name('ABRAHAM,  KRISTEN')
-        self.presenter.view.set_fte('101')
+        view.set_name('ABRAHAM,  KRISTEN')
+        view.set_fte('101')
         err_msg = self.presenter.validate()
         assert err_msg == 'FTE must be number between 0-100!'
 
-    @patch('presenters.presenter.Employee.add')
-    def testAddUpdatesModelAndView(self, add_mock):
-        self.presenter.clear()
-        self.presenter.view.set_name('MARX,GROUCHO')
-        self.presenter.view.set_fte('80')
-        self.presenter.view.set_investigator(True)
-        self.presenter.view.set_intern(False)
-        self.presenter.view.set_org('CCMR')
-        self.presenter.view.set_notes('Bla bla bla')
+    @patch('presenters.presenter.Dao._Dao__write', return_value=306)
+    def testAddUpdatesModelAndView(self, write_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        add_mock.return_value = 306
-        self.presenter.save()
+        click_button(view.clear_btn)
 
-        list_items = self.presenter.view.list_ctrl.GetObjects()
+        # Fill in the form
+        view.set_name('MARX,GROUCHO')
+        view.set_fte('80')
+        view.set_investigator(True)
+        view.set_intern(False)
+        view.set_org('CCMR')
+        view.set_notes('Bla bla bla')
+
+        click_button(view.save_btn)
+
+        # Check the INSERT
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[0] == 'INSERT INTO employees (name,fte,investigator,intern,org,notes,active) VALUES (?,?,?,?,?,?,?)'
+        assert args[1] == ['MARX,GROUCHO', 80, True, False, 'CCMR', 'Bla bla bla', 1]
+
+        # Check list has new item
+        list_items = list_ctrl.GetObjects()
         assert len(list_items) == 156
-        idx = self.presenter.view.get_selected_idx()
-        assert idx == 94
-        assert self.presenter.view.list_ctrl.GetItemText(idx - 1, 0) == 'MARINEC,NICOLLE A'
-        assert self.presenter.view.list_ctrl.GetItemText(idx + 1, 0) == 'MCCARTHY,JOHN'
-        item = list_items[idx]
+
+        # Gotta update our local model with the new stuff. Just for this test.
+        model = self.presenter.model
+
+        # Check the new item is in the right spot alphabetically
+        model_idx = view.get_selected_idx()
+        assert model_idx == 94
+        assert list_ctrl.GetItemText(model_idx - 1, 0) == 'MARINEC,NICOLLE A'
+        assert list_ctrl.GetItemText(model_idx + 1, 0) == 'MCCARTHY,JOHN'
+
+        # Check the correct new item
+        item = list_items[model_idx]
         assert item.id == 306
         assert item.name == 'MARX,GROUCHO'
-        assert item.fte == '80'
+        assert item.fte == 80
         assert item.investigator == True
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 2) == 'Y'
         assert item.intern == False
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 3) == 'N'
         assert item.org == 'CCMR'
         assert item.notes == 'Bla bla bla'
 
-        emp_model = self.presenter.model[idx]
-        assert emp_model.id == 306
-        assert emp_model.name == 'MARX,GROUCHO'
-        assert emp_model.fte == '80'
-        assert emp_model.investigator == True
-        assert emp_model.intern == False
-        assert emp_model.org == 'CCMR'
-        assert emp_model.notes == 'Bla bla bla'
-        assert emp_model.active == 1
-        assert emp_model.asns == []
+        # Check the YN display items
+        assert list_ctrl.GetItemText(model_idx, 2) == 'Y'
+        assert list_ctrl.GetItemText(model_idx, 3) == 'N'
 
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        # Check the new model
+        assert item == model[model_idx]
 
-    @patch('presenters.presenter.Employee.do_update')
-    def testUpdateUpdatesModelAndView(self, do_update_mock):
-        idx = 6
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
-        assert item.id == 292
-        assert item.name == 'BELANCOURT, PAT'
-        assert item.fte == 100
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'CCMR'
-        assert item.notes == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Check assignments list is empty
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns == []
 
-        assert self.presenter.view.get_name() == 'BELANCOURT, PAT'
-        assert self.presenter.view.get_fte() == '100'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == ''
+    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
+    def testUpdateUpdatesModelAndView(self, write_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        assert len(self.presenter.model[idx].asns) == 1
-        asn_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].id == 2240
-        assert asn_items[0].employee == 'BELANCOURT, PAT'
-        assert asn_items[0].employee_id == 292
-        assert asn_items[0].project == 'IIR 17-269 Morphomics (Su)'
-        assert asn_items[0].project_id == 293
-        assert asn_items[0].frum == '1906'
-        assert asn_items[0].thru == '2009'
+        model_idx = 6
+        click_list_ctrl(list_ctrl, model_idx)
 
-        self.presenter.view.set_name('BELANCOURT,PAT')
-        self.presenter.view.set_fte(80)
-        self.presenter.view.set_investigator(True)
-        self.presenter.view.set_intern(True)
-        self.presenter.view.set_org('Some Org')
-        self.presenter.view.set_notes('Bla bla bla')
+        # Check list
+        assert view.get_selection() == model[model_idx]
 
-        do_update_mock.return_value = 1
-        self.presenter.save()
+        # Check details
+        expected_vals = {
+            'name': 'BELANCOURT, PAT',
+            'fte': 100,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
 
-        list_items = self.presenter.view.list_ctrl.GetObjects()
+        # Check the assignments
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns
+
+        # New data
+        view.set_name('BELANCOURT,PAT')
+        view.set_fte(80)
+        view.set_investigator(True)
+        view.set_intern(True)
+        view.set_org('Some Org')
+        view.set_notes('Bla bla bla')
+
+        click_button(view.save_btn)
+
+        # Check the UPDATE
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[0] == 'UPDATE employees SET name=?,fte=?,investigator=?,intern=?,org=?,notes=? WHERE id=?;'
+        assert args[1] == ['BELANCOURT,PAT', 80, True, True, 'Some Org', 'Bla bla bla', 292]
+
+        # Check the list - still same number of items
+        list_items = list_ctrl.GetObjects()
         assert len(list_items) == 155
-        idx = self.presenter.view.get_selected_idx()
-        assert idx == 6
-        item = list_items[idx]
+
+        # New stuff should be in both list and model
+        assert list_items == model
+
+        # Check updated item to make sure data has changed
+        model_idx = view.get_selected_idx()
+        assert model_idx == 6
+        item = list_items[model_idx]
+
+        expected_vals = {
+            'name': 'BELANCOURT,PAT',
+            'fte': 80,
+            'investigator': True,
+            'intern': True,
+            'org': 'Some Org',
+            'notes': 'Bla bla bla',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
+        assert item == model[model_idx]
+
+        # Should be no change to assignments
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns
+
+    @patch('presenters.presenter.uil.confirm', return_value=True)
+    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
+    def testDropUpdatesModelAndView(self, write_mock, confirm_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        model_idx = 6
+        click_list_ctrl(list_ctrl, model_idx)
+
+        # Check the number of items & number of models
+        items = list_ctrl.GetObjects()
+        assert len(items) == len(model) == 155
+
+        # The item to be dropped
+        item = view.get_selection()
         assert item.id == 292
-        assert item.name == 'BELANCOURT,PAT'
-        assert item.fte == '80'
-        assert item.investigator == True
-        assert item.intern == True
-        assert item.org == 'Some Org'
-        assert item.notes == 'Bla bla bla'
 
-        emp_model = self.presenter.model[idx]
-        assert emp_model.id == 292
-        assert emp_model.name == 'BELANCOURT,PAT'
-        assert emp_model.fte == '80'
-        assert emp_model.investigator == True
-        assert emp_model.intern == True
-        assert emp_model.org == 'Some Org'
-        assert emp_model.notes == 'Bla bla bla'
-        assert emp_model.active == 1
+        # Get form values
+        expected_vals = {
+            'name': 'BELANCOURT, PAT',
+            'fte': 100,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
 
-        assert len(self.presenter.model[idx].asns) == 1
-        asn_items = self.presenter.view.asn_list_ctrl.GetObjects()
+        # Has an assignment
+        assert len(model[model_idx].asns) == 1
+        assert model[model_idx].asns[0].id == 2240
+        asn_items = asn_list_ctrl.GetObjects()
         assert len(asn_items) == 1
         assert asn_items[0].id == 2240
-        assert asn_items[0].employee == 'BELANCOURT, PAT'
-        assert asn_items[0].employee_id == 292
-        assert asn_items[0].project == 'IIR 17-269 Morphomics (Su)'
-        assert asn_items[0].project_id == 293
-        assert asn_items[0].frum == '1906'
-        assert asn_items[0].thru == '2009'
 
-    @patch('presenters.presenter.Employee.drop')
-    def testDropUpdatesModelAndView(self, drop_mock):
-        idx = 6
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
-        assert item.id == 292
-        assert item.name == 'BELANCOURT, PAT'
-        assert item.fte == 100
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'CCMR'
-        assert item.notes == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        click_button(view.drop_btn)
 
-        assert self.presenter.view.get_name() == 'BELANCOURT, PAT'
-        assert self.presenter.view.get_fte() == '100'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == ''
+        # Check that user confirmed drop
+        assert confirm_mock.call_count == 1
+        args, kwargs = confirm_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[1] == 'Drop selected employee?'
 
-        assert len(self.presenter.model[idx].asns) == 1
-        asn_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].id == 2240
-        assert asn_items[0].employee == 'BELANCOURT, PAT'
-        assert asn_items[0].employee_id == 292
-        assert asn_items[0].project == 'IIR 17-269 Morphomics (Su)'
-        assert asn_items[0].project_id == 293
-        assert asn_items[0].frum == '1906'
-        assert asn_items[0].thru == '2009'
+        # Check the SQL
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) ==0
+        assert args[0] == 'UPDATE employees SET active=0 WHERE id=?'
+        assert args[1] == (292,)
 
-        drop_mock.return_value = 1
-        self.presenter.drop()
+        # Check the list & model length
+        items = list_ctrl.GetObjects()
+        assert len(items) == len(model) == 154
 
-        idx = self.presenter.view.get_selected_idx()
-        assert idx == 6
-        item = self.presenter.view.get_selection()
-        assert item.id == 47
-        assert item.name == 'BLOW,FREDERIC PHD'
-        assert item.fte == 63
-        assert item.investigator == True
-        assert item.intern == False
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 2) == 'Y'
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 3) == 'N'
-        assert item.org == 'SMITREC'
-        assert item.notes == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Check list matches model
+        assert items == model
+
+        # Check that next item has been selected
+        model_idx = view.get_selected_idx()
+        assert model_idx == 6       # Still the same idx!
+        expected_item = {
+            'id': 47,
+            'name': 'BLOW,FREDERIC PHD',
+            'fte': 63,
+            'investigator': True,
+            'intern': False,
+            'org': 'SMITREC',
+            'notes': '',
+            'active': True,
+            'asns': []
+        }
+        item = view.get_selection()
+        assert item.__dict__ == expected_item
 
         # Check the details form
-        assert self.presenter.view.get_name() == 'BLOW,FREDERIC PHD'
-        assert self.presenter.view.get_fte() == '63'
-        assert self.presenter.view.get_investigator() == True
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'SMITREC'
-        assert self.presenter.view.get_notes() == ''
+        expected_vals = {
+            'name': 'BLOW,FREDERIC PHD',
+            'fte': 63,
+            'investigator': True,
+            'intern': False,
+            'org': 'SMITREC',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
 
         # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns == []
 
-    @patch('presenters.presenter.Employee.drop')
-    def testDropLastRecUpdatesModelAndView(self, drop_mock):
-        idx = 154
-        self.presenter.set_selection(idx)
-        item = self.presenter.view.get_selection()
-        assert item.id == 69
-        assert item.name == 'ZIVIN,KARA'
-        assert item.fte == 63
-        assert item.investigator == False
-        assert item.intern == False
-        assert item.org == 'CCMR'
-        assert item.notes == ''
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 2) == 'N'
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 3) == 'N'
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+    @patch('presenters.presenter.uil.confirm', return_value=True)
+    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
+    def testDropLastRecUpdatesModelAndView(self, write_mock, confirm_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Full number of items and models
+        assert list_ctrl.GetItemCount() == len(model) == 155
+
+        # Select last item
+        model_idx = 154
+        click_list_ctrl(list_ctrl, model_idx)
+
+        # Get the item
+        item = view.get_selection()
+        expected_item = {
+            'id': 69,
+            'name': 'ZIVIN,KARA',
+            'fte': 63,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+            'active': True,
+            'asns': []
+        }
+        assert item.__dict__ == expected_item
+        assert list_ctrl.GetItemText(model_idx, 2) == 'N'
+        assert list_ctrl.GetItemText(model_idx, 3) == 'N'
 
         # Check the details form
-        assert self.presenter.view.get_name() == 'ZIVIN,KARA'
-        assert self.presenter.view.get_fte() == '63'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == ''
+        expected_vals = {
+            'name': 'ZIVIN,KARA',
+            'fte': 63,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
+        assert view.get_button_label() == 'Update Employee'
 
         # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 0
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 0
+        assert asn_list_ctrl.GetObjects() == []
 
-        drop_mock.return_value = 1
-        self.presenter.drop()
+        click_button(view.drop_btn)
 
-        idx = self.presenter.view.get_selected_idx()
-        assert idx == 153
-        item = self.presenter.view.get_selection()
-        assert item.id == 86
-        assert item.name == 'YOULES,BRADLEY W'
-        assert item.fte == 100
-        assert item.investigator == False
-        assert item.intern == False
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 2) == 'N'
-        assert self.presenter.view.list_ctrl.GetItemText(idx, 3) == 'N'
-        assert item.org == 'CCMR'
-        assert item.notes == ''
-        assert self.presenter.view.get_button_label() == 'Update Employee'
+        # Check confirmation
+        assert confirm_mock.call_count == 1
+        args, kwargs = confirm_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[1] == 'Drop selected employee?'
+
+        # Check SQL
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) ==0
+        assert args[0] == 'UPDATE employees SET active=0 WHERE id=?'
+        assert args[1] == (69,)
+
+        # One less item
+        assert list_ctrl.GetItemCount() == 154
+        assert len(model) == 154
+
+        # Check the new selected item
+        model_idx = view.get_selected_idx()
+        assert model_idx == 153
+        item = view.get_selection()
+        expected_item = {
+            'id': 86,
+            'name': 'YOULES,BRADLEY W',
+            'fte': 100,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+            'active': True,
+            'asns': model[model_idx].asns
+        }
+        assert item.__dict__ == expected_item
+        assert list_ctrl.GetItemText(model_idx, 2) == 'N'
+        assert list_ctrl.GetItemText(model_idx, 3) == 'N'
+        assert view.get_button_label() == 'Update Employee'
 
         # Check the details form
-        assert self.presenter.view.get_name() == 'YOULES,BRADLEY W'
-        assert self.presenter.view.get_fte() == '100'
-        assert self.presenter.view.get_investigator() == False
-        assert self.presenter.view.get_intern() == False
-        assert self.presenter.view.get_org() == 'CCMR'
-        assert self.presenter.view.get_notes() == ''
+        expected_vals = {
+            'name': 'YOULES,BRADLEY W',
+            'fte': 100,
+            'investigator': False,
+            'intern': False,
+            'org': 'CCMR',
+            'notes': '',
+        }
+        assert self.presenter.get_form_values() == expected_vals
 
         # Check the assignments list
-        assert len(self.presenter.model[idx].asns) == 6
-        ass_items = self.presenter.view.asn_list_ctrl.GetObjects()
-        assert len(ass_items) == 6
-        assert ass_items[0].employee == 'YOULES,BRADLEY W'
-        assert ass_items[0].employee_id == 86
-        assert ass_items[0].project == 'ProAccess (Saini)'
-        assert ass_items[0].project_id == 278
-        assert self.presenter.model[idx].asns[0].frum == '1902'
-        assert self.presenter.model[idx].asns[0].thru == '1906'
-        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 1) == '02/19'
-        assert self.presenter.view.asn_list_ctrl.GetItemText(0, 2) == '06/19'
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns
+
+    @patch('presenters.presenter.AsnDlg.ShowModal')
+    def testAddAsnLoadsForm(self, show_modal_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 111
+        click_list_ctrl(list_ctrl, model_idx)
+        item = view.get_selection()
+        assert item.id == 295
+
+        click_button(view.add_asn_btn)
+
+        assert view.Children[2].Name == 'AsnDlg'
+        asn_view = self.presenter.asn_presenter.view
+        assert asn_view.Name == 'AssignmentPanel'
+
+        assert asn_view.owner_lbl.GetLabelText() == 'Employee: RANUSCH, ALLISON'
+        assert asn_view.assignee_lbl.GetLabelText() == 'Project: '
+        assert not isinstance(asn_view.assignee, str)
+        assert asn_view.assignee.Count == 32
+        assert asn_view.assignee.CurrentSelection == -1
+        assert asn_view.get_frum() == ''
+        assert asn_view.get_thru() == ''
+        assert asn_view.get_effort() == ''
+        assert asn_view.get_notes() == ''
+
+    @patch('presenters.presenter.AsnDlg.ShowModal')
+    def testEditAsnLoadsForm(self, show_modal_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 111
+        click_list_ctrl(list_ctrl, model_idx)
+        item = view.get_selection()
+        assert item.id == 295
+
+        # Select first assignment
+        asn_idx = 0
+        click_list_ctrl(asn_list_ctrl, asn_idx)
+
+        # Pop up dialog was called
+        assert view.Children[2].Name == 'AsnDlg'
+        asn_view = self.presenter.asn_presenter.view
+        assert asn_view.Name == 'AssignmentPanel'
+
+        assert asn_view.owner_lbl.GetLabelText() == 'Employee: RANUSCH, ALLISON'
+        assert asn_view.assignee_lbl.GetLabelText() == 'Project: HRO Metrics Evaluation (Damschroder)'
+        assert isinstance(asn_view.assignee, str)
+        assert asn_view.get_frum() == '1907'
+        assert asn_view.get_thru() == '2009'
+        assert asn_view.get_effort() == '50'
+        assert asn_view.get_notes() == ''
+
+    @patch('presenters.presenter.uil.show_error')
+    def testDropAsnNoneSelected(self, show_error_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 119
+        click_list_ctrl(list_ctrl, model_idx)
+        item = view.get_selection()
+        assert item.id == 22
+
+        # No assignmet selection made
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        asn_ids = [2030, 2290, 2293, 2398]
+        assert [asn.id for asn in asn_items] == asn_ids
+        assert [asn.id for asn in model[model_idx].asns] == asn_ids
+
+        click_button(view.drop_asn_btn)
+
+        args, kwargs = show_error_mock.call_args
+        assert len(args) == 1
+        assert len(kwargs) == 0
+        assert args[0] == 'No assignments selected!'
+
+        # No change in assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        asn_ids = [2030, 2290, 2293, 2398]
+        assert [asn.id for asn in asn_items] == asn_ids
+        assert [asn.id for asn in model[model_idx].asns] == asn_ids
+
+    @patch('presenters.presenter.uil.confirm', return_value=False)
+    def testDropAsnCancel(self, confirm_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 119
+        click_list_ctrl(list_ctrl, model_idx)
+        item = view.get_selection()
+        assert item.id == 22
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2293, 2398]
+
+        # Select assignment
+        obj = asn_list_ctrl
+        obj.Select(2)
+
+        click_button(view.drop_asn_btn)
+
+        assert confirm_mock.call_count == 1
+        args, kwargs = confirm_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[1] == 'Drop selected assignments?'
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2293, 2398]
+
+    @patch('presenters.presenter.uil.confirm', return_value=True)
+    @patch('presenters.presenter.Dao._Dao__write', return_value=None)
+    def testDropOneAsnUpdatesViewAndModel(self, write_mock, confirm_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 119
+        self.presenter.set_selection(model_idx)
+        item = view.get_selection()
+        assert item.id == 22
+
+        # Select assignment
+        obj = asn_list_ctrl
+        obj.Select(2)
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2293, 2398]
+
+        click_button(view.drop_asn_btn)
+
+        assert confirm_mock.call_count == 1
+        args, kwargs = confirm_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) ==0
+        assert args[1] ==  'Drop selected assignments?'
+
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) ==0
+        assert args[0] == 'UPDATE assignments SET active=0 WHERE id IN (?)'
+        assert args[1] == [2293]
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 3
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 3
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2398]
+
+    @patch('presenters.presenter.uil.confirm', return_value=True)
+    @patch('presenters.presenter.Dao._Dao__write', return_value=None)
+    def testDropLastAsnUpdatesViewAndModel(self, write_mock, confirm_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 119
+        self.presenter.set_selection(model_idx)
+        item = view.get_selection()
+        assert item.id == 22
+
+        # Select assignment
+        obj = asn_list_ctrl
+        obj.Select(3)
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2293, 2398]
+
+        click_button(view.drop_asn_btn)
+
+        assert confirm_mock.call_count == 1
+        args, kwargs = confirm_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[1] ==  'Drop selected assignments?'
+
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) ==0
+        assert args[0] == 'UPDATE assignments SET active=0 WHERE id IN (?)'
+        assert args[1] == [2398]
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 3
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 3
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2293]
+
+    @patch('presenters.presenter.uil.confirm', return_value=True)
+    @patch('presenters.presenter.Dao._Dao__write', return_value=None)
+    def testDropMultipleAsnsUpdatesViewAndModel(self, write_mock, confirm_mock):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select employee
+        model_idx = 119
+        click_list_ctrl(list_ctrl, model_idx)
+        item = view.get_selection()
+        assert item.id == 22
+
+        # Select assignment
+        selections = [
+            model[model_idx].asns[1],
+            model[model_idx].asns[3]
+        ]
+        asn_list_ctrl.SelectObjects(selections)
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 4
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 4
+        assert [asn.id for asn in asn_items] == [2030, 2290, 2293, 2398]
+
+        click_button(view.drop_asn_btn)
+
+        assert confirm_mock.call_count == 1
+        args, kwargs = confirm_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) == 0
+        assert args[1] == 'Drop selected assignments?'
+
+        assert write_mock.call_count == 1
+        args, kwargs = write_mock.call_args
+        assert len(args) == 2
+        assert len(kwargs) ==0
+        assert args[0] == 'UPDATE assignments SET active=0 WHERE id IN (?,?)'
+        assert args[1] == [2290, 2398]
+
+        # Check assignments
+        assert len(model[model_idx].asns) == 2
+        asn_items = asn_list_ctrl.GetObjects()
+        assert len(asn_items) == 2
+        assert [asn.id for asn in asn_items] == [2030, 2293]

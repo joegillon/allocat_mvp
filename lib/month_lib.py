@@ -12,7 +12,7 @@ def prettify(month):
 def uglify(month):
     if len(month) != 5:
         return month
-    return month[3:] + month[0:2]
+    return (month[3:] + month[0:2]).strip()
 
 
 def get_months(startMonth, thruMonth):

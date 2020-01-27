@@ -83,7 +83,8 @@ def validate_fte(value):
     if value is None or value == '':
         return 'FTE required!'
 
-    if not re.match(SCALE_100_PATTERN, value):
+    value = int(value)
+    if value < 0 or value > 100:
         return 'FTE must be number between 0-100!'
     return None
 

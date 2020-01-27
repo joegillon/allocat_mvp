@@ -76,3 +76,14 @@ class EmployeePresenter(Presenter):
         model.org = form_values['org']
         model.notes = form_values['notes']
 
+    def get_assignee_ctrl(self):
+        import lib.ui_lib as uil
+
+        return uil.ObjComboBox(self.view,
+                               gbl.dataset.prj_rex,
+                               'name',
+                               'Project',
+                               style=16)
+
+    def get_assignee_str(self, asn):
+        return 'Project: %s' % asn.project

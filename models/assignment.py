@@ -22,3 +22,9 @@ class Assignment(object):
                "JOIN employees e ON a.employee_id=e.id")
         rex = dao.execute(sql)
         return [Assignment(rec) for rec in rex] if rex else []
+
+    @staticmethod
+    def drop_many(dao, ids):
+        sql = "UPDATE assignments SET active=0 WHERE id IN (%s)" % (
+                  dao.get_param_str(ids))
+        return dao.execute(sql, ids)

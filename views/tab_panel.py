@@ -270,4 +270,5 @@ class TabPanel(wx.Panel):
         self.asn_list_ctrl.SetObjects(asns)
         self.Thaw()
 
-
+    def get_selected_asns(self):
+        return self.asn_list_ctrl.GetSelectedObjects()

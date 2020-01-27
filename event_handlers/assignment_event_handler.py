@@ -7,11 +7,11 @@ class AssignmentInteractor(object):
         self.presenter = presenter
         self.view = view
 
-        view.saveBtn.Bind(wx.EVT_BUTTON, self.OnSave)
-        view.cancelBtn.Bind(wx.EVT_BUTTON, self.OnCancel)
+        view.save_btn.Bind(wx.EVT_BUTTON, self.on_save)
+        view.cancel_btn.Bind(wx.EVT_BUTTON, self.on_cancel)
 
-    def OnSave(self, evt):
+    def on_save(self, evt):
         self.presenter.save()
 
-    def OnCancel(self, evt):
+    def on_cancel(self, evt):
         self.presenter.cancel()

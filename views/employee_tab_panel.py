@@ -56,7 +56,11 @@ class EmployeeTabPanel(TabPanel):
         self.fte_ctrl.SetValue(str(value))
 
     def get_fte(self):
-        return self.fte_ctrl.GetValue().strip()
+        val = self.fte_ctrl.GetValue().strip()
+        if val:
+            return int(self.fte_ctrl.GetValue())
+        else:
+            return None
 
     def set_investigator(self, value):
         self.investigator_ctrl.SetValue(value)

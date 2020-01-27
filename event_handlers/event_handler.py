@@ -48,20 +48,20 @@ class EventHandler(object):
         self.presenter.save()
 
     def on_drop(self, evt):
-        if uil.confirm(self.view, 'Drop selected ' + self.model_name + '?' ):
+        if uil.confirm(self.view, 'Drop selected ' + self.model_name.lower() + '?' ):
             self.presenter.drop()
 
     def on_list_select(self, evt):
         self.presenter.load_details()
 
     def on_asn_add(self, evt):
-        self.presenter.addAsn()
+        self.presenter.add_asn()
 
     def on_asn_drop(self, evt):
-        self.presenter.dropAsn()
+        self.presenter.drop_asn()
 
     def on_asn_list_dblclick(self, evt):
-        self.presenter.editAsn(evt.EventObject.GetSelectedObject())
+        self.presenter.edit_asn(evt.EventObject.GetSelectedObject())
 
     def OnDataFieldUpdated(self, evt):
         self.presenter.dataFieldUpdated()

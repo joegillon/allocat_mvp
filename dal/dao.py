@@ -9,46 +9,40 @@ class Dao(object):
         else:
             self.__db = sqlite3.connect(gbl.DB_PATH)
 
-        # This is so project and employee deletes will also drop
-        # their assignments
         self.__db.execute('PRAGMA FOREIGN_KEYS = ON')
 
         self.__cursor = self.__db.cursor()
-        self.__sql = ''
-        self.__params = []
         self.__stateful = stateful
 
     def execute(self, sql, params=None):
-        self.__sql = sql
-        self.__params = params
-        op = self.__sql.split(' ', 1)[0].upper()
-        if op == 'SELECT':
-            result = self.__read()
+        self.op = sql.split(' ', 1)[0].upper()
+        if self.op == 'SELECT':
+            result = self.__read(sql, params)
         else:
-            self.__write()
-            if op == 'INSERT':
-                return self.__cursor.lastrowid
-            else:
-                return self.__cursor.rowcount
+            result = self.__write(sql, params)
         if not self.__stateful:
             self.__db.close()
         return result
 
-    def __read(self):
+    def __read(self, sql, params=None):
         # Seems you can't pass a None type to the execute func.
-        if self.__params:
-            n = self.__cursor.execute(self.__sql, self.__params)
+        if params:
+            n = self.__cursor.execute(sql, params)
         else:
-            n = self.__cursor.execute(self.__sql)
+            n = self.__cursor.execute(sql)
         if not n:
             return []
         rex = self.__cursor.fetchall()
         flds = [f[0] for f in self.__cursor.description]
         return [dict(zip(flds, rec)) for rec in rex] if rex else []
 
-    def __write(self):
-        self.__cursor.execute(self.__sql, self.__params)
+    def __write(self, sql, params=None):
+        self.__cursor.execute(sql, params)
         self.__db.commit()
+        if self.op == 'INSERT':
+            return self.__cursor.lastrowid
+        else:
+            return self.__cursor.rowcount
 
     def close(self):
         self.__db.close()
