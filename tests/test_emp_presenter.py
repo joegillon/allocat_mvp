@@ -58,7 +58,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check form
         assert self.presenter.get_form_values() == self.first_item_form_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert asn_list_ctrl.GetObjects() == model[0].asns == []
@@ -113,7 +113,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert asn_list_ctrl.GetObjects() == model[model_idx].asns == []
@@ -140,7 +140,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': 'Start date is 9/22/19 per Mike Robertson',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
@@ -171,7 +171,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
@@ -190,7 +190,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check form
         assert self.presenter.get_form_values() == self.first_item_form_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert asn_list_ctrl.GetObjects() == model[0].asns == []
@@ -225,7 +225,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': 'Informatics Intern',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
@@ -244,7 +244,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check form
         assert self.presenter.get_form_values() == self.first_item_form_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
         assert asn_list_ctrl.GetObjects() == model[0].asns == []
@@ -267,7 +267,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Add Employee'
+        assert view.get_save_button_label() == 'Add Employee'
 
         # Check assignments list is empty
         assert asn_list_ctrl.GetObjects() == []
@@ -275,11 +275,11 @@ class TestEmployeePresenter(unittest.TestCase):
     def testButtonLabelChange(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
         click_button(view.clear_btn)
-        assert view.get_button_label() == 'Add Employee'
+        assert view.get_save_button_label() == 'Add Employee'
         click_list_ctrl(list_ctrl, 1)
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
     def testValidateEmployeeFormOnAdd(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -424,7 +424,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check the assignments
         assert asn_list_ctrl.GetObjects() == model[model_idx].asns
@@ -468,7 +468,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': 'Bla bla bla',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
         assert item == model[model_idx]
 
         # Should be no change to assignments
@@ -500,7 +500,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Has an assignment
         assert len(model[model_idx].asns) == 1
@@ -560,7 +560,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check the assignments list
         assert asn_list_ctrl.GetObjects() == model[model_idx].asns == []
@@ -604,7 +604,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'notes': '',
         }
         assert self.presenter.get_form_values() == expected_vals
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check the assignments list
         assert asn_list_ctrl.GetObjects() == []
@@ -648,7 +648,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert item.__dict__ == expected_item
         assert list_ctrl.GetItemText(model_idx, 2) == 'N'
         assert list_ctrl.GetItemText(model_idx, 3) == 'N'
-        assert view.get_button_label() == 'Update Employee'
+        assert view.get_save_button_label() == 'Update Employee'
 
         # Check the details form
         expected_vals = {

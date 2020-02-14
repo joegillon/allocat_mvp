@@ -62,6 +62,10 @@ class TabPanel(wx.Panel):
         self.notes_fltr_ctrl.ShowCancelButton(True)
         layout.Add(self.notes_fltr_ctrl, 0, wx.ALL, 5)
 
+        self.active_btn = uil.toolbar_button(panel, 'ALL')
+        self.active_btn.set_size(wx.Size(70, -1))
+        layout.Add(self.active_btn, 0, wx.ALL, 0)
+
         self.help_btn = uil.get_help_btn(panel)
         layout.Add(self.help_btn, 0, wx.ALL, 5)
 
@@ -235,6 +239,8 @@ class TabPanel(wx.Panel):
         return self.name_ctrl.GetValue()
 
     def set_notes(self, value):
+        if not value:
+            value = ''
         self.notes_ctrl.SetValue(value)
 
     def get_notes(self):
@@ -256,11 +262,17 @@ class TabPanel(wx.Panel):
     def clear_selection(self):
         self.list_ctrl.Select(self.get_selected_idx(), on=False)
 
-    def set_button_label(self, value):
+    def set_save_button_label(self, value):
         self.save_btn.SetLabel(value)
 
-    def get_button_label(self):
+    def get_save_button_label(self):
         return self.save_btn.GetLabel()
+
+    def set_active_button_label(self, value):
+        self.active_btn.set_label(value)
+
+    def get_active_button_label(self):
+        return self.active_btn.label
 
     def get_asn_selections(self):
         return self.asn_list_ctrl.GetSelectedObjects()

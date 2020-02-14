@@ -3,7 +3,7 @@ import wx
 
 class AssignmentInteractor(object):
 
-    def Install(self, presenter, view):
+    def install(self, presenter, view):
         self.presenter = presenter
         self.view = view
 

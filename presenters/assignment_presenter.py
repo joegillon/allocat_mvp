@@ -14,7 +14,7 @@ class AssignmentPresenter(object):
         self.asn = asn
 
     def go(self):
-        self.actor.Install(self, self.view)
+        self.actor.install(self, self.view)
         self.is_listening = True
         self.init_view()
 

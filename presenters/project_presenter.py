@@ -33,7 +33,7 @@ class ProjectPresenter(Presenter):
             if not item.asns:
                 item.asns = item.get_asns(Dao())
             self.view.set_asn_list(item.asns)
-            self.view.set_button_label('Update Project')
+            self.view.set_save_button_label('Update Project')
 
     def clear_model_values(self):
         self.view.set_full_name('')

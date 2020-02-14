@@ -4,7 +4,7 @@ import lib.ui_lib as uil
 
 class EventHandler(object):
 
-    def Install(self, presenter, view, model_name):
+    def install(self, presenter, view, model_name):
         self.presenter = presenter
         self.view = view
         self.model_name = model_name
@@ -14,6 +14,7 @@ class EventHandler(object):
         view.name_fltr_ctrl.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.on_filter_cancel)
         view.notes_fltr_ctrl.Bind(wx.EVT_CHAR, self.on_filter)
         view.notes_fltr_ctrl.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.on_filter_cancel)
+        view.active_btn.Bind(wx.EVT_BUTTON, self.on_active_click)
         view.help_btn.Bind(wx.EVT_BUTTON, self.on_help_click)
 
         view.clear_btn.Bind(wx.EVT_BUTTON, self.on_clear)
@@ -37,6 +38,9 @@ class EventHandler(object):
     def on_filter_cancel(self, evt):
         self.presenter.cancel_filter(evt.EventObject)
         evt.Skip()
+
+    def on_active_click(self, evt):
+        self.presenter.toggle_active()
 
     def on_help_click(self, evt):
         self.presenter.show_help()

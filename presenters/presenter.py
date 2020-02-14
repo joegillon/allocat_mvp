@@ -1,4 +1,5 @@
 import ObjectListView as olv
+import globals as gbl
 import lib.ui_lib as uil
 from dal.dao import Dao
 from views.asn_dlg import AsnDlg
@@ -15,7 +16,7 @@ class Presenter(object):
         self.model = model
         self.model_name = model_name
         self.view = view
-        actor.Install(self, view, model_name)
+        actor.install(self, view, model_name)
         self.is_listening = True
 
     def init_view(self, ):
@@ -36,7 +37,20 @@ class Presenter(object):
         raise NotImplementedError("Please Implement this method")
 
     def refresh_list(self):
-        self.view.set_list(self.model)
+        if gbl.active_only:
+            self.view.set_list([model for model in self.model  if model.active])
+        else:
+            self.view.set_list(self.model)
+
+    def toggle_active(self):
+        lbl_txt = self.view.get_active_button_label()
+        if lbl_txt == 'Active':
+            gbl.active_only = True
+            self.view.set_active_button_label('All')
+        else:
+            gbl.active_only = False
+            self.view.set_active_button_label('Active')
+        self.refresh_list()
 
     def set_selection(self, idx):
         self.view.set_selection(idx)
@@ -72,7 +86,7 @@ class Presenter(object):
         self.clear_model_values()
         self.view.set_notes('')
         self.view.set_asn_list([])
-        self.view.set_button_label('Add ' + self.model_name)
+        self.view.set_save_button_label('Add ' + self.model_name)
 
     def clear_model_values(self):
         raise NotImplementedError("Please Implement this method")

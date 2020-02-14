@@ -1,6 +1,6 @@
 import datetime as dt
 
-MONTH_FORMAT = '%m/%y'
+MONTH_FORMAT = '%y%m'
 
 
 def prettify(month):
@@ -28,7 +28,7 @@ def get_months(startMonth, thruMonth):
 
 
 def date_plus(d, nmonths):
-    return (d + dt.timedelta(nmonths * 365 / 12)).strftime(MONTH_FORMAT)
+    return (d + dt.timedelta(nmonths * 365 / 12))
 
 
 def d2month(d):

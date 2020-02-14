@@ -29,7 +29,7 @@ class EmployeePresenter(Presenter):
             if not item.asns:
                 item.asns = item.get_asns(Dao())
             self.view.set_asn_list(item.asns)
-            self.view.set_button_label('Update Employee')
+            self.view.set_save_button_label('Update Employee')
 
     def clear_model_values(self):
         self.view.set_fte('')

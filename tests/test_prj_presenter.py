@@ -59,7 +59,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert view.pi_ctrl.get_selection_id() == 67
         assert view.get_pm().name == 'ARASIM,MARIA E'
         assert view.pm_ctrl.get_selection_id() == 80
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the assignments list
         assert len(model[model_idx].asns) == 5
@@ -93,7 +93,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2009'
         assert model[model_idx].frum == '1910'
         assert model[model_idx].thru == '2009'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'CFIR V2 LIP'
@@ -137,7 +137,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '3009'
         assert model[model_idx].frum == '1905'
         assert model[model_idx].thru == '3009'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'IIR 17-269 Morphomics (Su)'
@@ -186,7 +186,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2009'
         assert model[model_idx].frum == '1910'
         assert model[model_idx].thru == '2009'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'LIP 20-120 (Sears)'
@@ -230,7 +230,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '1909'
         assert model[model_idx].frum == '1901'
         assert model[model_idx].thru == '1909'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'UM MTOP (Saini)'
@@ -271,7 +271,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert list_ctrl.GetItemText(model_idx, 2) == '09/21'
         assert item.frum == '1909'
         assert item.thru == '2109'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'UM ICU Expansion OPTION 2 (SAINT)'
@@ -315,7 +315,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2512'
         assert model[model_idx].frum == '2001'
         assert model[model_idx].thru == '2512'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'Biosimilar Merit_Waljee'
@@ -366,7 +366,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert list_ctrl.GetItemText(model_idx, 2) == '12/20'
         assert item.frum == '1901'
         assert item.thru == '2012'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'UM SPIRIT (Pfeiffer)'
@@ -410,7 +410,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2512'
         assert model[model_idx].frum == '2001'
         assert model[model_idx].thru == '2512'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'Biosimilar Merit_Waljee'
@@ -458,16 +458,16 @@ class TestProjectPresenter(unittest.TestCase):
         assert view.get_notes() == ''
         asn_items = asn_list_ctrl.GetObjects()
         assert len(asn_items) == 0
-        assert view.get_button_label() == 'Add Project'
+        assert view.get_save_button_label() == 'Add Project'
 
     def testButtonLabelChange(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
         click_button(view.clear_btn)
-        assert view.get_button_label() == 'Add Project'
+        assert view.get_save_button_label() == 'Add Project'
         click_list_ctrl(list_ctrl, 1)
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
     def testValidateProjectFormOnAdd(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -678,7 +678,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '1909'
         assert model[model_idx].frum == '1904'
         assert model[model_idx].thru == '1909'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'LIP 19-111 (Prescott)'
@@ -779,7 +779,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '1909'
         assert model[model_idx].frum == '1904'
         assert model[model_idx].thru == '1909'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'LIP 19-111 (Prescott)'
@@ -878,7 +878,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '1909'
         assert model[model_idx].frum == '1904'
         assert model[model_idx].thru == '1909'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'LIP 19-111 (Prescott)'
@@ -933,7 +933,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2009'
         assert model[model_idx].frum == '1903'
         assert model[model_idx].thru == '2009'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'LIP 19-112 (Kullgren-DeWitt) Visceral MDM'
@@ -983,7 +983,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '1909'
         assert model[model_idx].frum == '1904'
         assert model[model_idx].thru == '1909'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'VERAM CHRT (Adams)'
@@ -1042,7 +1042,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert item.thru == '2308'
         assert model[model_idx].frum == '1909'
         assert model[model_idx].thru == '2308'
-        assert view.get_button_label() == 'Update Project'
+        assert view.get_save_button_label() == 'Update Project'
 
         # Check the details form
         assert view.get_name() == 'UM_RO1 (Ilgen & LIn)'

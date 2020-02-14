@@ -1,10 +1,11 @@
 from collections import namedtuple
 
 
-# DB_PATH = 'c:/bench/allocat/data/allocat.db'
-DB_PATH = 'c:/bench/allocat/tests/allocat.db'
+DB_PATH = 'c:/bench/allocat/data/allocat0.db'
+# DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
 dataset = None
+active_only = True
 
 Skin = namedtuple('Skin', [
     'pnlBg', 'tbBg', 'tbFg', 'lstBg', 'lstHdr', 'lstSel',
@@ -156,7 +157,7 @@ SKINS = {
         grdCellBg='#C4DFE6'
     ),
 }
-COLOR_SCHEME = SKINS['Tan']
+COLOR_SCHEME = SKINS['Sandy']
 
 # Declare these vars globally
 # widestEmpName = 0

@@ -28,3 +28,13 @@ class Assignment(object):
         sql = "UPDATE assignments SET active=0 WHERE id IN (%s)" % (
                   dao.get_param_str(ids))
         return dao.execute(sql, ids)
+
+    @staticmethod
+    def get_for_timeframe(dao, frum, thru):
+        sql = ("SELECT a.*, e.name, p.name "
+               "FROM assignments a "
+               "JOIN employees e ON a.employee_id=e.id "
+               "JOIN projects p ON a.project_id=p.id "
+               "WHERE a.frum >= ? AND a.thru <= ?")
+        vals = (frum, thru)
+        return dao.execute(sql, vals)
