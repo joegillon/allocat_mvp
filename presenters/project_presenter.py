@@ -19,8 +19,6 @@ class ProjectPresenter(Presenter):
         self.view.load_pm(managers)
 
     def load_details(self):
-        from dal.dao import Dao
-
         item = self.view.get_selection()
         if item:
             self.view.set_name(item.name)
@@ -30,8 +28,6 @@ class ProjectPresenter(Presenter):
             self.view.set_pi(item.investigator)
             self.view.set_pm(item.manager)
             self.view.set_notes(item.notes)
-            if not item.asns:
-                item.asns = item.get_asns(Dao())
             self.view.set_asn_list(item.asns)
             self.view.set_save_button_label('Update Project')
 

@@ -32,7 +32,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Check the project list
         list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 31
+        assert len(list_items) == 30
         item = list_items[model_idx]
         assert item.id == 303
         assert item.name == 'Biosimilar Merit_Waljee'
@@ -216,7 +216,7 @@ class TestProjectPresenter(unittest.TestCase):
     def testPrjListSelectNoAsns(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 25
+        model_idx = 24
         click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 282
@@ -302,7 +302,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         model_idx = view.get_selected_idx()
         list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 31
+        assert len(list_items) == 30
         item = list_items[model_idx]
         assert item.id == 303
         assert item.name == 'Biosimilar Merit_Waljee'
@@ -397,7 +397,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         model_idx = view.get_selected_idx()
         list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 31
+        assert len(list_items) == 30
         item = list_items[model_idx]
         assert item.id == 303
         assert item.name == 'Biosimilar Merit_Waljee'
@@ -629,7 +629,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert args[1] == ['Test Prj 5', 'Test Project Five', '1911', '2004', 7, 52, 'This is a comment.', 1]
 
         list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 32
+        assert len(list_items) == 31
         model_idx = view.get_selected_idx()
         item = list_items[model_idx]
         assert item.id == 317
@@ -723,7 +723,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert args[1] == ['Test Prj 5', 'Test Project Five', '1905', '1908', 'This is a comment.', 7, 52, 279]
 
         list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 31
+        assert len(list_items) == 30
         model_idx = view.get_selected_idx()
         assert model_idx == 6
         item = list_items[model_idx]
@@ -822,7 +822,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert args[1] == ['1905', '1908', 'This is a comment.', None, None, 279]
 
         list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 31
+        assert len(list_items) == 30
         model_idx = view.get_selected_idx()
         assert model_idx == 6
         item = list_items[model_idx]
@@ -969,7 +969,7 @@ class TestProjectPresenter(unittest.TestCase):
     def testDropLastRecUpdatesModelAndView(self, write_mock, confirm_mock):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 30
+        model_idx = 29
         click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 300

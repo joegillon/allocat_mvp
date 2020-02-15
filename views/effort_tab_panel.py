@@ -95,7 +95,7 @@ class EffTab(wx.Panel):
             self.grid_ctrl.DeleteRows(0, nrows)
 
         # Resize new grid
-        self.grid_ctrl.AppendCols(numCols=len(months) - 1)
+        self.grid_ctrl.AppendCols(numCols=len(months))
         self.grid_ctrl.AppendRows(numRows=len(rows))
 
         self.set_grid_alignment(ncols, nrows)
@@ -112,7 +112,7 @@ class EffTab(wx.Panel):
             self.grid_ctrl.SetCellValue(rownum, 0, str(employee.id))
             self.grid_ctrl.SetCellValue(rownum, 1, employee.name)
             self.grid_ctrl.SetCellValue(rownum, 2, str(employee.fte))
-            for colnum in range(3, len(months) + 2):
+            for colnum in range(3, len(months) + 3):
                 value = rows[rownum].cells[colnum - 3].total
                 self.grid_ctrl.SetCellValue(rownum, colnum, str(value))
                 if value < employee.fte:

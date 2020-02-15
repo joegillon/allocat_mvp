@@ -61,7 +61,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
-        assert asn_list_ctrl.GetObjects() == model[0].asns == []
+        assert asn_list_ctrl.GetObjects() == model[0].asns
 
     def testEmpListSelectWithAsns(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -143,7 +143,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
-        assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
+        assert model[model_idx].asns == asn_list_ctrl.GetObjects()
 
     def testEmpNameFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -157,9 +157,10 @@ class TestEmployeePresenter(unittest.TestCase):
         assert [item.id for item in filtered_items] == [23, 103, 285, 301]
 
         # Check that the first item is selected
-        model_idx = view.get_selected_idx()
-        assert model_idx == 0
-        assert view.get_selection() == [x for x in model if x.id==23][0]
+        item_idx = view.get_selected_idx()
+        assert item_idx == 0
+        model_rec = [x for x in model if x.id == 23][0]
+        assert view.get_selection() == model_rec
 
         # Check form
         expected_vals = {
@@ -174,7 +175,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
-        assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
+        assert model_rec.asns == asn_list_ctrl.GetObjects()
 
     def testCancelEmpNameFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -193,7 +194,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
-        assert asn_list_ctrl.GetObjects() == model[0].asns == []
+        assert asn_list_ctrl.GetObjects() == model[0].asns
 
     def testEmpNotesFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -213,7 +214,8 @@ class TestEmployeePresenter(unittest.TestCase):
         # Check list
         item = view.get_selection()
         assert item.id == 286
-        assert view.get_selection() == [x for x in model if x.id==286][0]
+        model_rec = [x for x in model if x.id == 286][0]
+        assert view.get_selection() == model_rec
 
         # Check form
         expected_vals = {
@@ -228,7 +230,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
-        assert model[model_idx].asns == asn_list_ctrl.GetObjects() == []
+        assert model_rec.asns == asn_list_ctrl.GetObjects()
 
     def testCancelEmpNotesFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -247,7 +249,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check assignments
-        assert asn_list_ctrl.GetObjects() == model[0].asns == []
+        assert asn_list_ctrl.GetObjects() == model[0].asns
 
     def testClearForm(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -545,7 +547,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'org': 'SMITREC',
             'notes': '',
             'active': True,
-            'asns': []
+            'asns': model[model_idx].asns
         }
         item = view.get_selection()
         assert item.__dict__ == expected_item
@@ -563,7 +565,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check the assignments list
-        assert asn_list_ctrl.GetObjects() == model[model_idx].asns == []
+        assert asn_list_ctrl.GetObjects() == model[model_idx].asns
 
     @patch('presenters.presenter.uil.confirm', return_value=True)
     @patch('presenters.presenter.Dao._Dao__write', return_value=1)
@@ -588,7 +590,7 @@ class TestEmployeePresenter(unittest.TestCase):
             'org': 'CCMR',
             'notes': '',
             'active': True,
-            'asns': []
+            'asns': model[model_idx].asns
         }
         assert item.__dict__ == expected_item
         assert list_ctrl.GetItemText(model_idx, 2) == 'N'
@@ -607,7 +609,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
 
         # Check the assignments list
-        assert asn_list_ctrl.GetObjects() == []
+        assert asn_list_ctrl.GetObjects() == expected_item['asns']
 
         click_button(view.drop_btn)
 
@@ -683,7 +685,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert asn_view.owner_lbl.GetLabelText() == 'Employee: RANUSCH, ALLISON'
         assert asn_view.assignee_lbl.GetLabelText() == 'Project: '
         assert not isinstance(asn_view.assignee, str)
-        assert asn_view.assignee.Count == 32
+        assert asn_view.assignee.Count == 31
         assert asn_view.assignee.CurrentSelection == -1
         assert asn_view.get_frum() == ''
         assert asn_view.get_thru() == ''

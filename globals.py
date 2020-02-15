@@ -1,3 +1,4 @@
+import random
 from collections import namedtuple
 
 
@@ -157,7 +158,11 @@ SKINS = {
         grdCellBg='#C4DFE6'
     ),
 }
-COLOR_SCHEME = SKINS['Sandy']
+
+COLOR_SCHEME = None
+
+def pick_scheme():
+    return random.choice(list(SKINS.keys()))
 
 # Declare these vars globally
 # widestEmpName = 0

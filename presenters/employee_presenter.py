@@ -16,8 +16,6 @@ class EmployeePresenter(Presenter):
         pass
 
     def load_details(self):
-        from dal.dao import Dao
-
         item = self.view.get_selection()
         if item:
             self.view.set_name(item.name)
@@ -26,8 +24,6 @@ class EmployeePresenter(Presenter):
             self.view.set_intern(item.intern)
             self.view.set_org(item.org)
             self.view.set_notes(item.notes)
-            if not item.asns:
-                item.asns = item.get_asns(Dao())
             self.view.set_asn_list(item.asns)
             self.view.set_save_button_label('Update Employee')
 
