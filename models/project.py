@@ -135,3 +135,7 @@ class Project(object):
         result = dao.execute(sql, (self.id,))
         if result < 1 or result > expected:
             raise Exception('Expected %d records affected, got %d' % (expected, result))
+
+    def undrop(self, dao):
+        sql = "UPDATE projects SET active=1 WHERE id=?"
+        dao.execute(sql, (self.id,))

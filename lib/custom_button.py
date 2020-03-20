@@ -88,6 +88,9 @@ class CustomButton(CONTROL):
         self.label = label
         self.Refresh()
 
+    def get_label(self):
+        return self.label
+
     def set_bmp(self, normal, hover=None, focus=None, mouse_down=None):
 
         # bmp = (bmp, position)

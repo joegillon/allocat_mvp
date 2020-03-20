@@ -102,12 +102,12 @@ class TabPanel(wx.Panel):
         layout = wx.BoxSizer(wx.VERTICAL)
 
         tb_panel = self.build_detail_toolbar_panel(panel)
-        fm_panel = self.build_detail_form_panel(panel)
-        asn_panel = self.build_asn_panel(panel)
+        self.fm_panel = self.build_detail_form_panel(panel)
+        self.asn_panel = self.build_asn_panel(panel)
 
         layout.Add(tb_panel, 0, wx.EXPAND | wx.ALL, 5)
-        layout.Add(fm_panel, 0, wx.EXPAND | wx.ALL, 5)
-        layout.Add(asn_panel, 0, wx.EXPAND | wx.ALL, 5)
+        layout.Add(self.fm_panel, 0, wx.EXPAND | wx.ALL, 5)
+        layout.Add(self.asn_panel, 0, wx.EXPAND | wx.ALL, 5)
 
         panel.SetSizerAndFit(layout)
         return panel
@@ -121,7 +121,9 @@ class TabPanel(wx.Panel):
 
         self.clear_btn = uil.toolbar_button(panel, 'Clear Form')
         self.save_btn = uil.toolbar_button(panel, 'Update ' + self.model_name)
+
         self.drop_btn = uil.toolbar_button(panel, 'Drop ' + self.model_name)
+        self.drop_btn.set_size((150, -1))
 
         layout.Add(self.clear_btn, 0, wx.ALL, 5)
         layout.Add(self.drop_btn, 0, wx.ALL, 5)
@@ -173,10 +175,10 @@ class TabPanel(wx.Panel):
         layout = wx.BoxSizer(wx.VERTICAL)
 
         tb_panel = self.build_asn_list_toolbar_panel(panel)
-        lst_panel = self.build_asn_list_list_panel(panel)
+        asn_list_panel = self.build_asn_list_list_panel(panel)
 
         layout.Add(tb_panel, 0, wx.EXPAND | wx.ALL, 5)
-        layout.Add(lst_panel, 0, wx.EXPAND | wx.ALL, 5)
+        layout.Add(asn_list_panel, 0, wx.EXPAND | wx.ALL, 5)
 
         panel.SetSizerAndFit(layout)
         return panel
@@ -192,6 +194,7 @@ class TabPanel(wx.Panel):
         layout.Add(self.add_asn_btn, 0, wx.ALL, 5)
 
         self.drop_asn_btn = uil.toolbar_button(panel, 'Drop Assignments')
+        # self.drop_asn_btn.set_size((150, -1))
         layout.Add(self.drop_asn_btn, 0, wx.ALL, 5)
 
         panel.SetSizer(layout)
@@ -284,3 +287,22 @@ class TabPanel(wx.Panel):
 
     def get_selected_asns(self):
         return self.asn_list_ctrl.GetSelectedObjects()
+
+    # def set_drop_asn_btn_lbl(self, txt):
+    #     self.drop_asn_btn.set_label(txt)
+
+    def set_details_active(self, active, model):
+        if active:
+            self.drop_btn.set_label('Drop %s'% model)
+            # self.set_drop_asn_btn_lbl('Drop Assignments')
+            self.fm_panel.Enable()
+            self.asn_panel.Enable()
+            self.asn_list_ctrl.SetTextColour('black')
+            self.save_btn.Enable()
+        else:
+            self.drop_btn.set_label('Undrop %s'% model)
+            # self.set_drop_asn_btn_lbl('Undrop Assignments')
+            self.fm_panel.Disable()
+            self.asn_panel.Disable()
+            self.asn_list_ctrl.SetTextColour('gray')
+            self.save_btn.Disable()

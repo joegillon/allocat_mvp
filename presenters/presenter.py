@@ -140,8 +140,12 @@ class Presenter(object):
     def update_model_values(self, model, form_values):
             raise NotImplementedError("Please Implement this method")
 
-    def drop(self):
+    def drop(self, action):
         idx = self.view.get_selected_idx()
+
+        if action == 'Undrop':
+            self.undrop(idx)
+            return
 
         try:
             self.model[idx].drop(Dao())
@@ -154,6 +158,23 @@ class Presenter(object):
         if idx >= len(self.model):
             idx = len(self.model) - 1
         self.set_selection(idx)
+
+    def undrop(self, idx):
+        try:
+            self.model[idx].undrop(Dao())
+            self.model[idx].active = 1
+            self.model[idx].asns = []
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+
+        self.refresh_list()
+        if idx >= len(self.model):
+            idx = len(self.model) - 1
+        self.set_selection(idx)
+
+        self.view.set_details_active(True, self.model_name)
+        # self.view.set_drop_asn_btn_lbl('Undrop Assignments')
 
     def set_asn_selection(self, idx):
         self.view.set_selection(idx)
@@ -190,6 +211,11 @@ class Presenter(object):
         if not ids:
             uil.show_error('No assignments selected!')
             return
+
+        # if action == 'Undrop':
+        #     self.undrop_asn(ids)
+        #     return
+
         if uil.confirm(self.view, 'Drop selected assignments?'):
             try:
                 Assignment.drop_many(Dao(), ids)
@@ -200,6 +226,14 @@ class Presenter(object):
             new_list = [asn for asn in model.asns if asn.id not in ids]
             model.asns = new_list
             self.view.set_asn_list(new_list)
+
+    # def undrop_asn(self, ids):
+    #     if uil.confirm(self.view, 'Undrop selected assignments?'):
+    #         try:
+    #             Assignment.undrop_many(Dao(), ids)
+    #         except Exception as ex:
+    #             uil.show_error(str(ex))
+    #             return
 
     def show_help(self):
         import lib.ui_lib as uil

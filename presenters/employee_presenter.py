@@ -26,6 +26,7 @@ class EmployeePresenter(Presenter):
             self.view.set_notes(item.notes)
             self.view.set_asn_list(item.asns)
             self.view.set_save_button_label('Update Employee')
+            self.view.set_details_active(item.active, 'Employee')
 
     def clear_model_values(self):
         self.view.set_fte('')

@@ -30,6 +30,7 @@ class ProjectPresenter(Presenter):
             self.view.set_notes(item.notes)
             self.view.set_asn_list(item.asns)
             self.view.set_save_button_label('Update Project')
+            self.view.set_details_active(item.active, 'Project')
 
     def clear_model_values(self):
         self.view.set_full_name('')

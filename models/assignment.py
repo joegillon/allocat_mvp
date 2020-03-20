@@ -29,6 +29,12 @@ class Assignment(object):
                   dao.get_param_str(ids))
         return dao.execute(sql, ids)
 
+    # @staticmethod
+    # def undrop_many(dao, ids):
+    #     sql = "UPDATE assignments SET active=1 WHERE id IN (%s)" % (
+    #               dao.get_param_str(ids))
+    #     return dao.execute(sql, ids)
+
     @staticmethod
     def get_for_timeframe(dao, frum, thru):
         sql = ("SELECT a.*, e.name, p.name "
