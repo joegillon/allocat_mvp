@@ -183,7 +183,8 @@ class Presenter(object):
         return self.view.get_selection()
 
     def add_asn(self):
-        model = self.model[self.view.get_selected_idx()]
+        idx = self.view.get_selected_idx()
+        model = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
         owner = '%s: %s' % (self.model_name, model.name)
         assignee = self.get_assignee_ctrl()
         dlg = AsnDlg(self.view, -1, 'New Assignment', owner, assignee)
