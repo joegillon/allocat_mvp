@@ -184,23 +184,32 @@ class Presenter(object):
 
     def add_asn(self):
         idx = self.view.get_selected_idx()
-        model = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
-        owner = '%s: %s' % (self.model_name, model.name)
+        owner = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
         assignee = self.get_assignee_ctrl()
         dlg = AsnDlg(self.view, -1, 'New Assignment', owner, assignee)
         self.asn_presenter = dlg.presenter
         dlg.ShowModal()
+        dlg.Destroy()
+        new_asn = gbl.dataset.grab_bag['saved_asn']
+        gbl.dataset.asn_rex.append(new_asn)
+        owner.asns.append(new_asn)
+        self.view.set_asn_list(owner.asns)
 
     def get_assignee_ctrl(self):
             raise NotImplementedError("Please Implement this method")
 
     def edit_asn(self, asn):
-        model = self.model[self.view.get_selected_idx()]
-        owner = '%s: %s' % (self.model_name, model.name)
+        idx = self.view.get_selected_idx()
+        owner = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
+        # owner = self.model[self.view.get_selected_idx()]
         assignee = self.get_assignee_str(asn)
         dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
         self.asn_presenter = dlg.presenter
         dlg.ShowModal()
+        dlg.Destroy()
+        edited_asn = gbl.dataset.grab_bag['saved_asn']
+        self.view.set_asn_list(owner.asns)
+
 
     def get_assignee_str(self, asn):
             raise NotImplementedError("Please Implement this method")

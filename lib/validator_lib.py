@@ -102,5 +102,6 @@ def validate_effort(value):
 def showErrMsg(ctl, msg):
     import wx
 
-    ctl.SetFocus()
+    if ctl:
+        ctl.SetFocus()
     wx.MessageBox(msg, 'Error!', wx.ICON_EXCLAMATION | wx.OK)

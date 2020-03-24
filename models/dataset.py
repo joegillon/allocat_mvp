@@ -12,6 +12,8 @@ class AllocatDataSet(object):
         self.prj_full_names = {}
         self.emp_names = {}
 
+        self.grab_bag = {}
+
         self.build_dataset()
 
     def get_data(self):

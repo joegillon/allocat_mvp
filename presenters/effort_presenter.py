@@ -110,6 +110,7 @@ class EffortPresenter(object):
         dlg.set_total_lbl(s)
 
         dlg.ShowModal()
+        dlg.Destroy()
 
     def show_month_breakdown(self, col, row):
         from views.month_brkdwn_dlg import MonthBreakdownDialog
@@ -120,3 +121,4 @@ class EffortPresenter(object):
         key = str(emp_id) + ':' + month
         dlg = MonthBreakdownDialog(self.view, -1, empName, ml.prettify(month), self.breakdowns[key])
         dlg.ShowModal()
+        dlg.Destroy()

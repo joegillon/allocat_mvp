@@ -56,7 +56,8 @@ class Employee(object):
             self.org, self.notes, 1
         ]
         try:
-            return dao.execute(sql, vals)
+            self.id = dao.execute(sql, vals)
+            return self.id
         except Exception as e:
             s = str(e)
             if s.startswith('UNIQUE constraint failed'):

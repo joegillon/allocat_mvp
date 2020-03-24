@@ -43,10 +43,10 @@ def is_valid_span(first, last):
     return last >= first
 
 
-def is_in_prj_span(prj, first_month, last_month):
-    if first_month < prj['first_month']:
+def is_in_prj_span(prj, frum, thru):
+    if frum < prj.frum:
         return False
-    return last_month <= prj['last_month']
+    return thru <= prj.thru
 
 def get_timeframe_edges(list):
     min = '9999'

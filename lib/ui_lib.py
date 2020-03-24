@@ -75,6 +75,7 @@ def confirm(parent, msg):
     dlg = wx.MessageDialog(parent, msg, 'Just making sure...',
                            wx.YES_NO | wx.ICON_QUESTION)
     reply = dlg.ShowModal()
+    dlg.Destroy()
     return reply == wx.ID_YES
 
 
@@ -107,7 +108,7 @@ class ObjComboBox(wx.ComboBox):
         self.SetValue(x)
 
     def get_selection(self):
-        if self.CurrentSelection == 0:
+        if self.CurrentSelection == -1:
             return None
         return self.GetClientData(self.GetSelection())
 

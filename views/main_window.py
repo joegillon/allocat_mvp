@@ -7,7 +7,7 @@ from presenters.effort_presenter import EffortPresenter
 
 class MainWindow(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self, None, title='allocat', size=(1200, 800))
+        wx.Frame.__init__(self, None, title='allocat', size=(1300, 800))
         panel = wx.Panel(self)
         layout = wx.BoxSizer()
 

@@ -11,8 +11,12 @@ class Assignment(object):
         self.notes = ''
         self.active = 1
         if d:
-            for attr in d:
-                setattr(self, attr, d[attr])
+            self.from_dict(d)
+
+    def from_dict(self, d):
+        for attr in d:
+            setattr(self, attr, d[attr])
+        self.effort = int(self.effort)
 
     @staticmethod
     def get_all(dao):
@@ -43,4 +47,28 @@ class Assignment(object):
                "JOIN projects p ON a.project_id=p.id "
                "WHERE a.frum >= ? AND a.thru <= ?")
         vals = (frum, thru)
+        return dao.execute(sql, vals)
+
+    def add(self, dao):
+        sql = ("INSERT INTO assignments "
+               "(employee_id, project_id, frum, thru, effort, notes, active) "
+               "VALUES(%s)" % (('?,' * 7)[0:-1],))
+        vals = [
+            self.employee_id, self.project_id,
+            self.frum, self.thru, self.effort,
+            self.notes, 1
+        ]
+        self.id = dao.execute(sql, vals)
+        return self.id
+
+    def update(self, dao):
+        sql = ("UPDATE assignments "
+               "SET employee_id=?, project_id=?, "
+               "frum=?, thru=?, effort=?, notes=?, active=? "
+               "WHERE id=?")
+        vals = [
+            self.employee_id, self.project_id,
+            self.frum, self.thru, self.effort,
+            self.notes, 1, self.id
+        ]
         return dao.execute(sql, vals)
