@@ -1,3 +1,6 @@
+import globals as gbl
+
+
 class Project(object):
     def __init__(self, d=None):
         self.id = None
@@ -68,6 +71,7 @@ class Project(object):
         ]
         try:
             self.id = dao.execute(sql, vals)
+            gbl.dataset.add_prj(self)
             return self.id
         except Exception as e:
             s = str(e)
@@ -77,14 +81,18 @@ class Project(object):
                 raise
 
     def update(self, dao, new_values):
-        new_values, investigator, manager = self.prep_update(new_values)
+        import copy
+
+        new_values, investigator, manager = self.before_update(new_values)
+        old_self = copy.copy(self)
         nrex = self.do_update(dao, new_values)
         if nrex != 1:
             raise Exception('Unexpected update return value: %d' % nrex)
-        self.post_update(new_values, investigator, manager)
+        self.after_update(new_values, investigator, manager)
+        gbl.dataset.update_prj(old_self, self)
 
 
-    def prep_update(self, new_values):
+    def before_update(self, new_values):
         # Remove name and full_name if no change to avoid UNIQUE constraint
         if new_values['name'].upper() == self.name.upper():
             del new_values['name']
@@ -124,7 +132,7 @@ class Project(object):
             else:
                 raise
 
-    def post_update(self, new_values, investigator, manager):
+    def after_update(self, new_values, investigator, manager):
         for attr in new_values:
             setattr(self, attr, new_values[attr])
         self.investigator = investigator
@@ -136,6 +144,7 @@ class Project(object):
         result = dao.execute(sql, (self.id,))
         if result < 1 or result > expected:
             raise Exception('Expected %d records affected, got %d' % (expected, result))
+        gbl.dataset.drop_prj(self)
 
     def undrop(self, dao):
         sql = "UPDATE projects SET active=1 WHERE id=?"

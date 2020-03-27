@@ -266,10 +266,10 @@ class TabPanel(wx.Panel):
         self.list_ctrl.Select(self.get_selected_idx(), on=False)
 
     def set_save_button_label(self, value):
-        self.save_btn.SetLabel(value)
+        self.save_btn.set_label(value)
 
     def get_save_button_label(self):
-        return self.save_btn.GetLabel()
+        return self.save_btn.get_label()
 
     def set_active_button_label(self, value):
         self.active_btn.set_label(value)
@@ -298,6 +298,7 @@ class TabPanel(wx.Panel):
             self.fm_panel.Enable()
             self.asn_panel.Enable()
             self.asn_list_ctrl.SetTextColour('black')
+            self.clear_btn.Enable()
             self.save_btn.Enable()
         else:
             self.drop_btn.set_label('Undrop %s'% model)
@@ -305,4 +306,5 @@ class TabPanel(wx.Panel):
             self.fm_panel.Disable()
             self.asn_panel.Disable()
             self.asn_list_ctrl.SetTextColour('gray')
+            self.clear_btn.Disable()
             self.save_btn.Disable()

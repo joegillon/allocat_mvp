@@ -12,8 +12,9 @@ from models.employee import Employee
 
 class Presenter(object):
 
-    def __init__(self, model, view, actor, model_name):
-        self.model = model
+    def __init__(self, get_model, view, actor, model_name):
+        self.model = None
+        self.get_model = get_model
         self.model_name = model_name
         self.view = view
         actor.install(self, view, model_name)
@@ -36,19 +37,22 @@ class Presenter(object):
     def load_details(self):
         raise NotImplementedError("Please Implement this method")
 
-    def refresh_list(self):
-        if gbl.active_only:
-            self.view.set_list([model for model in self.model  if model.active])
+    def refresh_list(self, idx=None):
+        self.model = self.get_model()
+        self.view.set_list(self.model)
+
+        if idx:
+            self.set_selection(idx)
         else:
-            self.view.set_list(self.model)
+            self.set_selection(0)
 
     def toggle_active(self):
         lbl_txt = self.view.get_active_button_label()
         if lbl_txt == 'Active':
-            gbl.active_only = True
+            gbl.dataset.set_active_only(True)
             self.view.set_active_button_label('All')
         else:
-            gbl.active_only = False
+            gbl.dataset.set_active_only(False)
             self.view.set_active_button_label('Active')
         self.refresh_list()
 
@@ -119,11 +123,6 @@ class Presenter(object):
             uil.show_error(str(ex))
             return
 
-        self.model.append(new_model)
-        self.model = sorted(self.model, key=lambda i: i.name.lower())
-        self.refresh_list()
-        self.set_selection(self.model.index(new_model))
-
     def get_new_model_values(self, form_values):
             raise NotImplementedError("Please Implement this method")
 
@@ -134,8 +133,6 @@ class Presenter(object):
         except Exception as ex:
             uil.show_error(str(ex))
             return
-        self.refresh_list()
-        self.set_selection(self.model.index(model))
 
     def update_model_values(self, model, form_values):
             raise NotImplementedError("Please Implement this method")
@@ -152,12 +149,6 @@ class Presenter(object):
         except Exception as ex:
             uil.show_error(str(ex))
             return
-
-        del self.model[idx]
-        self.refresh_list()
-        if idx >= len(self.model):
-            idx = len(self.model) - 1
-        self.set_selection(idx)
 
     def undrop(self, idx):
         try:
@@ -200,8 +191,9 @@ class Presenter(object):
 
     def edit_asn(self, asn):
         idx = self.view.get_selected_idx()
-        owner = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
+        # owner = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
         # owner = self.model[self.view.get_selected_idx()]
+        owner = self.model[idx]
         assignee = self.get_assignee_str(asn)
         dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
         self.asn_presenter = dlg.presenter

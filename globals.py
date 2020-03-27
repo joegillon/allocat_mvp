@@ -6,7 +6,6 @@ DB_PATH = 'c:/bench/allocat/data/allocat.db'
 # DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
 dataset = None
-active_only = True
 
 Skin = namedtuple('Skin', [
     'pnlBg', 'tbBg', 'tbFg', 'lstBg', 'lstHdr', 'lstSel',

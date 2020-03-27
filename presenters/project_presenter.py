@@ -7,10 +7,11 @@ from event_handlers.event_handler import EventHandler
 class ProjectPresenter(Presenter):
 
     def __init__(self, frame):
-        model = gbl.dataset.prj_rex
+        get_model = gbl.dataset.get_prj_data
         view = ProjectTabPanel(frame)
         actor = EventHandler()
-        super().__init__(model, view, actor, 'Project')
+        super().__init__(get_model, view, actor, 'Project')
+        gbl.dataset.bind_to('projects', self.refresh_list)
 
     def load_combos(self):
         investigators = [rec for rec in gbl.dataset.emp_rex if rec.investigator]
@@ -84,11 +85,18 @@ class ProjectPresenter(Presenter):
         return None
 
     def get_new_model_values(self, form_values):
-        form_values['investigator_id'] = form_values['pi'].id
-        form_values['investigator'] = form_values['pi'].name
+        form_values['investigator_id'] = None
+        form_values['investigator'] = None
+        if form_values['pi']:
+            form_values['investigator_id'] = form_values['pi'].id
+            form_values['investigator'] = form_values['pi'].name
         del form_values['pi']
-        form_values['manager_id'] = form_values['pm'].id
-        form_values['manager'] = form_values['pm'].name
+
+        form_values['manager_id'] = None
+        form_values['manager'] = None
+        if form_values['pm']:
+            form_values['manager_id'] = form_values['pm'].id
+            form_values['manager'] = form_values['pm'].name
         del form_values['pm']
         return form_values
 
