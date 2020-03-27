@@ -24,12 +24,18 @@ class ProjectTabPanel(TabPanel):
         ])
 
     def add_model_layout(self, panel, layout):
+        name_layout = wx.BoxSizer(wx.HORIZONTAL)
+        name_lbl = wx.StaticText(panel, wx.ID_ANY, self.model_name + ' Name: *')
+        self.name_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(400, -1))
+        name_layout.Add(name_lbl, 0, wx.ALL, 5)
+        name_layout.Add(self.name_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        layout.Add(name_layout, 0, wx.ALL, 5)
+
         full_name_layout = wx.BoxSizer(wx.HORIZONTAL)
         full_name_lbl = wx.StaticText(panel, wx.ID_ANY, 'Full Name: *')
         self.full_name_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(500, -1))
         full_name_layout.Add(full_name_lbl, 0, wx.ALL, 5)
         full_name_layout.Add(self.full_name_ctrl, 0, wx.ALL, 5)
-
         layout.Add(full_name_layout, 0, wx.ALL | wx.EXPAND, 5)
 
         interval_layout = wx.BoxSizer(wx.HORIZONTAL)

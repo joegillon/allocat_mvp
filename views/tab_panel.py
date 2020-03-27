@@ -142,14 +142,6 @@ class TabPanel(wx.Panel):
 
         layout = wx.BoxSizer(wx.VERTICAL)
 
-        name_layout = wx.BoxSizer(wx.HORIZONTAL)
-        name_lbl = wx.StaticText(panel, wx.ID_ANY, self.model_name + ' Name: *')
-        self.name_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(400, -1))
-        name_layout.Add(name_lbl, 0, wx.ALL, 5)
-        name_layout.Add(self.name_ctrl, 0, wx.ALL | wx.EXPAND, 5)
-
-        layout.Add(name_layout, 0, wx.ALL | wx.EXPAND, 5)
-
         self.add_model_layout(panel, layout)
 
         notes_layout = wx.BoxSizer(wx.VERTICAL)
@@ -258,6 +250,7 @@ class TabPanel(wx.Panel):
 
     def set_selection(self, idx):
         self.list_ctrl.Select(idx, on=1)
+        self.list_ctrl.EnsureVisible(idx)
 
     def get_selection(self):
         return self.list_ctrl.GetSelectedObject()

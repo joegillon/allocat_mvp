@@ -127,3 +127,16 @@ def set2compare(s):
     import string
 
     return s.translate({ord(c): None for c in string.whitespace}).upper()
+
+
+class UpperTextCtrl(wx.TextCtrl):
+    def __init__(self, *args, **kwargs):
+        super(UpperTextCtrl, self).__init__(*args, **kwargs)
+        self.Bind(wx.EVT_TEXT, self.on_text)
+
+    def on_text(self, event):
+        event.Skip()
+        selection = self.GetSelection()
+        value = self.GetValue().upper()
+        self.ChangeValue(value)
+        self.SetSelection(*selection)

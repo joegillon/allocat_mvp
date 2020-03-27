@@ -24,7 +24,15 @@ class EmployeeTabPanel(TabPanel):
     def add_model_layout(self, panel, layout):
         import wx.lib.masked as masked
 
+        name_layout = wx.BoxSizer(wx.HORIZONTAL)
+        name_lbl = wx.StaticText(panel, wx.ID_ANY, self.model_name + ' Name: *')
+        self.name_ctrl = uil.UpperTextCtrl(panel, wx.ID_ANY, size=(400, -1))
+        name_layout.Add(name_lbl, 0, wx.ALL, 5)
+        name_layout.Add(self.name_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        layout.Add(name_layout, 0, wx.ALL, 5)
+
         form_layout = wx.BoxSizer(wx.HORIZONTAL)
+
         fte_lbl = wx.StaticText(panel, wx.ID_ANY, 'FTE: ')
         self.fte_ctrl = masked.TextCtrl(panel, wx.ID_ANY,
                                        mask='###',

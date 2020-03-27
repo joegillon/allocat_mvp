@@ -7,7 +7,7 @@ class AllocatDataSet(object):
         self.db_path = db_path
 
         self._prj_rex = []
-        self.emp_rex = []
+        self._emp_rex = []
         self.asn_rex = []
 
         # These are to validate uniqueness
@@ -33,7 +33,7 @@ class AllocatDataSet(object):
 
         dao = Dao(db_path=self.db_path, stateful=True)
         self._prj_rex = Project.get_all(dao)
-        self.emp_rex = Employee.get_all(dao)
+        self._emp_rex = Employee.get_all(dao)
         self.asn_rex = Assignment.get_all(dao)
         dao.close()
 
@@ -45,7 +45,7 @@ class AllocatDataSet(object):
             self.prj_names[uil.set2compare(prj.name)] = prj.id
             self.prj_full_names[uil.set2compare(prj.full_name)] = prj.id
 
-        for emp in self.emp_rex:
+        for emp in self._emp_rex:
             emp.asns = [asn for asn in self.asn_rex if asn.employee_id == emp.id]
             self.emp_names[uil.set2compare(emp.name)] = emp.id
 
@@ -56,6 +56,11 @@ class AllocatDataSet(object):
         if self._active_only:
             return [rec for rec in self._prj_rex if rec.active]
         return self._prj_rex
+
+    def get_emp_data(self):
+        if self._active_only:
+            return [rec for rec in self._emp_rex if rec.active]
+        return self._emp_rex
 
     def bind_to(self, tbl, callback):
         self._observers[tbl].append(callback)
@@ -92,3 +97,27 @@ class AllocatDataSet(object):
         idx = self._prj_rex.index(prj)
         del self._prj_rex[idx]
         self.notify('projects')
+
+    def add_emp(self, new_emp):
+        self._emp_rex.append(new_emp)
+        self._emp_rex = sorted(self._emp_rex, key=lambda i: i.name.lower())
+        idx = self._emp_rex.index(new_emp)
+        if self._active_only:
+            idx = [x for x in self._emp_rex if x.active].index(new_emp)
+        self.emp_names[uil.set2compare(new_emp.name)] = new_emp.id
+        self.notify('employees', idx)
+
+    def update_emp(self, old_rec, new_rec):
+        idx = self._emp_rex.index(new_rec)
+        if old_rec.name != new_rec.name:
+            del self.emp_names[uil.set2compare(old_rec.name)]
+            self.emp_names[uil.set2compare(new_rec.name)] = new_rec.id
+        if self._active_only:
+            idx = [x for x in self._emp_rex if x.active].index(new_rec)
+        self.notify('employees', idx)
+
+    def drop_emp(self, emp):
+        del self.emp_names[uil.set2compare(emp.name)]
+        idx = self._emp_rex.index(emp)
+        del self._emp_rex[idx]
+        self.notify('employees')

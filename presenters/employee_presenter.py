@@ -7,10 +7,11 @@ from event_handlers.event_handler import EventHandler
 class EmployeePresenter(Presenter):
 
     def __init__(self, frame):
-        model = gbl.dataset.emp_rex
+        get_model = gbl.dataset.get_emp_data
         view = EmployeeTabPanel(frame)
         actor = EventHandler()
-        super().__init__(model, view, actor, 'Employee')
+        super().__init__(get_model, view, actor, 'Employee')
+        gbl.dataset.bind_to('employees', self.refresh_list)
 
     def load_combos(self):
         pass
@@ -32,7 +33,7 @@ class EmployeePresenter(Presenter):
         self.view.set_fte('')
         self.view.set_investigator(False)
         self.view.set_intern(False)
-        self.view.set_org('')
+        self.view.set_org('CCMR')
 
     def get_form_values(self):
         return {

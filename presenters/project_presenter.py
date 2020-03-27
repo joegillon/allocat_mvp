@@ -14,8 +14,9 @@ class ProjectPresenter(Presenter):
         gbl.dataset.bind_to('projects', self.refresh_list)
 
     def load_combos(self):
-        investigators = [rec for rec in gbl.dataset.emp_rex if rec.investigator]
-        managers = [rec for rec in gbl.dataset.emp_rex if not rec.investigator]
+        emp_rex = gbl.dataset.get_emp_data()
+        investigators = [rec for rec in emp_rex if rec.investigator]
+        managers = [rec for rec in emp_rex if not rec.investigator]
         self.view.load_pi(investigators)
         self.view.load_pm(managers)
 

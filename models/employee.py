@@ -1,3 +1,6 @@
+import globals as gbl
+
+
 class Employee(object):
     def __init__(self, d=None):
         self.id = None
@@ -57,6 +60,7 @@ class Employee(object):
         ]
         try:
             self.id = dao.execute(sql, vals)
+            gbl.dataset.add_emp(self)
             return self.id
         except Exception as e:
             s = str(e)
@@ -66,10 +70,14 @@ class Employee(object):
                 raise
 
     def update(self, dao, new_values):
+        import copy
+
+        old_self = copy.copy(self)
         nrex = self.do_update(dao, new_values)
         if nrex != 1:
             raise Exception('Unexpected update return value: %d' % nrex)
-        self.post_update(new_values)
+        self.after_update(new_values)
+        gbl.dataset.update_emp(old_self, self)
 
     def do_update(self, dao, new_values):
         sql = ("UPDATE employees "
@@ -86,7 +94,7 @@ class Employee(object):
             else:
                 raise
 
-    def post_update(self, new_values):
+    def after_update(self, new_values):
         for attr in new_values:
             setattr(self, attr, new_values[attr])
 
@@ -96,6 +104,7 @@ class Employee(object):
         result = dao.execute(sql, (self.id,))
         if result < 1 or result > expected:
             raise Exception('Expected %d records affected, got %d' % (expected, result))
+        gbl.dataset.drop_emp(self)
 
     def undrop(self, dao):
         sql = "UPDATE employees SET active=1 WHERE id=?"
