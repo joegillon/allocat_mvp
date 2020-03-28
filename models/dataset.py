@@ -8,7 +8,7 @@ class AllocatDataSet(object):
 
         self._prj_rex = []
         self._emp_rex = []
-        self.asn_rex = []
+        self._asn_rex = []
 
         # These are to validate uniqueness
         self.prj_names = {}
@@ -34,19 +34,19 @@ class AllocatDataSet(object):
         dao = Dao(db_path=self.db_path, stateful=True)
         self._prj_rex = Project.get_all(dao)
         self._emp_rex = Employee.get_all(dao)
-        self.asn_rex = Assignment.get_all(dao)
+        self._asn_rex = Assignment.get_all(dao)
         dao.close()
 
     def _build_dataset(self):
         self._get_data()
 
         for prj in self._prj_rex:
-            prj.asns = [asn for asn in self.asn_rex if asn.project_id == prj.id]
+            prj.asns = [asn for asn in self._asn_rex if asn.project_id == prj.id]
             self.prj_names[uil.set2compare(prj.name)] = prj.id
             self.prj_full_names[uil.set2compare(prj.full_name)] = prj.id
 
         for emp in self._emp_rex:
-            emp.asns = [asn for asn in self.asn_rex if asn.employee_id == emp.id]
+            emp.asns = [asn for asn in self._asn_rex if asn.employee_id == emp.id]
             self.emp_names[uil.set2compare(emp.name)] = emp.id
 
     def set_active_only(self, value):
@@ -61,6 +61,11 @@ class AllocatDataSet(object):
         if self._active_only:
             return [rec for rec in self._emp_rex if rec.active]
         return self._emp_rex
+
+    def get_asn_data(self):
+        if self._active_only:
+            return [rec for rec in self._asn_rex if rec.active]
+        return self._asn_rex
 
     def bind_to(self, tbl, callback):
         self._observers[tbl].append(callback)
@@ -121,3 +126,41 @@ class AllocatDataSet(object):
         idx = self._emp_rex.index(emp)
         del self._emp_rex[idx]
         self.notify('employees')
+
+    def add_asn(self, new_asn):
+        prj = [rec for rec in self._prj_rex if rec.id == new_asn.project_id][0]
+        prj.asns.append(new_asn)
+
+        emp = [rec for rec in self._emp_rex if rec.id == new_asn.employee_id][0]
+        emp.asns.append(new_asn)
+
+        new_asn.employee = emp.name
+        new_asn.project = prj.name
+        self._asn_rex.append(new_asn)
+
+        self.notify('assignments', prj.asns)
+
+    def update_asn(self, asn):
+        prj = [rec for rec in self._prj_rex if rec.id == asn.project_id][0]
+        self.notify('assignments', prj.asns)
+
+    def drop_asns(self, ids):
+        asn_id = ids[0]
+        asn = [rec for rec in self._asn_rex if rec.id == asn_id][0]
+        prj_id = asn.project_id
+        emp_id = asn.employee_id
+
+        prj = [rec for rec in self._prj_rex if rec.id == prj_id][0]
+        for asn in prj.asns:
+            if asn.id in ids:
+                prj.asns.remove(asn)
+
+        emp = [rec for rec in self._emp_rex if rec.id == emp_id][0]
+        for asn in emp.asns:
+            if asn.id in ids:
+                emp.asns.remove(asn)
+
+        for asn in [rec for rec in self._asn_rex if rec.id in ids]:
+            self._asn_rex.remove(asn)
+
+        self.notify('assignments', prj.asns)

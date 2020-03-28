@@ -72,8 +72,8 @@ class AssignmentPresenter(object):
                     self.asn.update(Dao())
                 else:
                     self.asn = Assignment(form_values)
-                    self.asn.employee = [x for x in gbl.dataset.emp_rex if x.id == self.asn.employee_id][0].name
-                    self.asn.project = [x for x in gbl.dataset.prj_rex if x.id == self.asn.project_id][0].name
+                    # self.asn.employee = [x for x in gbl.dataset.emp_rex if x.id == self.asn.employee_id][0].name
+                    # self.asn.project = [x for x in gbl.dataset.prj_rex if x.id == self.asn.project_id][0].name
                     self.asn.add(Dao())
             except Exception as ex:
                 vl.showErrMsg(None, str(ex))

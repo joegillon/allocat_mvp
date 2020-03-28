@@ -1,3 +1,6 @@
+import globals as gbl
+
+
 class Assignment(object):
     def __init__(self, d=None):
         self.id = None
@@ -31,7 +34,9 @@ class Assignment(object):
     def drop_many(dao, ids):
         sql = "UPDATE assignments SET active=0 WHERE id IN (%s)" % (
                   dao.get_param_str(ids))
-        return dao.execute(sql, ids)
+        nrex = dao.execute(sql, ids)
+        gbl.dataset.drop_asns(ids)
+        return nrex
 
     # @staticmethod
     # def undrop_many(dao, ids):
@@ -59,6 +64,7 @@ class Assignment(object):
             self.notes, 1
         ]
         self.id = dao.execute(sql, vals)
+        gbl.dataset.add_asn(self)
         return self.id
 
     def update(self, dao):
@@ -71,4 +77,6 @@ class Assignment(object):
             self.frum, self.thru, self.effort,
             self.notes, 1, self.id
         ]
-        return dao.execute(sql, vals)
+        nrex = dao.execute(sql, vals)
+        gbl.dataset.update_asn(self)
+        return nrex

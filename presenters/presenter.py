@@ -19,6 +19,7 @@ class Presenter(object):
         self.view = view
         actor.install(self, view, model_name)
         self.is_listening = True
+        gbl.dataset.bind_to('assignments', self.refresh_asn_list)
 
     def init_view(self, ):
         self.load_view()
@@ -167,6 +168,9 @@ class Presenter(object):
         self.view.set_details_active(True, self.model_name)
         # self.view.set_drop_asn_btn_lbl('Undrop Assignments')
 
+    def refresh_asn_list(self, asns):
+        self.view.set_asn_list(asns)
+
     def set_asn_selection(self, idx):
         self.view.set_selection(idx)
 
@@ -175,16 +179,16 @@ class Presenter(object):
 
     def add_asn(self):
         idx = self.view.get_selected_idx()
-        owner = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
+        owner = self.model[idx]
         assignee = self.get_assignee_ctrl()
         dlg = AsnDlg(self.view, -1, 'New Assignment', owner, assignee)
         self.asn_presenter = dlg.presenter
         dlg.ShowModal()
         dlg.Destroy()
-        new_asn = gbl.dataset.grab_bag['saved_asn']
-        gbl.dataset.asn_rex.append(new_asn)
-        owner.asns.append(new_asn)
-        self.view.set_asn_list(owner.asns)
+        # new_asn = gbl.dataset.grab_bag['saved_asn']
+        # gbl.dataset.asn_rex.append(new_asn)
+        # owner.asns.append(new_asn)
+        # self.view.set_asn_list(owner.asns)
 
     def get_assignee_ctrl(self):
             raise NotImplementedError("Please Implement this method")
@@ -199,8 +203,8 @@ class Presenter(object):
         self.asn_presenter = dlg.presenter
         dlg.ShowModal()
         dlg.Destroy()
-        edited_asn = gbl.dataset.grab_bag['saved_asn']
-        self.view.set_asn_list(owner.asns)
+        # edited_asn = gbl.dataset.grab_bag['saved_asn']
+        # self.view.set_asn_list(owner.asns)
 
 
     def get_assignee_str(self, asn):
@@ -225,9 +229,9 @@ class Presenter(object):
                 uil.show_error(str(ex))
                 return
 
-            new_list = [asn for asn in model.asns if asn.id not in ids]
-            model.asns = new_list
-            self.view.set_asn_list(new_list)
+            # new_list = [asn for asn in model.asns if asn.id not in ids]
+            # model.asns = new_list
+            # self.view.set_asn_list(new_list)
 
     # def undrop_asn(self, ids):
     #     if uil.confirm(self.view, 'Undrop selected assignments?'):

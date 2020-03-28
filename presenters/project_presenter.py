@@ -114,7 +114,7 @@ class ProjectPresenter(Presenter):
         import lib.ui_lib as uil
 
         return uil.ObjComboBox(self.view,
-                               [rec for rec in gbl.dataset.emp_rex if rec.active],
+                               gbl.dataset.get_emp_data(),
                                'name',
                                'Employee',
                                style=16)
