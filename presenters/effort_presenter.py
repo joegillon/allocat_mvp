@@ -28,11 +28,12 @@ class EffRow(object):
 class EffortPresenter(object):
 
     def __init__(self, frame):
-        self.model = gbl.dataset.asn_rex
+        self.model = gbl.dataset.get_asn_data()
         self.view = EffTab(frame)
         actor = EffortEventHandler()
         actor.install(self, self.view)
-        self.emp_dict = {emp.id: emp for emp in gbl.dataset.emp_rex}
+        self.emp_rex = gbl.dataset.get_emp_data()
+        self.emp_dict = {emp.id: emp for emp in self.emp_rex}
         self.init_view()
 
     def init_view(self):
@@ -56,7 +57,7 @@ class EffortPresenter(object):
     def build_dataset(self, frum, thru, months):
         rows = []
         ugly_months = [ml.uglify(month) for month in months]
-        for emp in gbl.dataset.emp_rex:
+        for emp in self.emp_rex:
             row = EffRow(emp)
             for month in ugly_months:
                 cell = EffCell(month)
@@ -87,10 +88,8 @@ class EffortPresenter(object):
         if not self.emp_dict[emp_id].asns:
             uil.show_error('No assignments!')
             return
-        if gbl.active_only:
-            asns = [asn for asn in self.emp_dict[emp_id].asns if asn.active]
-        else:
-            asns = self.emp_dict[emp_id].asns
+
+        asns = [asn for asn in self.emp_dict[emp_id].asns if asn.active]
 
         total = 0
         items = []

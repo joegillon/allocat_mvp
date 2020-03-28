@@ -17,11 +17,11 @@ class MainWindow(wx.Frame):
 
         prj_presenter = ProjectPresenter(notebook)
         emp_presenter = EmployeePresenter(notebook)
-        # eff_presenter = EffortPresenter(notebook)
+        eff_presenter = EffortPresenter(notebook)
 
         notebook.AddPage(prj_presenter.view, 'Projects')
         notebook.AddPage(emp_presenter.view, 'Employees')
-        # notebook.AddPage(eff_presenter.view, 'Scoreboard')
+        notebook.AddPage(eff_presenter.view, 'Scoreboard')
 
         panel.SetSizer(layout)
 
