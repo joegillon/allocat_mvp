@@ -130,6 +130,8 @@ class AssignmentPanel(wx.Panel):
         return self.effort_ctrl.GetValue()
 
     def set_notes(self, value):
+        if not value:
+            value = ''
         self.notes_ctrl.SetValue(value)
 
     def get_notes(self):

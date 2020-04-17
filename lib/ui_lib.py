@@ -103,6 +103,8 @@ class ObjComboBox(wx.ComboBox):
             return None
 
     def set_selection(self, text):
+        if self.Count == 1:
+            return
         x = text if text else ''
         self.Select(self.GetItems().index(x))
         self.SetValue(x)

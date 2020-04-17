@@ -274,6 +274,8 @@ class TabPanel(wx.Panel):
         return self.asn_list_ctrl.GetSelectedObjects()
 
     def set_asn_list(self, asns):
+        if gbl.dataset.get_active_only():
+            asns = [asn for asn in asns if asn.active]
         self.Freeze()
         self.asn_list_ctrl.SetObjects(asns)
         self.Thaw()

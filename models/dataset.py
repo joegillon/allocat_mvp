@@ -52,6 +52,9 @@ class AllocatDataSet(object):
     def set_active_only(self, value):
         self._active_only = value
 
+    def get_active_only(self):
+        return self._active_only
+
     def get_prj_data(self):
         if self._active_only:
             return [rec for rec in self._prj_rex if rec.active]
@@ -72,7 +75,7 @@ class AllocatDataSet(object):
 
     def notify(self, tbl, idx=None):
         for callback in self._observers[tbl]:
-            callback(idx)
+            callback(idx) if idx else callback()
 
     def add_prj(self, new_prj):
         self._prj_rex.append(new_prj)
@@ -138,11 +141,10 @@ class AllocatDataSet(object):
         new_asn.project = prj.name
         self._asn_rex.append(new_asn)
 
-        self.notify('assignments', prj.asns)
+        self.notify('assignments')
 
     def update_asn(self, asn):
-        prj = [rec for rec in self._prj_rex if rec.id == asn.project_id][0]
-        self.notify('assignments', prj.asns)
+        self.notify('assignments')
 
     def drop_asns(self, ids):
         asn_id = ids[0]
@@ -163,4 +165,4 @@ class AllocatDataSet(object):
         for asn in [rec for rec in self._asn_rex if rec.id in ids]:
             self._asn_rex.remove(asn)
 
-        self.notify('assignments', prj.asns)
+        self.notify('assignments')

@@ -23,7 +23,6 @@ class Presenter(object):
 
     def init_view(self, ):
         self.load_view()
-        self.set_selection(0)
 
     def load_view(self):
         if self.is_listening:
@@ -166,10 +165,10 @@ class Presenter(object):
         self.set_selection(idx)
 
         self.view.set_details_active(True, self.model_name)
-        # self.view.set_drop_asn_btn_lbl('Undrop Assignments')
 
-    def refresh_asn_list(self, asns):
-        self.view.set_asn_list(asns)
+    def refresh_asn_list(self):
+        me = self.view.get_selection()
+        self.view.set_asn_list(me.asns)
 
     def set_asn_selection(self, idx):
         self.view.set_selection(idx)
@@ -185,42 +184,28 @@ class Presenter(object):
         self.asn_presenter = dlg.presenter
         dlg.ShowModal()
         dlg.Destroy()
-        # new_asn = gbl.dataset.grab_bag['saved_asn']
-        # gbl.dataset.asn_rex.append(new_asn)
-        # owner.asns.append(new_asn)
-        # self.view.set_asn_list(owner.asns)
 
     def get_assignee_ctrl(self):
             raise NotImplementedError("Please Implement this method")
 
     def edit_asn(self, asn):
         idx = self.view.get_selected_idx()
-        # owner = [rec for rec in self.model if rec.active][idx] if gbl.active_only else self.model[idx]
-        # owner = self.model[self.view.get_selected_idx()]
-        owner = self.model[idx]
+        owner = self.view.get_selection()
         assignee = self.get_assignee_str(asn)
         dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
         self.asn_presenter = dlg.presenter
         dlg.ShowModal()
         dlg.Destroy()
-        # edited_asn = gbl.dataset.grab_bag['saved_asn']
-        # self.view.set_asn_list(owner.asns)
-
 
     def get_assignee_str(self, asn):
             raise NotImplementedError("Please Implement this method")
 
     def drop_asn(self):
-        model = self.model[self.view.get_selected_idx()]
         selections = self.view.get_selected_asns()
         ids = [x.id for x in selections]
         if not ids:
             uil.show_error('No assignments selected!')
             return
-
-        # if action == 'Undrop':
-        #     self.undrop_asn(ids)
-        #     return
 
         if uil.confirm(self.view, 'Drop selected assignments?'):
             try:
@@ -228,18 +213,6 @@ class Presenter(object):
             except Exception as ex:
                 uil.show_error(str(ex))
                 return
-
-            # new_list = [asn for asn in model.asns if asn.id not in ids]
-            # model.asns = new_list
-            # self.view.set_asn_list(new_list)
-
-    # def undrop_asn(self, ids):
-    #     if uil.confirm(self.view, 'Undrop selected assignments?'):
-    #         try:
-    #             Assignment.undrop_many(Dao(), ids)
-    #         except Exception as ex:
-    #             uil.show_error(str(ex))
-    #             return
 
     def show_help(self):
         import lib.ui_lib as uil

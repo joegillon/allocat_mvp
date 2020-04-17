@@ -1,5 +1,4 @@
 import lib.month_lib as ml
-import lib.ui_lib as uil
 import lib.validator_lib as vl
 from views.assignment_panel import AssignmentPanel
 from event_handlers.assignment_event_handler import AssignmentInteractor
@@ -30,11 +29,8 @@ class AssignmentPresenter(object):
             self.view.frum_ctrl.SetFocus()
 
     def is_valid(self, form_values):
-        # if type(self.assignee) != str:
-        #     if self.assignee.GetValue() == '':
-        #         model_name = 'Project' if hasattr(self.owner, 'fte') else 'Employee'
-        #         uil.show_error('%s is required!' % model_name)
-        #         return False
+        import globals as gbl
+
         if not form_values['employee_id']:
             vl.showErrMsg(None, 'Employee is required!')
             return False
@@ -43,8 +39,9 @@ class AssignmentPresenter(object):
             vl.showErrMsg(None, 'Project is required!')
             return False
 
+        prj = [p for p in gbl.dataset._prj_rex if p.id == form_values['project_id']][0]
         err_msg = vl.validate_asn_timeframe(
-            form_values['frum'], form_values['thru'], self.owner)
+            form_values['frum'], form_values['thru'], prj)
         if err_msg:
             ctrl = self.view.frum_ctrl
             if err_msg.startswith('Thru'):
@@ -72,8 +69,6 @@ class AssignmentPresenter(object):
                     self.asn.update(Dao())
                 else:
                     self.asn = Assignment(form_values)
-                    # self.asn.employee = [x for x in gbl.dataset.emp_rex if x.id == self.asn.employee_id][0].name
-                    # self.asn.project = [x for x in gbl.dataset.prj_rex if x.id == self.asn.project_id][0].name
                     self.asn.add(Dao())
             except Exception as ex:
                 vl.showErrMsg(None, str(ex))
@@ -96,7 +91,6 @@ class AssignmentPresenter(object):
                 employee_id = self.asn.employee_id
             else:
                 employee_id = self.assignee.get_selection().id
-                # employee_id = emp.id if emp else None
             project_id = self.owner.id
         return {
             'employee_id': employee_id,
