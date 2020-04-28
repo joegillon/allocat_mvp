@@ -15,8 +15,6 @@ class AllocatDataSet(object):
         self.prj_full_names = {}
         self.emp_names = {}
 
-        self.grab_bag = {}
-
         self._build_dataset()
 
         self._active_only = True

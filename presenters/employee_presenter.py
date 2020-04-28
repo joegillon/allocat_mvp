@@ -1,4 +1,7 @@
 import globals as gbl
+from dal.dao import Dao
+from models.employee import Employee
+import lib.ui_lib as uil
 from presenters.presenter import Presenter
 from views.employee_tab_panel import EmployeeTabPanel
 from event_handlers.event_handler import EventHandler
@@ -85,3 +88,24 @@ class EmployeePresenter(Presenter):
 
     def get_assignee_str(self, asn):
         return 'Project: %s' % asn.project
+
+    def add_model(self, form_values):
+        new_model = Employee(self.get_new_model_values(form_values))
+
+        try:
+            new_model.id = new_model.add(Dao())
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+
+        uil.show_msg('Employee saved!', 'Hallelujah!')
+
+    def update_model(self, form_values):
+        model = self.model[self.view.get_selected_idx()]
+        try:
+            model.update(Dao(), form_values)
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+
+        uil.show_msg('Employee updated!', 'Hallelujah!')

@@ -5,10 +5,6 @@ from dal.dao import Dao
 from views.asn_dlg import AsnDlg
 from models.assignment import Assignment
 
-# These imports are needed for the klass bit
-from models.project import Project
-from models.employee import Employee
-
 
 class Presenter(object):
 
@@ -99,7 +95,7 @@ class Presenter(object):
         raise NotImplementedError("Please Implement this method")
 
     def validate(self):
-            raise NotImplementedError("Please Implement this method")
+        raise NotImplementedError("Please Implement this method")
 
     def save(self):
         err_msg = self.validate()
@@ -114,28 +110,16 @@ class Presenter(object):
             self.update_model(form_values)
 
     def add_model(self, form_values):
-        klass = globals()[self.model_name]
-        new_model = klass(self.get_new_model_values(form_values))
-
-        try:
-            new_model.id = new_model.add(Dao())
-        except Exception as ex:
-            uil.show_error(str(ex))
-            return
+        raise NotImplementedError("Please Implement this method")
 
     def get_new_model_values(self, form_values):
-            raise NotImplementedError("Please Implement this method")
+        raise NotImplementedError("Please Implement this method")
 
     def update_model(self, form_values):
-        model = self.model[self.view.get_selected_idx()]
-        try:
-            model.update(Dao(), form_values)
-        except Exception as ex:
-            uil.show_error(str(ex))
-            return
+        raise NotImplementedError("Please Implement this method")
 
     def update_model_values(self, model, form_values):
-            raise NotImplementedError("Please Implement this method")
+        raise NotImplementedError("Please Implement this method")
 
     def drop(self, action):
         idx = self.view.get_selected_idx()
@@ -186,7 +170,7 @@ class Presenter(object):
         dlg.Destroy()
 
     def get_assignee_ctrl(self):
-            raise NotImplementedError("Please Implement this method")
+        raise NotImplementedError("Please Implement this method")
 
     def edit_asn(self, asn):
         idx = self.view.get_selected_idx()
@@ -198,7 +182,7 @@ class Presenter(object):
         dlg.Destroy()
 
     def get_assignee_str(self, asn):
-            raise NotImplementedError("Please Implement this method")
+        raise NotImplementedError("Please Implement this method")
 
     def drop_asn(self):
         selections = self.view.get_selected_asns()

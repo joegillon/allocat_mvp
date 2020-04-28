@@ -48,12 +48,15 @@ def is_in_prj_span(prj, frum, thru):
         return False
     return thru <= prj.thru
 
+
 def get_timeframe_edges(list):
     min = '9999'
     max = '0000'
     for item in list:
-        if item['first_month'] < min:
-            min = item['first_month']
-        if item['last_month'] > max:
-            max = item['last_month']
+        if not item.active:
+            continue
+        if item.frum < min:
+            min = item.frum
+        if item.thru > max:
+            max = item.thru
     return min, max

@@ -1,4 +1,6 @@
 import globals as gbl
+import lib.ui_lib as uil
+from dal.dao import Dao
 from presenters.presenter import Presenter
 from views.project_tab_panel import ProjectTabPanel
 from event_handlers.event_handler import EventHandler
@@ -78,7 +80,7 @@ class ProjectPresenter(Presenter):
             if values['frum'] < prj.frum or \
                             values['thru'] > prj.thru:
                 min, max = ml.get_timeframe_edges(prj.asns)
-                if values['frum'] < min or values['thru'] > max:
+                if values['frum'] > min or values['thru'] < max:
                     err_msg = 'Assignment(s) out of new timeframe!'
         if err_msg:
             return err_msg
@@ -121,3 +123,26 @@ class ProjectPresenter(Presenter):
 
     def get_assignee_str(self, asn):
         return 'Employee: %s' % asn.employee
+
+    def add_model(self, form_values):
+        from models.project import Project
+
+        new_model = Project(self.get_new_model_values(form_values))
+
+        try:
+            new_model.id = new_model.add(Dao())
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+
+        uil.show_msg('Project added!', 'Hallelujah!')
+
+    def update_model(self, form_values):
+        model = self.model[self.view.get_selected_idx()]
+        try:
+            model.update(Dao(), form_values)
+        except Exception as ex:
+            uil.show_error(str(ex))
+            return
+
+        uil.show_msg('Project updated!', 'Hallelujah!')

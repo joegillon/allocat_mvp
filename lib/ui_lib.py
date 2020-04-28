@@ -71,6 +71,10 @@ def show_error(msg):
     wx.MessageBox(msg, 'Oops!', wx.OK | wx.ICON_ERROR)
 
 
+def show_msg(msg, caption):
+    wx.MessageBox(msg, caption, wx.OK)
+
+
 def confirm(parent, msg):
     dlg = wx.MessageDialog(parent, msg, 'Just making sure...',
                            wx.YES_NO | wx.ICON_QUESTION)

@@ -75,7 +75,6 @@ class AssignmentPresenter(object):
                 return
 
             wx.MessageBox('Assignment saved!', 'Hallelujah!', wx.OK)
-            gbl.dataset.grab_bag['saved_asn'] = self.asn
             self.view.Parent.Close()
 
     def cancel(self):
