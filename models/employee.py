@@ -9,6 +9,8 @@ class Employee(object):
         self.investigator = False
         self.intern = False
         self.org = ''
+        self.va_email = ''
+        self.nonva_email = ''
         self.notes = ''
         self.active = 1
         self.asns = []
@@ -50,13 +52,13 @@ class Employee(object):
         if missing:
             s = ','.join(missing)
             raise AttributeError('Missing required fields ' + s)
-        flds = 'name,fte,investigator,intern,org,notes,active'
+        flds = 'name,fte,investigator,intern,org,va_email, nonva_email, notes,active'
         sql = "INSERT INTO employees (%s) VALUES (%s)" % (
-            flds, ('?,' * 7)[0:-1]
+            flds, ('?,' * len(flds))[0:-1]
         )
         vals = [
             self.name, self.fte, self.investigator, self.intern,
-            self.org, self.notes, 1
+            self.org, self.va_email, self.nonva_email, self.notes, 1
         ]
         try:
             self.id = dao.execute(sql, vals)

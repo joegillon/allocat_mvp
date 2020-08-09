@@ -7,7 +7,7 @@ MONTH_PATTERN = r"^[0-9]{2}(0[1-9]|1[0-2])$"
 WHOLE_NAME_PATTERN = r"^[A-Z'\-]+,[\s]*[A-Z' \-]+$"
 SCALE_100_PATTERN = r"^[0-9][0-9]?$|^100$"
 SCALE_15_PATTERN = r"^[0-9]$|^1[0-5]$"
-
+EMAIL_PATTERN = r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
 
 ProjectMatch = namedtuple('ProjectMatch', 'id values')
 EmployeeMatch = namedtuple('EmployeeMatch', 'id names')
@@ -87,6 +87,23 @@ def validate_fte(value):
     if value < 0 or value > 100:
         return 'FTE must be number between 0-100!'
     return None
+
+
+def validate_email(value):
+    if value and (not re.search(EMAIL_PATTERN, value)):
+        return 'Invalid non-VA email!'
+
+
+def validate_va_email(value):
+    if not value:
+        return None
+
+    if not re.search(EMAIL_PATTERN, value):
+        return 'Invalid VA email'
+
+    parts = value.split('@')
+    if parts[1].lower() != 'va.gov':
+        return 'Invalid VA email!'
 
 
 def validate_effort(value):

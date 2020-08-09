@@ -57,6 +57,20 @@ class EmployeeTabPanel(TabPanel):
 
         layout.Add(form_layout, 0, wx.ALL, 5)
 
+        va_email_layout = wx.BoxSizer(wx.HORIZONTAL)
+        va_email_lbl = wx.StaticText(panel, wx.ID_ANY, 'VA Email:')
+        self.va_email_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(300, -1))
+        va_email_layout.Add(va_email_lbl, 0, wx.ALL, 5)
+        va_email_layout.Add(self.va_email_ctrl, 0, wx.ALL, 5)
+        layout.Add(va_email_layout, 0, wx.ALL, 5)
+
+        nonva_email_layout = wx.BoxSizer(wx.HORIZONTAL)
+        nonva_email_lbl = wx.StaticText(panel, wx.ID_ANY, 'non-VA Email:')
+        self.nonva_email_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(300, -1))
+        nonva_email_layout.Add(nonva_email_lbl, 0, wx.ALL, 5)
+        nonva_email_layout.Add(self.nonva_email_ctrl, 0, wx.ALL, 5)
+        layout.Add(nonva_email_layout, 0, wx.ALL, 5)
+
     def get_owner_column(self):
         return olv.ColumnDefn('Project', 'left', 200, 'project')
 
@@ -87,3 +101,19 @@ class EmployeeTabPanel(TabPanel):
 
     def get_org(self):
         return self.org_ctrl.GetValue()
+
+    def set_va_email(self, value):
+        if not value:
+            value = ''
+        self.va_email_ctrl.SetValue(value)
+
+    def get_va_email(self):
+        return self.va_email_ctrl.GetValue()
+
+    def set_nonva_email(self, value):
+        if not value:
+            value = ''
+        self.nonva_email_ctrl.SetValue(value)
+
+    def get_nonva_email(self):
+        return self.nonva_email_ctrl.GetValue()
