@@ -23,8 +23,8 @@ class Presenter(object):
     def load_view(self):
         if self.is_listening:
             self.is_listening = False
-            self.refresh_list()
             self.load_combos()
+            self.refresh_list()
             self.is_listening = True
 
     def load_combos(self):

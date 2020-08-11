@@ -135,7 +135,7 @@ class TabPanel(wx.Panel):
 
     def build_detail_form_panel(self, parent):
         panel = wx.Panel(
-            parent, wx.ID_ANY, wx.DefaultPosition, size=(-1, 300)
+            parent, wx.ID_ANY, wx.DefaultPosition, size=(-1, 400)
         )
         panel.SetBackgroundColour(wx.Colour(gbl.COLOR_SCHEME.frmBg))
         panel.SetForegroundColour('black')
@@ -199,7 +199,7 @@ class TabPanel(wx.Panel):
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
         self.asn_list_ctrl = olv.ObjectListView(panel, wx.ID_ANY,
-                                                size=wx.Size(-1, 375),
+                                                size=wx.Size(-1, 250),
                                                 style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 
         self.asn_list_ctrl.SetColumns([

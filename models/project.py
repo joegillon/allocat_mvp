@@ -13,6 +13,14 @@ class Project(object):
         self.investigator = ''
         self.manager_id = None
         self.manager = ''
+        self.grant_admin = ''
+        self.grant_admin_email = ''
+        self.dept = ''
+        self.short_code = ''
+        self.billing_date_1 = None
+        self.billing_date_2 = None
+        self.billing_date_3 = None
+        self.billing_date_4 = None
         self.active = 1
         self.asns = []
         if d:
@@ -61,13 +69,19 @@ class Project(object):
         if missing:
             s = ','.join(missing)
             raise AttributeError('Missing required fields ' + s)
-        flds = 'name,full_name,frum,thru,investigator_id,manager_id,notes,active'
+        flds = ("name,full_name,frum,thru,investigator_id,manager_id,"
+                    "grant_admin,grant_admin_email,short_code,dept,"
+                    "billing_date_1,billing_date_2,billing_date3,billing_date4,"
+                    "notes,active")
         sql = "INSERT INTO projects (%s) VALUES (%s)" % (
-            flds, ('?,' * 8)[0:-1]
+            flds, ('?,' * len(flds))[0:-1]
         )
         vals = [
             self.name, self.full_name, self.frum, self.thru,
-            self.investigator_id, self.manager_id, self.notes, 1
+            self.investigator_id, self.manager_id,
+            self.grant_admin, self.grant_admin_email, self.short_code, self.dept,
+            self.billing_date_1, self.billing_date_2, self.billing_date_3, self.billing_date_4,
+            self.notes, 1
         ]
         try:
             self.id = dao.execute(sql, vals)

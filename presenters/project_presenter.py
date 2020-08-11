@@ -4,6 +4,7 @@ from dal.dao import Dao
 from presenters.presenter import Presenter
 from views.project_tab_panel import ProjectTabPanel
 from event_handlers.event_handler import EventHandler
+from event_handlers.grant_admin_event_handler import GrantAdminInteractor
 
 
 class ProjectPresenter(Presenter):
@@ -14,13 +15,19 @@ class ProjectPresenter(Presenter):
         actor = EventHandler()
         super().__init__(get_model, view, actor, 'Project')
         gbl.dataset.bind_to('projects', self.refresh_list)
+        grant_admin_actor = GrantAdminInteractor()
+        grant_admin_actor.install(self, view)
 
     def load_combos(self):
         emp_rex = gbl.dataset.get_emp_data()
         investigators = [rec for rec in emp_rex if rec.investigator]
         managers = [rec for rec in emp_rex if not rec.investigator]
+        depts = gbl.dataset.get_dept_data()
+        self.grant_admins = gbl.dataset.get_grant_admin_data()
         self.view.load_pi(investigators)
         self.view.load_pm(managers)
+        self.view.load_depts(depts)
+        self.view.load_grant_admins(self.grant_admins)
 
     def load_details(self):
         item = self.view.get_selection()
@@ -29,8 +36,12 @@ class ProjectPresenter(Presenter):
             self.view.set_full_name(item.full_name)
             self.view.set_frum(item.frum)
             self.view.set_thru(item.thru)
+            self.view.set_dept(item.dept)
+            self.view.set_short_code(item.short_code)
             self.view.set_pi(item.investigator)
             self.view.set_pm(item.manager)
+            self.view.set_grant_admin(item.grant_admin)
+            self.view.set_grant_admin_email(item.grant_admin_email)
             self.view.set_notes(item.notes)
             self.view.set_asn_list(item.asns)
             self.view.set_save_button_label('Update Project')
@@ -40,8 +51,12 @@ class ProjectPresenter(Presenter):
         self.view.set_full_name('')
         self.view.set_frum('')
         self.view.set_thru('')
+        self.view.set_dept('')
+        self.view.set_short_code('')
         self.view.set_pi('')
         self.view.set_pm('')
+        self.view.set_grant_admin('')
+        self.view.set_grant_admin_email('')
 
     def get_form_values(self):
         return {
@@ -49,8 +64,12 @@ class ProjectPresenter(Presenter):
             'full_name': self.view.get_full_name(),
             'frum': self.view.get_frum(),
             'thru': self.view.get_thru(),
+            'dept': self.view.get_dept(),
+            'short_code': self.view.get_short_code(),
             'pi': self.view.get_pi(),
             'pm': self.view.get_pm(),
+            'grant_admin': self.view.get_grant_admin(),
+            'grant_admin_email': self.view.get_grant_admin_email(),
             'notes': self.view.get_notes()
         }
 
@@ -82,6 +101,17 @@ class ProjectPresenter(Presenter):
                 min, max = ml.get_timeframe_edges(prj.asns)
                 if values['frum'] > min or values['thru'] < max:
                     err_msg = 'Assignment(s) out of new timeframe!'
+        if err_msg:
+            return err_msg
+
+        err_msg = vl.validate_email(values['grant_admin_email'])
+        if err_msg:
+            return 'Invalid Grant Admin Email!'
+
+        if values['grant_admin_email'] and not values['grant_admin']:
+            return 'Grant Admin Email Without a Grant Admin!'
+
+        err_msg = vl.validate_short_code(values['short_code'])
         if err_msg:
             return err_msg
 
@@ -146,3 +176,8 @@ class ProjectPresenter(Presenter):
             return
 
         uil.show_msg('Project updated!', 'Hallelujah!')
+
+    def set_grant_admin_email(self, name):
+        email = [x.email for x in self.grant_admins if x.name == name]
+        email = email[0] if email else ''
+        self.view.set_grant_admin_email(email)

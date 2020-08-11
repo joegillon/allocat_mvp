@@ -116,6 +116,16 @@ def validate_effort(value):
     return None
 
 
+def validate_short_code(value):
+    if value:
+        if len(value)  != 6:
+            return 'Short Code Must Be 6 Digits!'
+        for c in value:
+            if not c.isdigit():
+                return 'Short Code Must Be Numeric!'
+    return None
+
+
 def showErrMsg(ctl, msg):
     import wx
 
