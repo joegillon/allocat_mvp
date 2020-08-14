@@ -42,27 +42,13 @@ class ProjectTabPanel(TabPanel):
         interval_layout = wx.BoxSizer(wx.HORIZONTAL)
         frum_lbl = wx.StaticText(panel, wx.ID_ANY, 'From: *')
         self.frum_ctrl = uil.get_month_ctrl(panel, '')
-        interval_layout.Add(frum_lbl, 0, wx.ALL, 1)
-        interval_layout.Add(self.frum_ctrl, 0, wx.ALL, 1)
+        interval_layout.Add(frum_lbl, 0, wx.ALL, 5)
+        interval_layout.Add(self.frum_ctrl, 0, wx.ALL, 5)
 
         thru_lbl = wx.StaticText(panel, wx.ID_ANY, 'Thru: *')
         self.thru_ctrl = uil.get_month_ctrl(panel, '')
-        interval_layout.Add(thru_lbl, 0, wx.ALL, 1)
-        interval_layout.Add(self.thru_ctrl, 0, wx.ALL, 1)
-
-        dept_layout = wx.BoxSizer(wx.HORIZONTAL)
-        dept_lbl = wx.StaticText(panel, wx.ID_ANY, 'Dept:')
-        self.dept_ctrl = wx.ComboBox(panel, wx.ID_ANY, '')
-        dept_layout.Add(dept_lbl, 0, wx.ALL, 1)
-        dept_layout.Add(self.dept_ctrl, 0, wx.ALL, 1)
-        interval_layout.Add(dept_layout, 0, wx.ALL, 1)
-
-        short_code_layout = wx.BoxSizer(wx.HORIZONTAL)
-        short_code_lbl = wx.StaticText(panel, wx.ID_ANY, ' Short Code:')
-        self.short_code_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(55, -1))
-        short_code_layout.Add(short_code_lbl, 0, wx.ALL, 1)
-        short_code_layout.Add(self.short_code_ctrl, 0, wx.ALL | wx.EXPAND, 1)
-        interval_layout.Add(short_code_layout, 0, wx.ALIGN_RIGHT, 5)
+        interval_layout.Add(thru_lbl, 0, wx.ALL, 5)
+        interval_layout.Add(self.thru_ctrl, 0, wx.ALL, 5)
 
         layout.Add(interval_layout, 0, wx.ALL, 0)
 
@@ -87,46 +73,6 @@ class ProjectTabPanel(TabPanel):
         persons_layout.Add(self.pm_ctrl, 0, wx.ALL, 5)
 
         layout.Add(persons_layout, 0, wx.ALL, 0)
-
-        grant_layout = wx.BoxSizer(wx.HORIZONTAL)
-
-        grant_admin_lbl = wx.StaticText(panel, wx.ID_ANY, 'Grant Admin:')
-        self.grant_admin_ctrl = wx.ComboBox(panel, wx.ID_ANY, '')
-        grant_layout.Add(grant_admin_lbl, 0, wx.ALL, 5)
-        grant_layout.Add(self.grant_admin_ctrl, 0, wx.ALL, 5)
-
-        grant_admin_email_lbl = wx.StaticText(panel, wx.ID_ANY, 'Email:')
-        self.grant_admin_email_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(200, -1))
-        grant_layout.Add(grant_admin_email_lbl, 0, wx.ALL, 5)
-        grant_layout.Add(self.grant_admin_email_ctrl, 0, wx.ALL, 5)
-
-        layout.Add(grant_layout, 0, wx.ALL, 0)
-
-        billing_layout1 = wx.BoxSizer(wx.HORIZONTAL)
-        q1_lbl = wx.StaticText(panel, wx.ID_ANY, 'Billing Dates Q1:')
-        self.q1_ctrl = wx.adv.DatePickerCtrl(panel, wx.ID_ANY,
-                             style=wx.adv.DP_DROPDOWN|wx.adv.DP_ALLOWNONE)
-        billing_layout1.Add(q1_lbl, 0, wx.ALL, 5)
-        billing_layout1.Add(self.q1_ctrl, 0, wx.ALL, 5)
-        q2_lbl = wx.StaticText(panel, wx.ID_ANY, 'Q2:')
-        self.q2_ctrl = wx.adv.DatePickerCtrl(panel, wx.ID_ANY,
-                             style=wx.adv.DP_DROPDOWN|wx.adv.DP_ALLOWNONE)
-        billing_layout1.Add(q2_lbl, 0, wx.ALL, 5)
-        billing_layout1.Add(self.q2_ctrl, 0, wx.ALL, 5)
-        layout.Add(billing_layout1, 0, wx.ALL, 5)
-
-        billing_layout2 = wx.BoxSizer(wx.HORIZONTAL)
-        q3_lbl = wx.StaticText(panel, wx.ID_ANY, 'Billing Dates Q3:')
-        self.q3_ctrl = wx.adv.DatePickerCtrl(panel, wx.ID_ANY,
-                             style=wx.adv.DP_DROPDOWN|wx.adv.DP_ALLOWNONE)
-        billing_layout2.Add(q3_lbl, 0, wx.ALL, 5)
-        billing_layout2.Add(self.q3_ctrl, 0, wx.ALL, 5)
-        q4_lbl = wx.StaticText(panel, wx.ID_ANY, 'Q4:')
-        self.q4_ctrl = wx.adv.DatePickerCtrl(panel, wx.ID_ANY,
-                             style=wx.adv.DP_DROPDOWN|wx.adv.DP_ALLOWNONE)
-        billing_layout2.Add(q4_lbl, 0, wx.ALL, 5)
-        billing_layout2.Add(self.q4_ctrl, 0, wx.ALL, 5)
-        layout.Add(billing_layout2, 0, wx.ALL, 0)
 
     def get_owner_column(self):
         return olv.ColumnDefn('Employee', 'left', 200, 'employee')
@@ -155,25 +101,6 @@ class ProjectTabPanel(TabPanel):
             value = ''
         return value
 
-    def load_depts(self, depts):
-        choices = [dept.name for dept in depts]
-        choices.insert(0, '')
-        self.dept_ctrl.Items = choices
-
-    def set_dept(self, value):
-        self.dept_ctrl.SetValue(value)
-
-    def get_dept(self):
-        return self.dept_ctrl.GetValue()
-
-    def set_short_code(self, value):
-        if not value:
-            value = ''
-        self.short_code_ctrl.SetValue(value)
-
-    def get_short_code(self):
-        return self.short_code_ctrl.GetValue()
-
     def load_pi(self, investigators):
         self.pi_ctrl.set_choices(investigators, 'name')
 
@@ -191,22 +118,3 @@ class ProjectTabPanel(TabPanel):
 
     def get_pm(self):
         return self.pm_ctrl.get_selection()
-
-    def load_grant_admins(self, admins):
-        choices = [admin.name for admin in admins]
-        choices.insert(0, '')
-        self.grant_admin_ctrl.Items = choices
-
-    def set_grant_admin(self, value):
-        self.grant_admin_ctrl.SetValue(value)
-
-    def get_grant_admin(self):
-        return self.grant_admin_ctrl.GetValue()
-
-    def set_grant_admin_email(self, value):
-        if not value:
-            value = ''
-        self.grant_admin_email_ctrl.SetValue(value)
-
-    def get_grant_admin_email(self):
-        return self.grant_admin_email_ctrl.GetValue()
