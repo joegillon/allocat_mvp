@@ -1,11 +1,12 @@
 import datetime
 import wx
+import wx.grid
 import globals as gbl
 import lib.ui_lib as uil
 from presenters.ledger_presenter import LedgerPresenter
 
 
-class MainLedgerWindow(wx.Frame):
+class LedgerWindow(wx.Frame):
 
     def __init__(self):
 

@@ -4,7 +4,7 @@ import globals as gbl
 import lib.ui_lib as uil
 
 
-class BillingFormDlg(wx.Dialog):
+class LedgerFormDlg(wx.Dialog):
 
     def __init__(self, parent, winId):
         wx.Dialog.__init__(self, parent, winId, size=(800, 275))
@@ -25,7 +25,7 @@ class BillingFormDlg(wx.Dialog):
         panel.SetBackgroundColour(gbl.COLOR_SCHEME.tbBg)
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.name_lbl = uil.get_toolbar_label(panel, 'Billing Record')
+        self.name_lbl = uil.get_toolbar_label(panel, 'Ledger Record')
         self.name_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
         layout.Add(self.name_lbl, 0, wx.ALL, 5)
 

@@ -1,12 +1,10 @@
 from datetime import date
 import globals as gbl
 import lib.month_lib as ml
-import lib.ui_lib as uil
 from dal.dao import Dao
 from models.billing_report import BillingReport
 from models.assignment import Assignment
-from views.billing_tab_panel import BillTab
-from views.billing_form_dlg import BillingFormDlg
+from views.ledger_form_dlg import LedgerFormDlg
 from event_handlers.billing_event_handler import BillingInteractor
 
 
@@ -14,7 +12,7 @@ class LedgerPresenter(object):
 
     def __init__(self, frame):
         self.view = frame
-        self.dlg = BillingFormDlg(self.view, -1)
+        self.dlg = LedgerFormDlg(self.view, -1)
         actor = BillingInteractor()
         actor.install(self, self.view, self.dlg)
         self.init_view()
@@ -91,7 +89,6 @@ class LedgerPresenter(object):
         frum = asn_frum if  asn_frum > qtr_frum else qtr_frum
         thru = asn_thru if asn_frum < qtr_thru else qtr_frum
         return ml.get_total_days(frum, thru)
-
 
     # def set_grant_admin_email(self, name):
     #     email = [x.email for x in self.grant_admins if x.name == name]
