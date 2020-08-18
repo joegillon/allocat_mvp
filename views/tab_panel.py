@@ -135,7 +135,7 @@ class TabPanel(wx.Panel):
 
     def build_detail_form_panel(self, parent):
         panel = wx.Panel(
-            parent, wx.ID_ANY, wx.DefaultPosition, size=(-1, 400)
+            parent, wx.ID_ANY, wx.DefaultPosition, size=(-1, 300)
         )
         panel.SetBackgroundColour(wx.Colour(gbl.COLOR_SCHEME.frmBg))
         panel.SetForegroundColour('black')
@@ -186,7 +186,6 @@ class TabPanel(wx.Panel):
         layout.Add(self.add_asn_btn, 0, wx.ALL, 5)
 
         self.drop_asn_btn = uil.toolbar_button(panel, 'Drop Assignments')
-        # self.drop_asn_btn.set_size((150, -1))
         layout.Add(self.drop_asn_btn, 0, wx.ALL, 5)
 
         panel.SetSizer(layout)
@@ -199,7 +198,7 @@ class TabPanel(wx.Panel):
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
         self.asn_list_ctrl = olv.ObjectListView(panel, wx.ID_ANY,
-                                                size=wx.Size(-1, 250),
+                                                size=wx.Size(-1, 375),
                                                 style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 
         self.asn_list_ctrl.SetColumns([
@@ -246,7 +245,6 @@ class TabPanel(wx.Panel):
 
     def get_selected_idx(self):
         return self.list_ctrl.GetNextSelected(-1)
-        # return self.selectedIdx
 
     def set_selection(self, idx):
         self.list_ctrl.Select(idx, on=1)
@@ -283,13 +281,9 @@ class TabPanel(wx.Panel):
     def get_selected_asns(self):
         return self.asn_list_ctrl.GetSelectedObjects()
 
-    # def set_drop_asn_btn_lbl(self, txt):
-    #     self.drop_asn_btn.set_label(txt)
-
     def set_details_active(self, active, model):
         if active:
             self.drop_btn.set_label('Drop %s'% model)
-            # self.set_drop_asn_btn_lbl('Drop Assignments')
             self.fm_panel.Enable()
             self.asn_panel.Enable()
             self.asn_list_ctrl.SetTextColour('black')
@@ -297,7 +291,6 @@ class TabPanel(wx.Panel):
             self.save_btn.Enable()
         else:
             self.drop_btn.set_label('Undrop %s'% model)
-            # self.set_drop_asn_btn_lbl('Undrop Assignments')
             self.fm_panel.Disable()
             self.asn_panel.Disable()
             self.asn_list_ctrl.SetTextColour('gray')

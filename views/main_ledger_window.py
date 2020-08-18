@@ -1,14 +1,15 @@
-import wx
-import wx.grid
 import datetime
+import wx
 import globals as gbl
 import lib.ui_lib as uil
+from presenters.ledger_presenter import LedgerPresenter
 
 
-class BillTab(wx.Panel):
+class MainLedgerWindow(wx.Frame):
 
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+    def __init__(self):
+
+        wx.Frame.__init__(self, None, title='allocat ledger', size=(1300, 800))
         self.SetBackgroundColour(gbl.COLOR_SCHEME.pnlBg)
         layout = wx.BoxSizer(wx.VERTICAL)
 
@@ -19,6 +20,9 @@ class BillTab(wx.Panel):
         layout.Add(grid_panel, 0, wx.EXPAND | wx.ALL, 5)
 
         self.SetSizerAndFit(layout)
+
+        presenter = LedgerPresenter(self)
+        presenter.init_view()
 
     def build_toolbar_panel(self, parent):
         panel = wx.Panel(
@@ -133,7 +137,6 @@ class BillTab(wx.Panel):
                 self.grid_ctrl.SetCellValue(rownum, colnum, str(value))
 
         self.grid_ctrl.AutoSizeColumns()
-
 
     def get_row(self, rownum):
         ncols = self.grid_ctrl.GetNumberCols()

@@ -16,7 +16,7 @@ class BillingInteractor(object):
         self.presenter.run_query()
 
     def on_left_click(self, evt):
-        self.presenter.launch_form()
+        self.presenter.launch_form(evt.Row, evt.Col)
 
     def on_form_cancel(self, evt):
         self.presenter.close_form()

@@ -9,8 +9,6 @@ class AllocatDataSet(object):
         self._prj_rex = []
         self._emp_rex = []
         self._asn_rex = []
-        self._dept_rex = []
-        self._grant_admin_rex = []
 
         # These are to validate uniqueness
         self.prj_names = {}
@@ -30,15 +28,11 @@ class AllocatDataSet(object):
         from models.project import Project
         from models.employee import Employee
         from models.assignment import Assignment
-        from models.department import Department
-        from models.grant_admin import GrantAdmin
 
         dao = Dao(db_path=self.db_path, stateful=True)
         self._prj_rex = Project.get_all(dao)
         self._emp_rex = Employee.get_all(dao)
         self._asn_rex = Assignment.get_all(dao)
-        self._dept_rex = Department.get_all(dao)
-        self._grant_admin_rex = GrantAdmin.get_all(dao)
         dao.close()
 
     def _build_dataset(self):
@@ -73,12 +67,6 @@ class AllocatDataSet(object):
         if self._active_only:
             return [rec for rec in self._asn_rex if rec.active]
         return self._asn_rex
-
-    def get_dept_data(self):
-        return self._dept_rex
-
-    def get_grant_admin_data(self):
-        return self._grant_admin_rex
 
     def bind_to(self, tbl, callback):
         self._observers[tbl].append(callback)

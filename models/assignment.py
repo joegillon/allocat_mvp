@@ -40,7 +40,7 @@ class Assignment(object):
 
     @staticmethod
     def get_for_timeframe(dao, frum, thru):
-        sql = ("SELECT a.*, e.name, p.name "
+        sql = ("SELECT a.*, e.name AS employee, p.name AS project "
                "FROM assignments a "
                "JOIN employees e ON a.employee_id=e.id "
                "JOIN projects p ON a.project_id=p.id "

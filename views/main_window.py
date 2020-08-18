@@ -3,7 +3,6 @@ import globals as gbl
 from presenters.project_presenter import ProjectPresenter
 from presenters.employee_presenter import EmployeePresenter
 from presenters.effort_presenter import EffortPresenter
-from presenters.billing_presenter import BillingPresenter
 
 
 class MainWindow(wx.Frame):
@@ -19,12 +18,10 @@ class MainWindow(wx.Frame):
         prj_presenter = ProjectPresenter(notebook)
         emp_presenter = EmployeePresenter(notebook)
         eff_presenter = EffortPresenter(notebook)
-        billing_presenter = BillingPresenter(notebook)
 
         notebook.AddPage(prj_presenter.view, 'Projects')
         notebook.AddPage(emp_presenter.view, 'Employees')
         notebook.AddPage(eff_presenter.view, 'Scoreboard')
-        notebook.AddPage(billing_presenter.view, 'Billing')
 
         panel.SetSizer(layout)
 

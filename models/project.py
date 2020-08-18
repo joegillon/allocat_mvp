@@ -13,14 +13,6 @@ class Project(object):
         self.investigator = ''
         self.manager_id = None
         self.manager = ''
-        self.grant_admin = ''
-        self.grant_admin_email = ''
-        self.dept = ''
-        self.short_code = ''
-        self.billing_date_1 = None
-        self.billing_date_2 = None
-        self.billing_date_3 = None
-        self.billing_date_4 = None
         self.active = 1
         self.asns = []
         if d:
@@ -70,8 +62,6 @@ class Project(object):
             s = ','.join(missing)
             raise AttributeError('Missing required fields ' + s)
         flds = ("name,full_name,frum,thru,investigator_id,manager_id,"
-                    "grant_admin,grant_admin_email,short_code,dept,"
-                    "billing_date_1,billing_date_2,billing_date3,billing_date4,"
                     "notes,active")
         sql = "INSERT INTO projects (%s) VALUES (%s)" % (
             flds, ('?,' * len(flds))[0:-1]
@@ -79,8 +69,6 @@ class Project(object):
         vals = [
             self.name, self.full_name, self.frum, self.thru,
             self.investigator_id, self.manager_id,
-            self.grant_admin, self.grant_admin_email, self.short_code, self.dept,
-            self.billing_date_1, self.billing_date_2, self.billing_date_3, self.billing_date_4,
             self.notes, 1
         ]
         try:
@@ -163,3 +151,9 @@ class Project(object):
     def undrop(self, dao):
         sql = "UPDATE projects SET active=1 WHERE id=?"
         dao.execute(sql, (self.id,))
+
+    @staticmethod
+    def get_names(dao):
+        sql = "SELECT name FROM projects ORDER BY name"
+        rex = dao.execute(sql)
+        return [rec['name'] for rec in rex] if rex else []

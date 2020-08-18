@@ -111,3 +111,9 @@ class Employee(object):
     def undrop(self, dao):
         sql = "UPDATE employees SET active=1 WHERE id=?"
         dao.execute(sql, (self.id,))
+
+    @staticmethod
+    def get_names(dao):
+        sql = "SELECT name FROM employees ORDER BY name"
+        rex = dao.execute(sql)
+        return [rec['name'] for rec in rex] if rex else []

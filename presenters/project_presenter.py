@@ -19,8 +19,6 @@ class ProjectPresenter(Presenter):
         emp_rex = gbl.dataset.get_emp_data()
         investigators = [rec for rec in emp_rex if rec.investigator]
         managers = [rec for rec in emp_rex if not rec.investigator]
-        depts = gbl.dataset.get_dept_data()
-        self.grant_admins = gbl.dataset.get_grant_admin_data()
         self.view.load_pi(investigators)
         self.view.load_pm(managers)
 
@@ -148,8 +146,3 @@ class ProjectPresenter(Presenter):
             return
 
         uil.show_msg('Project updated!', 'Hallelujah!')
-
-    # def set_grant_admin_email(self, name):
-    #     email = [x.email for x in self.grant_admins if x.name == name]
-    #     email = email[0] if email else ''
-    #     self.view.set_grant_admin_email(email)

@@ -14,3 +14,9 @@ class GrantAdmin(object):
         sql = "SELECT * FROM grant_admins ORDER BY name"
         rex = dao.execute(sql)
         return [GrantAdmin(rec) for rec in rex] if rex else []
+
+    @staticmethod
+    def get_names(dao):
+        sql = "SELECT name FROM grant_admins ORDER BY name"
+        rex = dao.execute(sql)
+        return [rec['name'] for rec in rex] if rex else []

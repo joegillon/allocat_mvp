@@ -1,5 +1,4 @@
 import wx
-import wx.adv
 import ObjectListView as olv
 from views.tab_panel import TabPanel
 import lib.month_lib as ml
@@ -30,14 +29,14 @@ class ProjectTabPanel(TabPanel):
         self.name_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(400, -1))
         name_layout.Add(name_lbl, 0, wx.ALL, 5)
         name_layout.Add(self.name_ctrl, 0, wx.ALL | wx.EXPAND, 5)
-        layout.Add(name_layout, 0, wx.ALL, 0)
+        layout.Add(name_layout, 0, wx.ALL, 5)
 
         full_name_layout = wx.BoxSizer(wx.HORIZONTAL)
         full_name_lbl = wx.StaticText(panel, wx.ID_ANY, 'Full Name: *')
         self.full_name_ctrl = wx.TextCtrl(panel, wx.ID_ANY, size=(500, -1))
         full_name_layout.Add(full_name_lbl, 0, wx.ALL, 5)
         full_name_layout.Add(self.full_name_ctrl, 0, wx.ALL, 5)
-        layout.Add(full_name_layout, 0, wx.ALL | wx.EXPAND, 0)
+        layout.Add(full_name_layout, 0, wx.ALL | wx.EXPAND, 5)
 
         interval_layout = wx.BoxSizer(wx.HORIZONTAL)
         frum_lbl = wx.StaticText(panel, wx.ID_ANY, 'From: *')
@@ -50,7 +49,7 @@ class ProjectTabPanel(TabPanel):
         interval_layout.Add(thru_lbl, 0, wx.ALL, 5)
         interval_layout.Add(self.thru_ctrl, 0, wx.ALL, 5)
 
-        layout.Add(interval_layout, 0, wx.ALL, 0)
+        layout.Add(interval_layout, 0, wx.ALL, 5)
 
         persons_layout = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -72,7 +71,7 @@ class ProjectTabPanel(TabPanel):
         persons_layout.Add(pm_lbl, 0, wx.ALL, 5)
         persons_layout.Add(self.pm_ctrl, 0, wx.ALL, 5)
 
-        layout.Add(persons_layout, 0, wx.ALL, 0)
+        layout.Add(persons_layout, 0, wx.ALL, 5)
 
     def get_owner_column(self):
         return olv.ColumnDefn('Employee', 'left', 200, 'employee')

@@ -67,24 +67,9 @@ class BillingFormDlg(wx.Dialog):
         grant_layout.Add(invoice_lbl, 0, wx.ALL, 5)
         grant_layout.Add(self.invoice_ctrl, 0, wx.ALL, 5)
 
-        prj_lbl = wx.StaticText(panel, wx.ID_ANY, 'Project:')
-        self.prj_ctrl = wx.ComboBox(panel, wx.ID_ANY, '')
-        grant_layout.Add(prj_lbl, 0, wx.ALL, 5)
-        grant_layout.Add(self.prj_ctrl, 0, wx.ALL, 5)
-
         layout.Add(grant_layout, 0, wx.ALL, 5)
 
         staff_layout = wx.BoxSizer(wx.HORIZONTAL)
-
-        staff_lbl = wx.StaticText(panel, wx.ID_ANY, 'Staff:')
-        self.staff_ctrl = wx.ComboBox(panel, wx.ID_ANY, '')
-        staff_layout.Add(staff_lbl, 0, wx.ALL, 5)
-        staff_layout.Add(self.staff_ctrl, 0, wx.ALL, 5)
-
-        eff_lbl = wx.StaticText(panel, wx.ID_ANY, '% Effort:')
-        self.eff_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
-        staff_layout.Add(eff_lbl, 0, wx.ALL, 5)
-        staff_layout.Add(self.eff_ctrl, 0, wx.ALL, 5)
 
         salary_lbl = wx.StaticText(panel, wx.ID_ANY, 'Base Salary:')
         self.salary_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
@@ -101,11 +86,6 @@ class BillingFormDlg(wx.Dialog):
         staff_layout.Add(total_lbl, 0, wx.ALL, 5)
         staff_layout.Add(self.total_ctrl, 0, wx.ALL, 5)
 
-        days_lbl = wx.StaticText(panel, wx.ID_ANY, 'Days:')
-        self.days_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
-        staff_layout.Add(days_lbl, 0, wx.ALL, 5)
-        staff_layout.Add(self.days_ctrl, 0, wx.ALL, 5)
-
         layout.Add(staff_layout, 0, wx.ALL, 5)
 
         amt_layout = wx.BoxSizer(wx.HORIZONTAL)
@@ -114,18 +94,6 @@ class BillingFormDlg(wx.Dialog):
         self.amt_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
         amt_layout.Add(amt_lbl, 0, wx.ALL, 5)
         amt_layout.Add(self.amt_ctrl, 0, wx.ALL, 5)
-
-        frum_lbl = wx.StaticText(panel, wx.ID_ANY, 'From:')
-        self.frum_ctrl = wx.adv.DatePickerCtrl(panel, wx.ID_ANY,
-                             style=wx.adv.DP_DROPDOWN|wx.adv.DP_ALLOWNONE)
-        amt_layout.Add(frum_lbl, 0, wx.ALL, 5)
-        amt_layout.Add(self.frum_ctrl, 0, wx.ALL, 5)
-
-        thru_lbl = wx.StaticText(panel, wx.ID_ANY, 'Thru:')
-        self.thru_ctrl = wx.adv.DatePickerCtrl(panel, wx.ID_ANY,
-                             style=wx.adv.DP_DROPDOWN|wx.adv.DP_ALLOWNONE)
-        amt_layout.Add(thru_lbl, 0, wx.ALL, 5)
-        amt_layout.Add(self.thru_ctrl, 0, wx.ALL, 5)
 
         paid_lbl = wx.StaticText(panel, wx.ID_ANY, 'Paid:')
         self.paid_ctrl = wx.CheckBox(panel, wx.ID_ANY)
@@ -162,6 +130,21 @@ class BillingFormDlg(wx.Dialog):
 
         return panel
 
+    def load_data(self, data):
+        self.set_dept(data[0])
+        self.set_admin_approved(data[1])
+        self.set_va_approved(data[2])
+        self.set_invoice_num(data[3])
+        self.set_salary(data[7])
+        self.set_fringe(data[8])
+        self.set_total(data[9])
+        self.set_amount(data[11])
+        self.set_paid(data[14])
+        self.set_balance(data[15])
+        self.set_short_code(data[16])
+        self.set_grant_admin(data[17])
+        self.set_grant_admin_email(data[18])
+
     def load_depts(self, depts):
         choices = depts
         choices.insert(0, '')
@@ -176,14 +159,14 @@ class BillingFormDlg(wx.Dialog):
         return self.dept_ctrl.GetValue()
 
     def set_admin_approved(self, value):
-        value = 'Y' if value else 'N'
+        value = True if value == 'Y' else False
         self.admin_approved_ctrl.SetValue(value)
 
     def get_admin_approved(self):
         return True if self.admin_approved_ctrl.GetValue() == 'Y' else False
 
     def set_va_approved(self, value):
-        value = 'Y' if value else 'N'
+        value = True if value == 'Y' else False
         self.va_approved_ctrl.SetValue(value)
 
     def get_va_approved(self):
@@ -196,40 +179,6 @@ class BillingFormDlg(wx.Dialog):
 
     def get_invoice_num(self):
         return self.invoice_ctrl.GetValue()
-
-    def load_projects(self, prjs):
-        choices = prjs
-        choices.insert(0, '')
-        self.prj_ctrl.Items = choices
-
-    def set_project(self, value):
-        if not value:
-            value = ''
-        self.prj_ctrl.SetValue(value)
-
-    def get_project(self):
-        return self.prj_ctrl.GetValue()
-
-    def load_staff(self, emps):
-        choices = emps
-        choices.insert(0, '')
-        self.staff_ctrl.Items = choices
-
-    def set_staff(self, value):
-        if not value:
-            value = ''
-        self.staff_ctrl.SetValue(value)
-
-    def get_staff(self):
-        return self.staff_ctrl.GetValue()
-
-    def set_effort(self, value):
-        if not value:
-            value = ''
-        self.eff_ctrl.SetValue(str(value))
-
-    def get_effort(self):
-        return self.eff_ctrl.GetValue()
 
     def set_salary(self, value):
         if not value:
@@ -255,14 +204,6 @@ class BillingFormDlg(wx.Dialog):
     def get_total(self):
         return self.total_ctrl.GetValue()
 
-    def set_days(self, value):
-        if not value:
-            value = ''
-        self.days_ctrl.SetValue(str(value))
-
-    def get_days(self):
-        return self.days_ctrl.GetValue()
-
     def set_amount(self, value):
         if not value:
             value = ''
@@ -271,24 +212,8 @@ class BillingFormDlg(wx.Dialog):
     def get_amount(self):
         return self.amt_ctrl.GetValue()
 
-    def set_frum(self, value):
-        if not value:
-            value = ''
-        self.frum_ctrl.SetValue(value)
-
-    def get_frum(self):
-        return self.frum_ctrl.GetValue()
-
-    def set_thru(self, value):
-        if not value:
-            value = ''
-        self.thru_ctrl.SetValue(value)
-
-    def get_thru(self):
-        return self.thru_ctrl.GetValue()
-
     def set_paid(self, value):
-        value = 'Y' if value else 'N'
+        value = True if value == 'Y' else False
         self.paid_ctrl.SetValue(value)
 
     def get_paid(self):
@@ -328,3 +253,18 @@ class BillingFormDlg(wx.Dialog):
 
     def get_grant_admin_email(self):
         return self.grant_admin_email_ctrl.GetValue()
+
+    def get_form_values(self):
+        return {
+            'dept': self.get_dept(),
+            'admin_approved': self.get_admin_approved(),
+            'va_approved': self.get_va_approved(),
+            'invoice_num': self.get_invoice_num(),
+            'salary': self.get_salary(),
+            'fringe': self.get_fringe(),
+            'paid': self.get_paid(),
+            'balance': self.get_balance(),
+            'short_code': self.get_short_code(),
+            'grant_admin': self.get_grant_admin(),
+            'grant_admin_email': self.get_grant_admin_email()
+        }
