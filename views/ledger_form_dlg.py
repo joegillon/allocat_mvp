@@ -180,6 +180,8 @@ class LedgerFormDlg(wx.Dialog):
     def get_invoice_num(self):
         return self.invoice_ctrl.GetValue()
 
+    def set_project(self, value):
+        self.prj_
     def set_salary(self, value):
         if not value:
             value = ''

@@ -94,6 +94,10 @@ def frum2dt(frum):
     return dt.datetime(y, m, 1)
 
 
+def frum2str(frum):
+    return frum2dt(frum).strftime('%#m/%#d/%y')
+
+
 def thru2dt(thru):
     m = int(thru[2:])
     y = int(thru[0:2]) + 2000
@@ -104,6 +108,9 @@ def thru2dt(thru):
         d = 29 if is_leap_year(y) else 28
     return dt.datetime(y, m, d)
 
+
+def thru2str(thru):
+    return thru2dt(thru).strftime('%#m/%#d/%y')
 
 def is_leap_year(year):
     if (year % 4) == 0:

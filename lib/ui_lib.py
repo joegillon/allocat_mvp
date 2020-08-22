@@ -146,3 +146,32 @@ class UpperTextCtrl(wx.TextCtrl):
         value = self.GetValue().upper()
         self.ChangeValue(value)
         self.SetSelection(*selection)
+
+
+class RadioGroup(wx.BoxSizer):
+    def __init__(self, parent, lbl_text, options):
+        super(RadioGroup, self).__init__()
+        self.SetOrientation(wx.HORIZONTAL)
+
+        lbl = get_toolbar_label(parent, lbl_text)
+        self.Add(lbl, 0, wx.ALL, 5)
+
+        self.buttons = {
+            options[0]: wx.RadioButton(parent, wx.ID_ANY, style=wx.RB_GROUP)
+        }
+        for option in options[1:]:
+            self.buttons[option] = wx.RadioButton(parent, wx.ID_ANY)
+
+        for option, button in self.buttons.items():
+            lbl = wx.StaticText(parent, wx.ID_ANY, option)
+            lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
+            font = lbl.GetFont().MakeBold()
+            lbl.SetFont(font)
+            self.Add(lbl, 0, wx.ALL, 5)
+            self.Add(button, 0, wx.ALL, 5)
+
+    def get_selection(self):
+        for option, button in self.buttons.items():
+            if button.GetValue():
+                return option
+        return None

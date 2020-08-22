@@ -5,7 +5,7 @@ from dal.dao import Dao
 from models.billing_report import BillingReport
 from models.assignment import Assignment
 from views.ledger_form_dlg import LedgerFormDlg
-from event_handlers.billing_event_handler import BillingInteractor
+from event_handlers.ledger_event_handler import BillingInteractor
 
 
 class LedgerPresenter(object):
@@ -23,7 +23,7 @@ class LedgerPresenter(object):
 
         today = datetime.today()
         self.view.set_year(today.year)
-        self.view.set_qtr(today.month)
+        # self.view.set_qtr(today.month)
 
         self.dlg.load_depts([d for d in gbl.dataset.get_dept_data()])
         self.dlg.load_grant_admins([a for a in gbl.dataset.get_grant_admin_data()])
@@ -57,8 +57,8 @@ class LedgerPresenter(object):
                 'total_day': None,
                 'days': self.get_total_days_asn(frum, thru, a['frum'], a['thru']),
                 'amount': None,
-                'frum': ml.frum2dt(a['frum']),
-                'thru': ml.thru2dt(a['thru']),
+                'frum': ml.frum2str(a['frum']),
+                'thru': ml.thru2str(a['thru']),
                 'paid': False,
                 'balance': None,
                 'short_code': '',
@@ -68,7 +68,13 @@ class LedgerPresenter(object):
         ]
 
         rex = rex + new_rex
-        self.view.load_grid(rex)
+        model = [BillingReport(rec) for rec in rex] if rex else []
+        self.view.load_grid(model)
+
+    def load_details(self):
+        item = self.view.get_selection()
+        if item:
+            self.view.load_form(item)
 
     def launch_form(self, rownum, colnum):
         self.selected_rownum = rownum
