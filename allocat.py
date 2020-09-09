@@ -1,4 +1,5 @@
 if __name__ == '__main__':
+    import locale
     import wx
     import globals as gbl
     from models.dataset import AllocatDataSet
@@ -7,6 +8,8 @@ if __name__ == '__main__':
     gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
 
     app = wx.App()
+
+    locale.setlocale(locale.LC_ALL, 'en_US')
 
     gbl.dataset = AllocatDataSet(gbl.DB_PATH)
 

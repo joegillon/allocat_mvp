@@ -49,3 +49,12 @@ class Dao(object):
 
     def get_param_str(self, lst):
         return ('?,' * len(lst))[0:-1]
+
+    def txn_write(self, sql, params=None):
+        self.__cursor.execute(sql, params)
+
+    def rollback(self):
+        self.__db.rollback()
+
+    def commit(self):
+        self.__db.commit()

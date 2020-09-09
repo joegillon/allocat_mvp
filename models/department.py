@@ -18,3 +18,8 @@ class Department(object):
         sql = "SELECT name FROM departments ORDER BY name"
         rex = dao.execute(sql)
         return [rec['name'] for rec in rex] if rex else []
+
+    @staticmethod
+    def add_rec(dao, name):
+        sql = "INSERT INTO departments (name) VALUES (?)"
+        return dao.execute(sql, (name,))

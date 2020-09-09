@@ -1,4 +1,4 @@
-class BillingReport(object):
+class Ledger(object):
 
     def __init__(self, d=None):
         self.id = None
@@ -10,7 +10,7 @@ class BillingReport(object):
         self.invoice_num = ''
         self.staff_id = None
         self.pct_effort = None
-        self.base_salary = None
+        self.salary = None
         self.fringe = None
         self.total_day = None
         self.days = None
@@ -28,6 +28,14 @@ class BillingReport(object):
 
     @staticmethod
     def get_rex(dao, quarter):
-        sql = ("SELECT * FROM billing_reports "
+        sql = ("SELECT * FROM ledger "
                "WHERE quarter=?")
         return dao.execute(sql, (quarter,))
+
+    @staticmethod
+    def update_salary_fringe(dao, salary, fringe, id):
+        sql = ("UPDATE ledger "
+               "SET salary=?, fringe=? "
+               "WHERE id=?")
+        vals = (salary, fringe, id)
+        return dao.execute(sql, vals)

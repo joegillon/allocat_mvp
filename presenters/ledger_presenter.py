@@ -1,38 +1,38 @@
-from datetime import date
 import globals as gbl
 import lib.month_lib as ml
+import lib.ui_lib as uil
 from dal.dao import Dao
-from models.billing_report import BillingReport
+from models.ledger import Ledger
 from models.assignment import Assignment
-from views.ledger_form_dlg import LedgerFormDlg
-from event_handlers.ledger_event_handler import BillingInteractor
+from views.ledger_panel import LedgerPanel
+from event_handlers.ledger_event_handler import LedgerInteractor
 
 
 class LedgerPresenter(object):
 
-    def __init__(self, frame):
-        self.view = frame
-        self.dlg = LedgerFormDlg(self.view, -1)
-        actor = BillingInteractor()
-        actor.install(self, self.view, self.dlg)
-        self.init_view()
-        self.selected_rownum = -1
+    def __init__(self, panel=None):
+        # No panel is for testing
+        if panel:
+            self.view = LedgerPanel(panel)
+            self.model = gbl.dataset
+            actor = LedgerInteractor()
+            actor.install(self, self.view)
+            self.init_view()
 
     def init_view(self):
         from datetime import datetime
 
         today = datetime.today()
         self.view.set_year(today.year)
-        # self.view.set_qtr(today.month)
 
-        self.dlg.load_depts([d for d in gbl.dataset.get_dept_data()])
-        self.dlg.load_grant_admins([a for a in gbl.dataset.get_grant_admin_data()])
+        self.view.load_depts([d for d in self.model.get_dept_data()])
+        self.view.load_grant_admins([a.name for a in self.model.get_grant_admin_data()])
 
     def run_query(self):
         yr = self.view.get_year()
         qtr = self.view.get_qtr() + 1
         dao = Dao(stateful=True)
-        rex = BillingReport.get_rex(dao, '%s%d' % (yr, qtr))
+        rex = Ledger.get_rex(dao, '%s%d' % (yr, qtr))
         prj_names = [r['project'] for r in rex]
         emp_names = [r['staff'] for r in rex]
 
@@ -68,35 +68,61 @@ class LedgerPresenter(object):
         ]
 
         rex = rex + new_rex
-        model = [BillingReport(rec) for rec in rex] if rex else []
+        model = [Ledger(rec) for rec in rex] if rex else []
         self.view.load_grid(model)
 
     def load_details(self):
         item = self.view.get_selection()
-        if item:
-            self.view.load_form(item)
-
-    def launch_form(self, rownum, colnum):
-        self.selected_rownum = rownum
-        data = self.view.get_row(rownum)
-        self.dlg.load_data(data)
-        self.dlg.ShowModal()
-        self.dlg.Hide()
-
-    def close_form(self):
-        self.dlg.Hide()
-
-    def save_form_data(self):
-        form_values = self.dlg.get_form_values()
-        self.view.set_row(self.selected_rownum, form_values)
-        self.dlg.Hide()
+        if not item:
+            return
+        if not item.salary or not item.fringe:
+            emp_rec = gbl.dataset.get_emp_rec(item.staff)
+            item.salary = emp_rec['salary']
+            item.fringe = emp_rec['fringe']
+            item.amount, item.total_day = self.calculate_cost(
+                item.salary, item.fringe, item.pct_effort, item.days
+            )
+            if not item.balance:
+                item.balance = item.amount
+            # try:
+            #     Ledger.update_salary_fringe(Dao(), )
+        self.view.load_form(item)
 
     def get_total_days_asn(self, qtr_frum, qtr_thru, asn_frum, asn_thru):
         frum = asn_frum if  asn_frum > qtr_frum else qtr_frum
         thru = asn_thru if asn_frum < qtr_thru else qtr_frum
         return ml.get_total_days(frum, thru)
 
-    # def set_grant_admin_email(self, name):
-    #     email = [x.email for x in self.grant_admins if x.name == name]
-    #     email = email[0] if email else ''
-    #     self.view.set_grant_admin_email(email)
+    def set_grant_admin_email(self, name):
+        grant_admins = self.model.get_grant_admin_data()
+        email = [x.email for x in grant_admins if x.name == name]
+        email = email[0] if email else ''
+        self.view.set_grant_admin_email(email)
+
+    def run_import(self):
+        uil.show_msg('Not yet implemented.', 'Someday!')
+
+    def run_va_emails(self):
+        uil.show_msg('Not yet implemented.', 'Someday!')
+
+    def run_ga_emails(self):
+        uil.show_msg('Not yet implemented.', 'Someday!')
+
+    def run_script(self):
+        uil.show_msg('Not yet implemented.', 'Someday!')
+
+    def update_entry(self):
+        uil.show_msg('Not yet implemented.', 'Someday!')
+
+    def calculate_cost(self, salary, fringe, effort, ndays):
+        per_hr = salary / 2087
+        per_hr = per_hr * (1 + fringe)
+        per_day =per_hr * 8
+        per_asn = per_day * ndays
+        return round(per_asn * effort / 100, 2), round(per_day, 2)
+
+    def set_balance(self, paid):
+        if paid:
+            self.view.set_balance(0.0)
+        else:
+            self.view.reset_balance()

@@ -20,3 +20,8 @@ class GrantAdmin(object):
         sql = "SELECT name FROM grant_admins ORDER BY name"
         rex = dao.execute(sql)
         return [rec['name'] for rec in rex] if rex else []
+
+    @staticmethod
+    def add_admin(dao, name, email):
+        sql = "INSERT INTO grant_admins (name, email) VALUES (?,?)"
+        return dao.execute(sql, (name, email))

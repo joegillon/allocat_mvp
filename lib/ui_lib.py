@@ -175,3 +175,13 @@ class RadioGroup(wx.BoxSizer):
             if button.GetValue():
                 return option
         return None
+
+
+def to_money(value):
+    if type(value) == int:
+        return format(value, ',d')
+    return format(float(value), ',.2f')
+
+
+def frum_money(value):
+    return value.replace(',', '')

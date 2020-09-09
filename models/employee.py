@@ -11,6 +11,8 @@ class Employee(object):
         self.org = ''
         self.va_email = ''
         self.nonva_email = ''
+        self.salary = ''
+        self.fringe = ''
         self.notes = ''
         self.active = 1
         self.asns = []
@@ -113,7 +115,25 @@ class Employee(object):
         dao.execute(sql, (self.id,))
 
     @staticmethod
-    def get_names(dao):
-        sql = "SELECT name FROM employees ORDER BY name"
-        rex = dao.execute(sql)
-        return [rec['name'] for rec in rex] if rex else []
+    def update_name(dao, old_name, new_name):
+        sql = "UPDATE employees SET name=? WHERE name=?"
+        try:
+            return dao.execute(sql, (new_name, old_name))
+        except Exception as e:
+            s = str(e)
+            if s.startswith('UNIQUE constraint failed'):
+                raise Exception('Employee %s is not unique!' % s.split('.')[1])
+            else:
+                raise
+
+    @staticmethod
+    def add_name(dao, name):
+        sql = "INSERT INTO employees (name, active) VALUES (?, ?)"
+        try:
+            return dao.execute(sql, (name, 1))
+        except Exception as e:
+            s = str(e)
+            if s.startswith('UNIQUE constraint failed'):
+                raise Exception('Employee %s is not unique!' % s.split('.')[1])
+            else:
+                raise
