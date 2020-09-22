@@ -10,7 +10,7 @@ class LedgerWindow(wx.Frame):
 
     def __init__(self):
 
-        wx.Frame.__init__(self, None, title='allocat ledger', size=(1300, 800))
+        wx.Frame.__init__(self, None, title='allocat ledger', size=(1400, 800))
         self.SetBackgroundColour(gbl.COLOR_SCHEME.pnlBg)
 
         notebook = wx.Notebook(self)

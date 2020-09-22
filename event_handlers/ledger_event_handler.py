@@ -8,6 +8,7 @@ class LedgerInteractor(object):
         self.presenter = presenter
 
         view.qry_btn.Bind(wx.EVT_BUTTON, self.on_qry_click)
+        view.reload_btn.Bind(wx.EVT_BUTTON, self.on_reload_click)
         view.list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_list_select)
         view.update_btn.Bind(wx.EVT_BUTTON, self.on_update_click)
         view.grant_admin_ctrl.Bind(wx.EVT_COMBOBOX, self.on_ga_select)
@@ -18,6 +19,9 @@ class LedgerInteractor(object):
 
     def on_qry_click(self, evt):
         self.presenter.run_query()
+
+    def on_reload_click(self, evt):
+        self.presenter.reload()
 
     def on_import_click(self, evt):
         self.presenter.run_import()

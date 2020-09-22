@@ -17,6 +17,9 @@ class LedgerPresenter(object):
             self.model = gbl.dataset
             actor = LedgerInteractor()
             actor.install(self, self.view)
+
+            self.quarter = ''
+
             self.init_view()
 
     def init_view(self):
@@ -31,10 +34,11 @@ class LedgerPresenter(object):
     def run_query(self):
         yr = self.view.get_year()
         qtr = self.view.get_qtr() + 1
+        self.quarter =  '%s%d' % (yr, qtr)
         dao = Dao(stateful=True)
-        rex = Ledger.get_rex(dao, '%s%d' % (yr, qtr))
+        rex = Ledger.get_rex(dao, self.quarter)
         prj_names = [r['project'] for r in rex]
-        emp_names = [r['staff'] for r in rex]
+        emp_names = [r['employee'] for r in rex]
 
         frum, thru = ml.get_quarter_interval(yr, qtr)
         asns = Assignment.get_for_timeframe(dao, frum, thru)
@@ -44,14 +48,14 @@ class LedgerPresenter(object):
         new_rex = [
             {
                 'id': None,
-                'quarter': '',
-                'department': '',
+                'quarter': self.quarter,
+                'dept': '',
                 'admin_approved': False,
                 'va_approved': False,
                 'invoice_num': '',
                 'project': a['project'],
-                'staff': a['employee'],
-                'pct_effort': a['effort'],
+                'employee': a['employee'],
+                'effort': a['effort'],
                 'salary': None,
                 'fringe': None,
                 'total_day': None,
@@ -63,12 +67,14 @@ class LedgerPresenter(object):
                 'balance': None,
                 'short_code': '',
                 'grant_admin': '',
-                'grant_admin_email': ''
+                'grant_admin_email': '',
+                'asn_id': a['id']
             } for a in asns
         ]
 
         rex = rex + new_rex
         model = [Ledger(rec) for rec in rex] if rex else []
+        gbl.dataset.set_ledger_data(model)
         self.view.load_grid(model)
 
     def load_details(self):
@@ -76,16 +82,17 @@ class LedgerPresenter(object):
         if not item:
             return
         if not item.salary or not item.fringe:
-            emp_rec = gbl.dataset.get_emp_rec(item.staff)
-            item.salary = emp_rec['salary']
-            item.fringe = emp_rec['fringe']
-            item.amount, item.total_day = self.calculate_cost(
-                item.salary, item.fringe, item.pct_effort, item.days
-            )
-            if not item.balance:
-                item.balance = item.amount
-            # try:
-            #     Ledger.update_salary_fringe(Dao(), )
+            emp_rec = gbl.dataset.get_emp_rec(item.employee)
+            item.salary = emp_rec.salary
+            if not item.salary:
+                uil.show_error('%s has no salary! Not imported?' % (item.employee,))
+            else:
+                item.fringe = emp_rec.fringe
+                item.amount, item.total_day = self.calculate_cost(
+                    item.salary, item.fringe, item.effort, item.days
+                )
+                if not item.balance:
+                    item.balance = item.amount
         self.view.load_form(item)
 
     def get_total_days_asn(self, qtr_frum, qtr_thru, asn_frum, asn_thru):
@@ -112,7 +119,23 @@ class LedgerPresenter(object):
         uil.show_msg('Not yet implemented.', 'Someday!')
 
     def update_entry(self):
-        uil.show_msg('Not yet implemented.', 'Someday!')
+        form_vals = self.view.get_form_values()
+        obj = self.view.get_selection()
+        updatable_flds = [
+            'dept', 'admin_approved', 'va_approved', 'invoice_num',
+            'paid', 'balance', 'short_code', 'grant_admin', 'grant_admin_email'
+        ]
+        for fld in updatable_flds:
+            setattr(obj, fld, form_vals[fld])
+
+        if obj.id:
+            result = obj.update(Dao())
+        else:
+            result = obj.add(Dao())
+
+        self.view.reload_entry(obj)
+
+        uil.show_msg('Ledger updated!', 'Hooray')
 
     def calculate_cost(self, salary, fringe, effort, ndays):
         per_hr = salary / 2087

@@ -54,6 +54,9 @@ class LedgerPanel(wx.Panel):
         self.qry_btn = uil.toolbar_button(panel, 'Query')
         layout.Add(self.qry_btn, 0, wx.ALL, 5)
 
+        self.reload_btn = uil.toolbar_button(panel, 'Reload')
+        layout.Add(self.reload_btn, 0, wx.ALL, 5)
+
         panel.SetSizerAndFit(layout)
 
         return panel
@@ -74,12 +77,12 @@ class LedgerPanel(wx.Panel):
 
         self.list_ctrl.SetColumns([
             olv.ColumnDefn('Project', 'left', wx.LIST_AUTOSIZE, 'project'),
-            olv.ColumnDefn('Staff', 'left', wx.LIST_AUTOSIZE, 'staff'),
+            olv.ColumnDefn('Staff', 'left', wx.LIST_AUTOSIZE, 'employee'),
             olv.ColumnDefn('GA\u2713', 'left', 70, '',
                            imageGetter=self.admin_approve_image_getter),
             olv.ColumnDefn('VA\u2713', 'right', 70, '',
                            imageGetter=self.va_approve_image_getter),
-            olv.ColumnDefn('Invoice #', 'right', 60, 'invoice_num'),
+            olv.ColumnDefn('Inv #', 'right', 70, 'invoice_num'),
             olv.ColumnDefn('Grant Admin', 'left', wx.LIST_AUTOSIZE, 'grant_admin'),
         ])
         self.list_ctrl.AutoSizeColumns()
@@ -309,8 +312,15 @@ class LedgerPanel(wx.Panel):
         model.sort(key=lambda x: x.project)
         self.list_ctrl.SetObjects(model)
 
+    def reload_entry(self, entry):
+        self.list_ctrl.RefreshObject(entry)
+
     def get_selection(self):
         return self.list_ctrl.GetSelectedObject()
+
+    def set_selection(self, idx):
+        self.list_ctrl.Select(idx, on=1)
+        self.list_ctrl.EnsureVisible(idx)
 
     def load_depts(self, depts):
         choices = depts
@@ -356,17 +366,32 @@ class LedgerPanel(wx.Panel):
     def set_project(self, value):
         self.prj_ctrl.SetValue(value)
 
+    def get_project(self):
+        return self.prj_ctrl.GetValue()
+
     def set_employee(self, value):
         self.emp_ctrl.SetValue(value)
+
+    def get_employee(self):
+        return self.emp_ctrl.GetValue()
 
     def set_frum(self, value):
         self.frum_ctrl.SetValue(value)
 
+    def get_frum(self):
+        return self.frum_ctrl.GetValue()
+
     def set_thru(self, value):
         self.thru_ctrl.SetValue(value)
 
+    def get_thru(self):
+        self.thru_ctrl.GetValue()
+
     def set_effort(self, value):
         self.eff_ctrl.SetValue(str(value))
+
+    def get_effort(self):
+        self.eff_ctrl.GetValue()
 
     def set_salary(self, value):
         if not value:
@@ -394,6 +419,9 @@ class LedgerPanel(wx.Panel):
 
     def set_days(self, value):
         self.days_ctrl.SetValue(str(value))
+
+    def get_days(self):
+        return self.days_ctrl.GetValue()
 
     def set_amount(self, value):
         if not value:
@@ -450,12 +478,16 @@ class LedgerPanel(wx.Panel):
 
     def get_form_values(self):
         return {
+            'asn_id': self.get_selection().asn_id,
             'dept': self.get_dept(),
             'admin_approved': self.get_admin_approved(),
             'va_approved': self.get_va_approved(),
             'invoice_num': self.get_invoice_num(),
             'salary': self.get_salary(),
             'fringe': self.get_fringe(),
+            'total_day': self.get_total(),
+            'days': self.get_days(),
+            'amount': self.get_amount(),
             'paid': self.get_paid(),
             'balance': self.get_balance(),
             'short_code': self.get_short_code(),
@@ -464,15 +496,15 @@ class LedgerPanel(wx.Panel):
         }
 
     def load_form(self, model):
-        self.set_dept(model.department)
+        self.set_dept(model.dept)
         self.set_admin_approved(model.admin_approved)
         self.set_va_approved(model.va_approved)
         self.set_invoice_num(model.invoice_num)
         self.set_project(model.project)
-        self.set_employee(model.staff)
+        self.set_employee(model.employee)
         self.set_frum(model.frum)
         self.set_thru(model.thru)
-        self.set_effort(model.pct_effort)
+        self.set_effort(model.effort)
         self.set_salary(model.salary)
         self.set_fringe(model.fringe)
         self.set_total(model.total_day)
@@ -483,4 +515,3 @@ class LedgerPanel(wx.Panel):
         self.set_short_code(model.short_code)
         self.set_grant_admin(model.grant_admin)
         self.set_grant_admin_email(model.grant_admin_email)
-
