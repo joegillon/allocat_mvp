@@ -91,7 +91,8 @@ def validate_fte(value):
 
 def validate_email(value):
     if value and (not re.search(EMAIL_PATTERN, value)):
-        return 'Invalid non-VA email!'
+        return False
+    return True
 
 
 def validate_va_email(value):
@@ -132,3 +133,10 @@ def showErrMsg(ctl, msg):
     if ctl:
         ctl.SetFocus()
     wx.MessageBox(msg, 'Error!', wx.ICON_EXCLAMATION | wx.OK)
+
+
+def validate_name(value):
+    if not re.match(WHOLE_NAME_PATTERN, value.upper()):
+        return 'Name invalid!'
+
+    return None

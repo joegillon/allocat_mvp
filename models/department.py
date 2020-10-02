@@ -23,3 +23,15 @@ class Department(object):
     def add_rec(dao, name):
         sql = "INSERT INTO departments (name) VALUES (?)"
         return dao.execute(sql, (name,))
+
+    def add(self, dao):
+        sql = "INSERT INTO departments (name) VALUES (?)"
+        return dao.execute(sql, (self.name,))
+
+    def update(self, dao):
+        sql = "UPDATE departments SET name=? WHERE id=?"
+        return dao.execute(sql, (self.name, self.id))
+
+    def drop(self, dao):
+        sql = 'DELETE FROM departments WHERE id=?'
+        return dao.execute(sql, (self.id,))

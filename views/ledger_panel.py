@@ -42,17 +42,20 @@ class LedgerPanel(wx.Panel):
         panel.SetBackgroundColour(gbl.COLOR_SCHEME.tbBg)
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
-        yr_lbl = uil.get_toolbar_label(panel, 'Year:')
-        yr_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
-        self.yr_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
-        layout.Add(yr_lbl, 0, wx.ALL, 5)
-        layout.Add(self.yr_ctrl, 0, wx.ALL, 5)
+        # yr_lbl = uil.get_toolbar_label(panel, 'Year:')
+        # yr_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
+        # self.yr_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
+        # layout.Add(yr_lbl, 0, wx.ALL, 5)
+        # layout.Add(self.yr_ctrl, 0, wx.ALL, 5)
+        #
+        # self.qtr_ctrl = uil.RadioGroup(panel, 'Qtr:', ['1', '2', '3', '4'])
+        # layout.Add(self.qtr_ctrl, 0, wx.ALL, 5)
+        #
+        # self.qry_btn = uil.toolbar_button(panel, 'Query')
+        # layout.Add(self.qry_btn, 0, wx.ALL, 5)
 
-        self.qtr_ctrl = uil.RadioGroup(panel, 'Qtr:', ['1', '2', '3', '4'])
-        layout.Add(self.qtr_ctrl, 0, wx.ALL, 5)
-
-        self.qry_btn = uil.toolbar_button(panel, 'Query')
-        layout.Add(self.qry_btn, 0, wx.ALL, 5)
+        self.update_entries_btn = uil.toolbar_button(panel, 'Update')
+        layout.Add(self.update_entries_btn, 0, wx.ALL, 5)
 
         self.reload_btn = uil.toolbar_button(panel, 'Reload')
         layout.Add(self.reload_btn, 0, wx.ALL, 5)
@@ -84,6 +87,7 @@ class LedgerPanel(wx.Panel):
                            imageGetter=self.va_approve_image_getter),
             olv.ColumnDefn('Inv #', 'right', 70, 'invoice_num'),
             olv.ColumnDefn('Grant Admin', 'left', wx.LIST_AUTOSIZE, 'grant_admin'),
+            olv.ColumnDefn('Qtr', 'left', 70, 'quarter'),
         ])
         self.list_ctrl.AutoSizeColumns()
 
@@ -102,6 +106,11 @@ class LedgerPanel(wx.Panel):
 
     def va_approve_image_getter(self, obj):
         if obj.va_approved:
+            return 'approved'
+        return 'not_approved'
+
+    def paid_image_getter(self, obj):
+        if obj.paid:
             return 'approved'
         return 'not_approved'
 
@@ -131,8 +140,8 @@ class LedgerPanel(wx.Panel):
         layout.Add(self.name_lbl, 0, wx.ALL, 5)
 
         btn_layout = wx.BoxSizer(wx.HORIZONTAL)
-        self.update_btn = uil.toolbar_button(panel, 'Update')
-        btn_layout.Add(self.update_btn, 0, wx.ALL, 5)
+        self.update_entry_btn = uil.toolbar_button(panel, 'Update')
+        btn_layout.Add(self.update_entry_btn, 0, wx.ALL, 5)
         layout.Add(btn_layout, 0, wx.ALIGN_RIGHT, 5)
 
         panel.SetSizer(layout)
@@ -285,28 +294,28 @@ class LedgerPanel(wx.Panel):
 
         return panel
 
-    def set_year(self, value):
-        self.yr_ctrl.SetValue(str(value))
-
-    def get_year(self):
-        return self.yr_ctrl.GetValue()
-
-    def set_qtr(self, value):
-        if value in [10, 11, 12]:
-            choice = 0
-        elif value in [1, 2, 3]:
-            choice = 1
-        elif value in [4, 5, 6]:
-            choice = 2
-        else:
-            choice = 3
-        self.qtr_ctrl.SetSelection(choice)
-
-    def get_qtr(self):
-        option = self.qtr_ctrl.get_selection()
-        if option:
-            return int(option) - 1
-        return -1
+    # def set_year(self, value):
+    #     self.yr_ctrl.SetValue(str(value))
+    #
+    # def get_year(self):
+    #     return self.yr_ctrl.GetValue()
+    #
+    # def set_qtr(self, value):
+    #     if value in [10, 11, 12]:
+    #         choice = 0
+    #     elif value in [1, 2, 3]:
+    #         choice = 1
+    #     elif value in [4, 5, 6]:
+    #         choice = 2
+    #     else:
+    #         choice = 3
+    #     self.qtr_ctrl.SetSelection(choice)
+    #
+    # def get_qtr(self):
+    #     option = self.qtr_ctrl.get_selection()
+    #     if option:
+    #         return int(option) - 1
+    #     return -1
 
     def load_grid(self, model):
         model.sort(key=lambda x: x.project)

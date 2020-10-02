@@ -25,3 +25,17 @@ class GrantAdmin(object):
     def add_admin(dao, name, email):
         sql = "INSERT INTO grant_admins (name, email) VALUES (?,?)"
         return dao.execute(sql, (name, email))
+
+    def add(self, dao):
+        sql = "INSERT INTO grant_admins (name, email) VALUES (?,?)"
+        return dao.execute(sql, (self.name, self.email))
+
+    def update(self, dao):
+        sql = ("UPDATE grant_admins "
+               "SET name=?, email=? "
+               "WHERE id=?")
+        return dao.execute(sql, (self.name, self.email, self.id))
+
+    def drop(self, dao):
+        sql = "DELETE FROM grant_admins WHERE id=?"
+        return dao.execute(sql, (self.id,))

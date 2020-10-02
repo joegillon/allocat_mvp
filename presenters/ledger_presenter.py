@@ -23,13 +23,14 @@ class LedgerPresenter(object):
             self.init_view()
 
     def init_view(self):
-        from datetime import datetime
+        # from datetime import datetime
+        #
+        # today = datetime.today()
+        # self.view.set_year(today.year)
 
-        today = datetime.today()
-        self.view.set_year(today.year)
-
-        self.view.load_depts([d for d in self.model.get_dept_data()])
+        self.view.load_depts([d.name for d in self.model.get_dept_data()])
         self.view.load_grant_admins([a.name for a in self.model.get_grant_admin_data()])
+        self.view.load_grid(self.model.get_ledger_data())
 
     def run_query(self):
         yr = self.view.get_year()
@@ -149,3 +150,52 @@ class LedgerPresenter(object):
             self.view.set_balance(0.0)
         else:
             self.view.reset_balance()
+
+    def update_entries(self):
+        from dal.dao import Dao
+        from models.ledger import Ledger
+
+        dao = Dao(stateful=True)
+
+        billing_rex = self.import_spreadsheet()
+
+        for billing_rec in list(billing_rex):
+            ledger_rec = Ledger.get_by_invoice(dao, billing_rec.invoice_num)
+            if ledger_rec:
+                ledger_rec.update_balance(dao, billing_rec.amount)
+
+        new_rex = Ledger.get_rex(dao)
+
+        dao.close()
+
+        gbl.dataset.set_ledger_data(new_rex)
+        self.init_view()
+
+    def import_spreadsheet(self):
+        import lib.excel_lib as xl
+        from models.billing_record import BillingRecord
+        from views.billing_ss_dlg import BillingSSDlg
+
+        file = xl.get_file(self.view)
+        if not file:
+            return
+
+        wb = xl.open_wb(file)
+        sheets = wb.sheet_names()
+
+        dlg = BillingSSDlg(self.view, -1, sheets)
+        dlg.ShowModal()
+        stop_at = dlg.result
+        dlg.Destroy()
+
+        rex = []
+        last_idx = sheets.index(stop_at)
+        for idx in range(0, last_idx + 1):
+            sh = wb.sheet_by_index(idx)
+
+            nrows = sum(1 for _ in sh.get_rows())
+            for rownum in range(0, nrows):
+                if sh.cell_value(rownum, 1).startswith('506'):
+                    rex.append(BillingRecord(sh.row_values(rownum)))
+
+        return rex

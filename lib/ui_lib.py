@@ -185,3 +185,5 @@ def to_money(value):
 
 def frum_money(value):
     return value.replace(',', '')
+
+

@@ -17,13 +17,14 @@ class LedgerDataSet(object):
         from models.ledger_employee import LedgerEmployee
         from models.department import Department
         from models.grant_admin import GrantAdmin
+        from models.ledger import Ledger
 
         dao = Dao(db_path=self.db_path, stateful=True)
         self._prj_rex = Project.get_names(dao)
         self._emp_rex = LedgerEmployee.get_all(dao)
-        self._dept_rex = Department.get_names(dao)
+        self._dept_rex = Department.get_all(dao)
         self._grant_admin_rex = GrantAdmin.get_all(dao)
-        self._ledger_rex = []
+        self._ledger_rex = Ledger.get_rex(dao)
         dao.close()
 
     def build_dataset(self):
@@ -43,6 +44,9 @@ class LedgerDataSet(object):
 
     def get_grant_admin_data(self):
         return self._grant_admin_rex
+
+    def get_ledger_data(self):
+        return self._ledger_rex
 
     def set_ledger_data(self, rex):
         self._ledger_rex = rex

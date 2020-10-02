@@ -25,8 +25,24 @@ class Ledger(object):
             for attr in d:
                 setattr(self, attr, d[attr])
 
+    # @staticmethod
+    # def get_rex(dao, quarter):
+    #     sql = ("SELECT ledger.*, "
+    #            "projects.name AS project, "
+    #            "employees.name AS employee, "
+    #            "assignments.id AS asn_id, "
+    #            "assignments.frum AS frum, "
+    #            "assignments.thru AS thru, "
+    #            "assignments.effort AS effort "
+    #            "FROM ledger "
+    #            "INNER JOIN assignments ON ledger.asn_id=assignments.id "
+    #            "INNER JOIN projects ON assignments.project_id=projects.id "
+    #            "INNER JOIN employees ON assignments.employee_id=employees.id "
+    #            "WHERE quarter=?")
+    #     return dao.execute(sql, (quarter,))
+
     @staticmethod
-    def get_rex(dao, quarter):
+    def get_rex(dao):
         sql = ("SELECT ledger.*, "
                "projects.name AS project, "
                "employees.name AS employee, "
@@ -38,8 +54,9 @@ class Ledger(object):
                "INNER JOIN assignments ON ledger.asn_id=assignments.id "
                "INNER JOIN projects ON assignments.project_id=projects.id "
                "INNER JOIN employees ON assignments.employee_id=employees.id "
-               "WHERE quarter=?")
-        return dao.execute(sql, (quarter,))
+               "WHERE paid=?")
+        rex = dao.execute(sql, (0,))
+        return [Ledger(rec) for rec in rex] if rex else []
 
     def add(self, dao):
         vals = self.get_updatable_values()
@@ -72,3 +89,16 @@ class Ledger(object):
         for k, v in vals.items():
             vals[k] = str(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else v
         return vals
+
+    @staticmethod
+    def get_by_invoice(dao, invoice_num):
+        sql = "SELECT * FROM ledger WHERE invoice_num=?"
+        rex = dao.execute(sql, (invoice_num,))
+        return Ledger(rex[0]) if rex else None
+
+    def update_balance(self, dao, amount):
+        self.balance = round(self.balance - amount, 2)
+        if self.balance == 0.0:
+            self.paid = True
+        sql = "UPDATE ledger SET balance=?, paid=? WHERE id=?"
+        dao.execute(sql, (self.balance, self.paid, self.id))
