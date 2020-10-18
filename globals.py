@@ -3,8 +3,8 @@ import random
 from collections import namedtuple
 
 
-DB_PATH = os.getcwd() + '\\data\\allocat0.db'
-# DB_PATH = 'c:/bench/allocat/tests/allocat.db'
+# DB_PATH = os.getcwd() + '\\data\\allocat0.db'
+DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
 dataset = None
 

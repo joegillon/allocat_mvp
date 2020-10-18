@@ -42,17 +42,17 @@ class LedgerPanel(wx.Panel):
         panel.SetBackgroundColour(gbl.COLOR_SCHEME.tbBg)
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
-        # yr_lbl = uil.get_toolbar_label(panel, 'Year:')
-        # yr_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
-        # self.yr_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
-        # layout.Add(yr_lbl, 0, wx.ALL, 5)
-        # layout.Add(self.yr_ctrl, 0, wx.ALL, 5)
-        #
-        # self.qtr_ctrl = uil.RadioGroup(panel, 'Qtr:', ['1', '2', '3', '4'])
-        # layout.Add(self.qtr_ctrl, 0, wx.ALL, 5)
-        #
-        # self.qry_btn = uil.toolbar_button(panel, 'Query')
-        # layout.Add(self.qry_btn, 0, wx.ALL, 5)
+        yr_lbl = uil.get_toolbar_label(panel, 'Year:')
+        yr_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
+        self.yr_ctrl = wx.TextCtrl(panel, wx.ID_ANY, '', size=(50, -1))
+        layout.Add(yr_lbl, 0, wx.ALL, 5)
+        layout.Add(self.yr_ctrl, 0, wx.ALL, 5)
+
+        self.qtr_ctrl = uil.RadioGroup(panel, 'Qtr:', ['1', '2', '3', '4'])
+        layout.Add(self.qtr_ctrl, 0, wx.ALL, 5)
+
+        self.qry_btn = uil.toolbar_button(panel, 'Query')
+        layout.Add(self.qry_btn, 0, wx.ALL, 5)
 
         self.update_entries_btn = uil.toolbar_button(panel, 'Update')
         layout.Add(self.update_entries_btn, 0, wx.ALL, 5)
@@ -294,28 +294,29 @@ class LedgerPanel(wx.Panel):
 
         return panel
 
-    # def set_year(self, value):
-    #     self.yr_ctrl.SetValue(str(value))
-    #
-    # def get_year(self):
-    #     return self.yr_ctrl.GetValue()
-    #
-    # def set_qtr(self, value):
-    #     if value in [10, 11, 12]:
-    #         choice = 0
-    #     elif value in [1, 2, 3]:
-    #         choice = 1
-    #     elif value in [4, 5, 6]:
-    #         choice = 2
-    #     else:
-    #         choice = 3
-    #     self.qtr_ctrl.SetSelection(choice)
-    #
-    # def get_qtr(self):
-    #     option = self.qtr_ctrl.get_selection()
-    #     if option:
-    #         return int(option) - 1
-    #     return -1
+    def set_year(self, value):
+        self.yr_ctrl.SetValue(str(value))
+
+    def get_year(self):
+        value = self.yr_ctrl.GetValue()
+        return int(value) if value else None
+
+    def set_qtr(self, month):
+        if month in [10, 11, 12]:
+            choice = 0
+        elif month in [1, 2, 3]:
+            choice = 1
+        elif month in [4, 5, 6]:
+            choice = 2
+        else:
+            choice = 3
+        self.qtr_ctrl.set_selection(choice, True)
+
+    def get_qtr(self):
+        return int(self.qtr_ctrl.get_selection()) + 1
+        # if option:
+        #     return int(option) - 1
+        # return -1
 
     def load_grid(self, model):
         model.sort(key=lambda x: x.project)
@@ -472,6 +473,8 @@ class LedgerPanel(wx.Panel):
         self.grant_admin_ctrl.Items = choices
 
     def set_grant_admin(self, value):
+        if not value:
+            value = ''
         self.grant_admin_ctrl.SetValue(value)
 
     def get_grant_admin(self):

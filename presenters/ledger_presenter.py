@@ -10,42 +10,45 @@ from event_handlers.ledger_event_handler import LedgerInteractor
 
 class LedgerPresenter(object):
 
-    def __init__(self, panel=None):
-        # No panel is for testing
-        if panel:
-            self.view = LedgerPanel(panel)
-            self.model = gbl.dataset
-            actor = LedgerInteractor()
-            actor.install(self, self.view)
+    def __init__(self, panel):
+        self.view = LedgerPanel(panel)
+        self.model = gbl.dataset
+        actor = LedgerInteractor()
+        actor.install(self, self.view)
 
-            self.quarter = ''
+        self.quarter = ''
 
-            self.init_view()
+        self.init_view()
 
     def init_view(self):
-        # from datetime import datetime
-        #
-        # today = datetime.today()
-        # self.view.set_year(today.year)
+        from datetime import datetime
+
+        today = datetime.today()
+        self.view.set_year(today.year)
+        self.view.set_qtr(today.month)
 
         self.view.load_depts([d.name for d in self.model.get_dept_data()])
         self.view.load_grant_admins([a.name for a in self.model.get_grant_admin_data()])
-        self.view.load_grid(self.model.get_ledger_data())
+
+    def get_query_params(self):
+        yr = self.view.get_year()
+        qtr = self.view.get_qtr()
+        self.quarter = '%d%d' % (yr, qtr)
+        frum, thru = ml.get_quarter_interval(yr, qtr)
+        return self.quarter, frum, thru
 
     def run_query(self):
-        yr = self.view.get_year()
-        qtr = self.view.get_qtr() + 1
-        self.quarter =  '%s%d' % (yr, qtr)
-        dao = Dao(stateful=True)
-        rex = Ledger.get_rex(dao, self.quarter)
-        prj_names = [r['project'] for r in rex]
-        emp_names = [r['employee'] for r in rex]
+        qtr, frum, thru = self.get_query_params()
 
-        frum, thru = ml.get_quarter_interval(yr, qtr)
-        asns = Assignment.get_for_timeframe(dao, frum, thru)
+        dao = Dao(stateful=True)
+        rex = Ledger.get_rex(dao, qtr)
+
+        ledger_ids = [rec.id for rec in rex]
+
+        asns = Assignment.get_billables(dao, frum, thru)
         dao.close()
 
-        asns = [a for a in asns if not(a['employee'] in emp_names and a['project'] in prj_names)]
+        asns = [a for a in asns if a['id'] not in ledger_ids]
         new_rex = [
             {
                 'id': None,
@@ -77,6 +80,12 @@ class LedgerPresenter(object):
         model = [Ledger(rec) for rec in rex] if rex else []
         gbl.dataset.set_ledger_data(model)
         self.view.load_grid(model)
+
+    def reload(self):
+        new_data = Ledger.get_rex(Dao())
+        gbl.dataset.set_ledger_data(new_data)
+        self.view.load_grid(self.model.get_ledger_data())
+        uil.show_msg('Reloaded!','Try Again')
 
     def load_details(self):
         item = self.view.get_selection()
@@ -139,9 +148,8 @@ class LedgerPresenter(object):
         uil.show_msg('Ledger updated!', 'Hooray')
 
     def calculate_cost(self, salary, fringe, effort, ndays):
-        per_hr = salary / 2087
-        per_hr = per_hr * (1 + fringe)
-        per_day =per_hr * 8
+        per_hr = (salary / 2087) * (1 + fringe)
+        per_day = per_hr * 8
         per_asn = per_day * ndays
         return round(per_asn * effort / 100, 2), round(per_day, 2)
 

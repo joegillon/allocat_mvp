@@ -15,11 +15,11 @@ def uglify(month):
     return (month[3:] + month[0:2]).strip()
 
 
-def get_months(startMonth, thruMonth):
+def get_months(frum, thru):
     from dateutil.relativedelta import relativedelta as rd
 
-    start_date = month2d(startMonth)
-    thru_date = month2d(thruMonth)
+    start_date = month2d(frum)
+    thru_date = month2d(thru)
     months = []
     while start_date <= thru_date:
         months.append(d2month(start_date))
@@ -28,7 +28,7 @@ def get_months(startMonth, thruMonth):
 
 
 def date_plus(d, nmonths):
-    return (d + dt.timedelta(nmonths * 365 / 12))
+    return d + dt.timedelta(nmonths * 365 / 12)
 
 
 def d2month(d):
@@ -49,25 +49,38 @@ def is_in_prj_span(prj, frum, thru):
     return thru <= prj.thru
 
 
-def get_timeframe_edges(list):
-    min = '9999'
-    max = '0000'
-    for item in list:
+def get_timeframe_edges(lst):
+    mn = '9999'
+    mx = '0000'
+    for item in lst:
         if not item.active:
             continue
-        if item.frum < min:
-            min = item.frum
-        if item.thru > max:
-            max = item.thru
-    return min, max
+        if item.frum < mn:
+            mn = item.frum
+        if item.thru > mx:
+            mx = item.thru
+    return mn, mx
+
+
+def get_quarter(month):
+    if month in [10, 12]:
+        return 1
+    if month in [1, 3]:
+        return 2
+    if month in [4, 6]:
+        return 3
+    if month in [7, 9]:
+        return 4
+    return None
+
 
 def get_quarter_interval(yr, qtr):
-    y = int(yr[0:2])
+    y = int(str(yr)[2:])
 
     if qtr == 1:
         m1 = '10'
         m2 = '12'
-        y = y - 1
+        y -= 1
     elif qtr == 2:
         m1 = '01'
         m2 = '03'
@@ -112,17 +125,16 @@ def thru2dt(thru):
 def thru2str(thru):
     return thru2dt(thru).strftime('%#m/%#d/%y')
 
+
 def is_leap_year(year):
     if (year % 4) == 0:
-       if (year % 100) == 0:
-           if (year % 400) == 0:
-               return True
-           else:
-               return False
-       else:
-           return True
+        if (year % 100) == 0:
+            if (year % 400) == 0:
+                return True
+            else:
+                return False
     else:
-       return False
+        return False
 
 
 def get_total_days(frum, thru):

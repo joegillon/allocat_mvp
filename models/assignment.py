@@ -48,6 +48,16 @@ class Assignment(object):
         vals = (frum, thru)
         return dao.execute(sql, vals)
 
+    @staticmethod
+    def get_billables(dao, frum, thru):
+        sql = ("SELECT a.*, e.name AS employee, p.name AS project "
+               "FROM assignments a "
+               "JOIN employees e ON a.employee_id=e.id "
+               "JOIN projects p ON a.project_id=p.id "
+               "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
+        vals = (frum, thru, 1)
+        return dao.execute(sql, vals)
+
     def add(self, dao):
         sql = ("INSERT INTO assignments "
                "(employee_id, project_id, frum, thru, effort, notes, active) "

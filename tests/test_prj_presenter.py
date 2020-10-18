@@ -13,6 +13,9 @@ class TestProjectPresenter(unittest.TestCase):
         self.app = wx.App()
         self.frame = wx.Frame(None)
 
+        gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
+        gbl.DB_PATH = 'c:/bench/allocat/tests/allocat.db'
+
         self.presenter = ProjectPresenter(self.frame)
         self.presenter.init_view()
 
@@ -80,7 +83,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 1
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 313
         assert item.name == 'CFIR V2 LIP'
@@ -124,7 +127,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 4
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 293
         assert item.name == 'IIR 17-269 Morphomics (Su)'
@@ -173,7 +176,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 10
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 308
         assert item.name == 'LIP 20-120 (Sears)'
@@ -217,7 +220,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 24
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 282
         assert item.name == 'UM MTOP (Saini)'
@@ -466,7 +469,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Project'
         click_button(view.clear_btn)
         assert view.get_save_button_label() == 'Add Project'
-        click_list_ctrl(list_ctrl, 1)
+        dbl_click_list_ctrl(list_ctrl, 1)
         assert view.get_save_button_label() == 'Update Project'
 
     def testValidateProjectFormOnAdd(self):
@@ -532,7 +535,7 @@ class TestProjectPresenter(unittest.TestCase):
     def testValidateProjectFormOnUpdate(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        click_list_ctrl(list_ctrl, 1)
+        dbl_click_list_ctrl(list_ctrl, 1)
         assert view.get_name() == 'CFIR V2 LIP'
 
         # No project name entered
@@ -605,6 +608,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert err_msg == None
 
     # This test has all valid data. See above invalid tests
+    @patch('presenters.presenter.uil.show_msg', return_value=True)
     @patch('presenters.presenter.Dao._Dao__write', return_value=317)
     def testAddUpdatesModelAndView(self, write_mock):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -660,12 +664,13 @@ class TestProjectPresenter(unittest.TestCase):
         assert len(asn_items) == 0
 
     # This test has all valid data. See above invalid tests
+    @patch('presenters.presenter.uil.show_msg', return_value=True)
     @patch('presenters.presenter.Dao._Dao__write', return_value=1)
     def testUpdateUpdatesModelAndView(self, write_mock):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 6
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 279
         assert item.name == 'LIP 19-111 (Prescott)'
@@ -761,12 +766,13 @@ class TestProjectPresenter(unittest.TestCase):
         assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
 
     # This time update with no name, full name change and no PI or PM
+    @patch('presenters.presenter.uil.show_msg', return_value=True)
     @patch('presenters.presenter.Dao._Dao__write', return_value=1)
     def testUpdateUpdatesModelAndView2(self, write_mock):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 6
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 279
         assert item.name == 'LIP 19-111 (Prescott)'
@@ -865,7 +871,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 6
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 279
         assert item.name == 'LIP 19-111 (Prescott)'
@@ -970,7 +976,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 29
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 300
         assert item.name == 'VERAM CHRT (Adams)'
@@ -994,21 +1000,22 @@ class TestProjectPresenter(unittest.TestCase):
         assert view.get_thru() == '1909'
         assert view.pi_ctrl.GetCount() == 29
         assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
+        assert view.get_pi() is None
+        assert view.pi_ctrl.get_selection_id() is None
         assert view.get_pm().name == 'SAFFAR,DARCY A'
         assert view.pm_ctrl.get_selection_id() == 22
 
         # Check the assignments list
+        # There are 5 but only 2 are active and being displayed
         assert len(model[model_idx].asns) == 5
         asn_idx = 0
         asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
+        assert len(asn_items) == 2
         asn_ids = [2290, 2291, 2292, 2293, 2398]
-        assert [asn.id for asn in asn_items] == asn_ids
+        assert [asn.id for asn in asn_items] == [2291, 2292]
         assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'SAFFAR,DARCY A'
-        assert asn_items[asn_idx].employee_id == 22
+        assert asn_items[asn_idx].employee == 'GAO,YUQUING'
+        assert asn_items[asn_idx].employee_id == 264
         assert model[model_idx].asns[asn_idx].frum == '1904'
         assert model[model_idx].asns[asn_idx].thru == '1904'
         assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
@@ -1025,7 +1032,7 @@ class TestProjectPresenter(unittest.TestCase):
         assert write_mock.call_count == 1
         args, kwargs = write_mock.call_args
         assert len(args) == 2
-        assert len(kwargs) ==0
+        assert len(kwargs) == 0
         assert args[0] == 'UPDATE projects SET active=0 WHERE id=?'
         assert args[1] == (300,)
 
@@ -1074,7 +1081,7 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 6
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 279
 
@@ -1084,7 +1091,7 @@ class TestProjectPresenter(unittest.TestCase):
         asn_view = self.presenter.asn_presenter.view
         assert asn_view.Name == 'AssignmentPanel'
 
-        assert asn_view.owner_lbl.GetLabelText() == 'Project: LIP 19-111 (Prescott)'
+        assert asn_view.owner_lbl.GetLabelText() == 'LIP 19-111 (Prescott)'
         assert asn_view.assignee_lbl.GetLabelText() == 'Employee: '
         assert not isinstance(asn_view.assignee, str)
         assert asn_view.assignee.Count == 156
@@ -1099,17 +1106,17 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 0
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 303
 
-        click_list_ctrl(asn_list_ctrl, 2)
+        dbl_click_list_ctrl(asn_list_ctrl, 2)
 
         assert view.Children[2].Name == 'AsnDlg'
         asn_view = self.presenter.asn_presenter.view
         assert asn_view.Name == 'AssignmentPanel'
 
-        assert asn_view.owner_lbl.GetLabelText() == 'Project: Biosimilar Merit_Waljee'
+        assert asn_view.owner_lbl.GetLabelText() == 'Biosimilar Merit_Waljee'
         assert asn_view.assignee_lbl.GetLabelText() == 'Employee: WIITALA,WYNDY L'
         assert isinstance(asn_view.assignee, str)
         assert asn_view.get_frum() == '2001'
@@ -1123,7 +1130,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Select project
         model_idx = 0
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 303
 
@@ -1172,7 +1179,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Select project
         model_idx = 0
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 303
 
@@ -1225,7 +1232,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Select project
         model_idx = 0
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 303
 
@@ -1284,7 +1291,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Select project
         model_idx = 0
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 303
 
@@ -1344,7 +1351,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Select project
         model_idx = 0
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 303
 

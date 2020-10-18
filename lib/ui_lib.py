@@ -1,4 +1,5 @@
 import wx
+import wx.lib.newevent
 from collections import namedtuple
 import globals as gbl
 from lib.custom_button import CustomButton
@@ -156,25 +157,38 @@ class RadioGroup(wx.BoxSizer):
         lbl = get_toolbar_label(parent, lbl_text)
         self.Add(lbl, 0, wx.ALL, 5)
 
-        self.buttons = {
-            options[0]: wx.RadioButton(parent, wx.ID_ANY, style=wx.RB_GROUP)
-        }
-        for option in options[1:]:
-            self.buttons[option] = wx.RadioButton(parent, wx.ID_ANY)
-
-        for option, button in self.buttons.items():
-            lbl = wx.StaticText(parent, wx.ID_ANY, option)
+        self.buttons = []
+        for option in options:
+            lbl = get_toolbar_label(parent, option)
             lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
-            font = lbl.GetFont().MakeBold()
-            lbl.SetFont(font)
+            lbl.SetFont(lbl.GetFont().MakeBold())
+            btn = wx.RadioButton(parent, wx.ID_ANY, style=wx.RB_GROUP,
+                                 name=option)
+            btn.SetValue(False)
+            btn.Bind(wx.EVT_RADIOBUTTON, self.on_button_select)
             self.Add(lbl, 0, wx.ALL, 5)
-            self.Add(button, 0, wx.ALL, 5)
+            self.Add(btn, 0, wx.ALL, 5)
+            self.buttons.append(btn)
+
+    def on_button_select(self, evt):
+        self.clear()
+        btn_name = evt.EventObject.GetName()
+        selected_button = next((b for b in self.buttons if b.GetName() == btn_name), None)
+        selected_button.SetValue(True)
 
     def get_selection(self):
-        for option, button in self.buttons.items():
+        for button in self.buttons:
             if button.GetValue():
-                return option
-        return None
+                return self.buttons.index(button)
+        return -1
+
+    def clear(self):
+        for button in self.buttons:
+            button.SetValue(False)
+
+    def set_selection(self, idx, value):
+        self.clear()
+        self.buttons[idx].SetValue(value)
 
 
 def to_money(value):

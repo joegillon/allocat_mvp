@@ -3,7 +3,6 @@ import globals as gbl
 import lib.ui_lib as uil
 from dal.dao import Dao
 from models.employee import Employee
-from models.ledger_employee import LedgerEmployee
 from views.import_panel import ImportPanel
 from event_handlers.import_event_handler import ImportInteractor
 
@@ -30,10 +29,10 @@ class ImportPresenter(object):
         self.import_file(file)
 
     def import_file(self, file):
-        import xlrd
+        import lib.excel_lib as xl
         from models.spreadsheet_record import SpreadsheetRecord
 
-        wb = xlrd.open_workbook(file)
+        wb = xl.open_wb(file)
         sheet = wb.sheet_by_index(0)
         rex = [SpreadsheetRecord(
                     {'name': rec[0], 'salary': rec[14], 'fringe': round(rec[17], 2)})
@@ -70,18 +69,18 @@ class ImportPresenter(object):
         new_rex = []
         for rec in rex:
             new_rec = {
-                'emp_id': next((x.emp_id for x in self.emps if x.name == rec.name), None),
+                'id': next((x.id for x in self.emps if x.name == rec.name), None),
                 'salary': rec.salary,
                 'fringe': rec.fringe
             }
-            if not new_rec['emp_id']:
+            if not new_rec['id']:
                 uil.show_error('Uh oh! No employee record for ' + rec.name)
                 return
             new_rex.append(new_rec)
 
         dao = Dao(stateful=True)
         try:
-            LedgerEmployee.update_salaries(dao, new_rex)
+            Employee.update_salaries(dao, new_rex)
             uil.show_msg('Hurray!', 'Done!')
         except Exception as e:
             uil.show_error(str(e))

@@ -137,3 +137,25 @@ class Employee(object):
                 raise Exception('Employee %s is not unique!' % s.split('.')[1])
             else:
                 raise
+
+    @staticmethod
+    def update_salaries(dao, rex):
+        sql = ("UPDATE employees "
+               "SET salary=?, fringe=? "
+               "WHERE id=?")
+        for rec in rex:
+            vals = (int(rec['salary']), rec['fringe'], rec['id'])
+            try:
+                dao.txn_write(sql, vals)
+            except Exception as e:
+                dao.rollback()
+                raise
+
+        dao.commit()
+
+    def update_pm(self, dao):
+        sql = ("UPDATE employees "
+               "SET pm=?, va_email=?, nonva_email=? "
+               "WHERE id=?")
+        vals = [self.pm, self.va_email, self.nonva_email, self.id]
+        return dao.execute(sql, vals)

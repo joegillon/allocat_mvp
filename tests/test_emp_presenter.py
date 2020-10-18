@@ -68,7 +68,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select 143rd employee
         model_idx = 142
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
         item = view.get_selection()
@@ -96,7 +96,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select 95th employee
         model_idx = 94
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
         item = view.get_selection()
@@ -123,7 +123,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select 15th employee
         model_idx = 14
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
         item = view.get_selection()
@@ -209,7 +209,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select 3rd item
         model_idx = 2
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
         item = view.get_selection()
@@ -280,7 +280,7 @@ class TestEmployeePresenter(unittest.TestCase):
         assert view.get_save_button_label() == 'Update Employee'
         click_button(view.clear_btn)
         assert view.get_save_button_label() == 'Add Employee'
-        click_list_ctrl(list_ctrl, 1)
+        dbl_click_list_ctrl(list_ctrl, 1)
         assert view.get_save_button_label() == 'Update Employee'
 
     def testValidateEmployeeFormOnAdd(self):
@@ -333,7 +333,7 @@ class TestEmployeePresenter(unittest.TestCase):
     def testValidateEmployeeFormOnUpdate(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        click_list_ctrl(list_ctrl, 0)
+        dbl_click_list_ctrl(list_ctrl, 0)
         assert self.presenter.get_selection().__dict__ == self.first_item
 
         view.set_name('')
@@ -411,7 +411,7 @@ class TestEmployeePresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 6
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
         assert view.get_selection() == model[model_idx]
@@ -482,7 +482,7 @@ class TestEmployeePresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         model_idx = 6
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Check the number of items & number of models
         items = list_ctrl.GetObjects()
@@ -577,7 +577,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select last item
         model_idx = 154
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
 
         # Get the item
         item = view.get_selection()
@@ -672,7 +672,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select employee
         model_idx = 111
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 295
 
@@ -698,13 +698,13 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select employee
         model_idx = 111
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 295
 
         # Select first assignment
         asn_idx = 0
-        click_list_ctrl(asn_list_ctrl, asn_idx)
+        dbl_click_list_ctrl(asn_list_ctrl, asn_idx)
 
         # Pop up dialog was called
         assert view.Children[2].Name == 'AsnDlg'
@@ -725,7 +725,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select employee
         model_idx = 119
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 22
 
@@ -760,7 +760,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select employee
         model_idx = 119
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 22
 
@@ -879,7 +879,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Select employee
         model_idx = 119
-        click_list_ctrl(list_ctrl, model_idx)
+        dbl_click_list_ctrl(list_ctrl, model_idx)
         item = view.get_selection()
         assert item.id == 22
 

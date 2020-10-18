@@ -63,14 +63,14 @@ class Project(object):
             raise AttributeError('Missing required fields ' + s)
         flds = ("name,full_name,frum,thru,investigator_id,manager_id,"
                     "notes,active")
-        sql = "INSERT INTO projects (%s) VALUES (%s)" % (
-            flds, ('?,' * len(flds))[0:-1]
-        )
         vals = [
             self.name, self.full_name, self.frum, self.thru,
             self.investigator_id, self.manager_id,
             self.notes, 1
         ]
+        sql = "INSERT INTO projects (%s) VALUES (%s)" % (
+            flds, ('?,' * len(vals))[0:-1]
+        )
         try:
             self.id = dao.execute(sql, vals)
             gbl.dataset.add_prj(self)

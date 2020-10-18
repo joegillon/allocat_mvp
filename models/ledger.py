@@ -42,10 +42,14 @@ class Ledger(object):
     #     return dao.execute(sql, (quarter,))
 
     @staticmethod
-    def get_rex(dao):
+    def get_rex(dao, quarter):
         sql = ("SELECT ledger.*, "
                "projects.name AS project, "
                "employees.name AS employee, "
+               "employees.salary AS salary, "
+               "employees.fringe AS fringe, "
+               "employees.va_email AS va_email, "
+               "employees.nonva_email AS nonva_email, "
                "assignments.id AS asn_id, "
                "assignments.frum AS frum, "
                "assignments.thru AS thru, "
@@ -54,8 +58,8 @@ class Ledger(object):
                "INNER JOIN assignments ON ledger.asn_id=assignments.id "
                "INNER JOIN projects ON assignments.project_id=projects.id "
                "INNER JOIN employees ON assignments.employee_id=employees.id "
-               "WHERE paid=?")
-        rex = dao.execute(sql, (0,))
+               "WHERE quarter=? AND paid=?")
+        rex = dao.execute(sql, (quarter, 0))
         return [Ledger(rec) for rec in rex] if rex else []
 
     def add(self, dao):

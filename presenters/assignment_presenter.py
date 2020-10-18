@@ -32,11 +32,11 @@ class AssignmentPresenter(object):
         import globals as gbl
 
         if not form_values['employee_id']:
-            vl.showErrMsg(None, 'Employee is required!')
+            vl.show_errmsg(None, 'Employee is required!')
             return False
 
         if not form_values['project_id']:
-            vl.showErrMsg(None, 'Project is required!')
+            vl.show_errmsg(None, 'Project is required!')
             return False
 
         prj = [p for p in gbl.dataset._prj_rex if p.id == form_values['project_id']][0]
@@ -46,11 +46,11 @@ class AssignmentPresenter(object):
             ctrl = self.view.frum_ctrl
             if err_msg.startswith('Thru'):
                 ctrl = self.view.thru_ctrl
-            vl.showErrMsg(ctrl, err_msg)
+            vl.show_errmsg(ctrl, err_msg)
             return False
         err_msg = vl.validate_effort(form_values['effort'])
         if err_msg:
-            vl.showErrMsg(self.view.effort_ctrl, err_msg)
+            vl.show_errmsg(self.view.effort_ctrl, err_msg)
             return False
 
         return True
@@ -71,7 +71,7 @@ class AssignmentPresenter(object):
                     self.asn = Assignment(form_values)
                     self.asn.add(Dao())
             except Exception as ex:
-                vl.showErrMsg(None, str(ex))
+                vl.show_errmsg(None, str(ex))
                 return
 
             wx.MessageBox('Assignment saved!', 'Hallelujah!', wx.OK)

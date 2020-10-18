@@ -35,4 +35,3 @@ def to_date(xl_date):
 
 def get_nrows(xl_sheet):
     return sum(1 for _ in xl_sheet.get_rows())
-

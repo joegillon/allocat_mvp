@@ -51,10 +51,11 @@ def validate_timeframe(frum, thru):
 
     return None
 
+
 def validate_asn_timeframe(frum, thru, prj=None):
-    errMsg = validate_timeframe(frum, thru)
-    if errMsg:
-        return errMsg
+    errmsg = validate_timeframe(frum, thru)
+    if errmsg:
+        return errmsg
 
     if prj:
         if not ml.is_in_prj_span(prj, frum, thru):
@@ -106,6 +107,8 @@ def validate_va_email(value):
     if parts[1].lower() != 'va.gov':
         return 'Invalid VA email!'
 
+    return None
+
 
 def validate_effort(value):
     if value is None or value == '':
@@ -127,7 +130,7 @@ def validate_short_code(value):
     return None
 
 
-def showErrMsg(ctl, msg):
+def show_errmsg(ctl, msg):
     import wx
 
     if ctl:

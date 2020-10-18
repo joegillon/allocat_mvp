@@ -53,7 +53,7 @@ class EventHandler(object):
 
     def on_drop(self, evt):
         action, model = evt.EventObject.get_label().split(' ')
-        if uil.confirm(self.view, '%s selected %s?' % (action, model)):
+        if uil.confirm(self.view, '%s selected %s?' % (action, model.lower())):
             self.presenter.drop(action)
 
     def on_list_select(self, evt):

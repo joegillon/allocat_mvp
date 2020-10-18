@@ -3,6 +3,7 @@ from lib.validator_lib import *
 
 
 class ValidationTestSuite(unittest.TestCase):
+
     def setUp(self):
         self.prj_names = {
             'TESTNAME1': 41,
@@ -64,6 +65,8 @@ class ValidationTestSuite(unittest.TestCase):
         self.assertIsNone(result)
 
     def testTimeframe(self):
+        from models.project import Project
+
         result = validate_timeframe('', '')
         self.assertEqual(result, 'From date invalid!')
 
@@ -109,20 +112,20 @@ class ValidationTestSuite(unittest.TestCase):
         result = validate_timeframe('1912', '2001')
         self.assertIsNone(result)
 
-        prj = {
+        prj = Project({
             'name': 'Any name',
-            'nickname': 'Any nickname',
-            'first_month': '1407',
-            'last_month': '1906'
-        }
+            'full_name': 'Any full name',
+            'frum': '1407',
+            'thru': '1906'
+        })
         result = validate_asn_timeframe('1406', '1906', prj)
         self.assertEqual(result, 'Timeframe outside project timeframe!')
 
-        prj['first_month'] = '1407'
+        prj.frum = '1407'
         result = validate_asn_timeframe('1407', '1907', prj)
         self.assertEqual(result, 'Timeframe outside project timeframe!')
 
-        prj['last_month'] = '1906'
+        prj.thru = '1906'
         result = validate_asn_timeframe('1407', '1906', prj)
         self.assertIsNone(result)
 
