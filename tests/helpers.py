@@ -17,6 +17,10 @@ def click_search_ctrl(ctrl):
 
 def click_list_ctrl(ctrl, idx):
     ctrl.Select(idx)
+    # evt = wx.ListEvent(wx.EVT_LIST_ITEM_SELECTED.typeId)
+    # evt.SetEventObject(ctrl)
+    # evt.SetId(ctrl.GetId())
+    # ctrl.GetEventHandler().ProcessEvent(evt)
 
 
 def dbl_click_list_ctrl(ctrl, idx):
@@ -57,6 +61,14 @@ def enter_in_textbox_ctrl(ctrl, value):
 
 def assertEqualObjects(obj1, obj2):
     for attr in list(vars(obj1)):
-        if getattr(obj1, attr) != getattr(obj2, attr):
-            return False
-    return True
+        val1 = getattr(obj1, attr)
+        val2 = getattr(obj2, attr)
+        if val1 != val2:
+            msg = "%s: %s != %s" % (attr, str(val1), str(val2))
+            assert False, msg
+
+def assertEqualListOfObjects(lst1, lst2):
+    if len(lst1) != len(lst2):
+        assert False, 'Lists of different lengths!'
+    for idx in range(0, len(lst1)):
+        assertEqualObjects(lst1[idx], lst2[idx])

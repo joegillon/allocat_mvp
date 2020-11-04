@@ -44,19 +44,30 @@ class Assignment(object):
                "FROM assignments a "
                "JOIN employees e ON a.employee_id=e.id "
                "JOIN projects p ON a.project_id=p.id "
-               "WHERE a.frum >= ? AND a.thru <= ?")
+               "WHERE a.frum <= ? AND a.thru >= ?")
         vals = (frum, thru)
         return dao.execute(sql, vals)
 
     @staticmethod
-    def get_billables(dao, frum, thru):
+    def get_billables_by_timeframe(dao, frum, thru):
         sql = ("SELECT a.*, e.name AS employee, p.name AS project "
                "FROM assignments a "
                "JOIN employees e ON a.employee_id=e.id "
                "JOIN projects p ON a.project_id=p.id "
                "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
         vals = (frum, thru, 1)
-        return dao.execute(sql, vals)
+        rex = dao.execute(sql, vals)
+        return [Assignment(rec) for rec in rex] if rex else []
+
+    @staticmethod
+    def get_billables(dao):
+        sql = ("SELECT a.*, e.name AS employee, p.name AS project "
+               "FROM assignments a "
+               "JOIN employees e ON a.employee_id=e.id "
+               "JOIN projects p ON a.project_id=p.id "
+               "WHERE a.active=1 AND p.non_va=1")
+        rex = dao.execute(sql)
+        return [Assignment(rec) for rec in rex] if rex else []
 
     def add(self, dao):
         sql = ("INSERT INTO assignments "

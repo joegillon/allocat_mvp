@@ -25,7 +25,7 @@ class LedgerPresenter(object):
 
         today = datetime.today()
         self.view.set_year(today.year)
-        self.view.set_qtr(today.month)
+        self.view.set_qtr(ml.get_quarter(today.month))
 
         self.view.load_depts([d.name for d in self.model.get_dept_data()])
         self.view.load_grant_admins([a.name for a in self.model.get_grant_admin_data()])
@@ -40,45 +40,47 @@ class LedgerPresenter(object):
     def run_query(self):
         qtr, frum, thru = self.get_query_params()
 
-        dao = Dao(stateful=True)
-        rex = Ledger.get_rex(dao, qtr)
+        ledger_rex = gbl.dataset.get_ledger_data(qtr)
+        ledgerized_asns = [rec.asn_id for rec in ledger_rex]
 
-        ledger_ids = [rec.id for rec in rex]
+        asns = Assignment.get_billables(Dao(), frum, thru)
+        gbl.dataset.set_asn_data(asns)
 
-        asns = Assignment.get_billables(dao, frum, thru)
-        dao.close()
+        asns = [a for a in asns if a.id not in ledgerized_asns]
 
-        asns = [a for a in asns if a['id'] not in ledger_ids]
-        new_rex = [
-            {
+        new_rex = []
+        for asn in asns:
+            emp = gbl.dataset.get_emp_rec(asn.employee_id)
+            days = self.get_total_days_asn(frum, thru, asn.frum, asn.thru)
+            amt, day_total = self.calculate_cost(emp.salary, emp.fringe, asn.effort, days)
+            new_rec = Ledger({
                 'id': None,
                 'quarter': self.quarter,
                 'dept': '',
                 'admin_approved': False,
                 'va_approved': False,
                 'invoice_num': '',
-                'project': a['project'],
-                'employee': a['employee'],
-                'effort': a['effort'],
-                'salary': None,
-                'fringe': None,
-                'total_day': None,
-                'days': self.get_total_days_asn(frum, thru, a['frum'], a['thru']),
-                'amount': None,
-                'frum': ml.frum2str(a['frum']),
-                'thru': ml.thru2str(a['thru']),
+                'project': asn.project,
+                'employee': asn.employee,
+                'effort': asn.effort,
+                'salary': emp.salary,
+                'fringe': emp.fringe,
+                'total_day': day_total,
+                'days': days,
+                'amount': amt,
+                'frum': ml.frum2str(asn.frum),
+                'thru': ml.thru2str(asn.thru),
                 'paid': False,
-                'balance': None,
+                'balance': amt,
                 'short_code': '',
                 'grant_admin': '',
                 'grant_admin_email': '',
-                'asn_id': a['id']
-            } for a in asns
-        ]
+                'asn_id': asn.id
+            })
+            new_rex.append(new_rec)
 
-        rex = rex + new_rex
-        model = [Ledger(rec) for rec in rex] if rex else []
-        gbl.dataset.set_ledger_data(model)
+        model = ledger_rex + new_rex
+        gbl.dataset.set_ledger_entries(model)
         self.view.load_grid(model)
 
     def reload(self):
@@ -106,8 +108,8 @@ class LedgerPresenter(object):
         self.view.load_form(item)
 
     def get_total_days_asn(self, qtr_frum, qtr_thru, asn_frum, asn_thru):
-        frum = asn_frum if  asn_frum > qtr_frum else qtr_frum
-        thru = asn_thru if asn_frum < qtr_thru else qtr_frum
+        frum = asn_frum if asn_frum > qtr_frum else qtr_frum
+        thru = asn_thru if asn_thru < qtr_thru else qtr_thru
         return ml.get_total_days(frum, thru)
 
     def set_grant_admin_email(self, name):
@@ -148,6 +150,8 @@ class LedgerPresenter(object):
         uil.show_msg('Ledger updated!', 'Hooray')
 
     def calculate_cost(self, salary, fringe, effort, ndays):
+        if fringe > 0:
+            fringe = round(fringe * .001, 3)
         per_hr = (salary / 2087) * (1 + fringe)
         per_day = per_hr * 8
         per_asn = per_day * ndays

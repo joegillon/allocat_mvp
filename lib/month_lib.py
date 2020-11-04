@@ -138,4 +138,19 @@ def is_leap_year(year):
 
 
 def get_total_days(frum, thru):
-    return (thru2dt(thru) - frum2dt(frum)).days + 1
+    f_date = month2d(frum)
+    t_date = month2d(thru)
+    t_date = get_last_day_of_month(t_date)
+    delta = t_date - f_date
+    return delta.days + 1
+
+
+def get_last_day_of_month(any_day):
+    next_month = any_day.replace(day=28) + dt.timedelta(days=4)
+    return next_month - dt.timedelta(days=next_month.day)
+
+def is_in_span(frum, thru, span_frum, span_thru):
+    if frum < span_frum or thru > span_thru:
+        return False
+    return True
+

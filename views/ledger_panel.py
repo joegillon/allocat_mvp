@@ -301,16 +301,9 @@ class LedgerPanel(wx.Panel):
         value = self.yr_ctrl.GetValue()
         return int(value) if value else None
 
-    def set_qtr(self, month):
-        if month in [10, 11, 12]:
-            choice = 0
-        elif month in [1, 2, 3]:
-            choice = 1
-        elif month in [4, 5, 6]:
-            choice = 2
-        else:
-            choice = 3
-        self.qtr_ctrl.set_selection(choice, True)
+    def set_qtr(self, choice):
+        if choice:
+            self.qtr_ctrl.set_selection(choice - 1, True)
 
     def get_qtr(self):
         return int(self.qtr_ctrl.get_selection()) + 1
@@ -490,7 +483,7 @@ class LedgerPanel(wx.Panel):
 
     def get_form_values(self):
         return {
-            'asn_id': self.get_selection().asn_id,
+            # 'asn_id': self.get_selection().asn_id,
             'dept': self.get_dept(),
             'admin_approved': self.get_admin_approved(),
             'va_approved': self.get_va_approved(),

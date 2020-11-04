@@ -1,6 +1,7 @@
 import wx
 import globals as gbl
 import lib.ui_lib as uil
+import lib.excel_lib as xl
 from dal.dao import Dao
 from models.employee import Employee
 from views.import_panel import ImportPanel
@@ -16,35 +17,32 @@ class ImportPresenter(object):
         actor.install(self, self.view)
 
         self.emps = gbl.dataset.get_emp_data()
+        # self.ss_rex = []
         self.mismatches = []
 
-    def get_file(self):
-        folder = 'c:/bench/allocat/data'
-        dlg = wx.FileDialog(self.view, 'Open', folder, '',
-                            'Excel files (*.xls;*.xlsx)|*.xls;*.xlsx',
-                            wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-        dlg.ShowModal()
-        file = dlg.GetPath()
-        dlg.Destroy()
-        self.import_file(file)
-
-    def import_file(self, file):
-        import lib.excel_lib as xl
-        from models.spreadsheet_record import SpreadsheetRecord
-
+    def import_data(self):
+        file = xl.get_file(self.view)
         wb = xl.open_wb(file)
         sheet = wb.sheet_by_index(0)
-        rex = [SpreadsheetRecord(
-                    {'name': rec[0], 'salary': rec[14], 'fringe': round(rec[17], 2)})
-                        for rec in sheet._cell_values[1:]]
-        self.mismatches = self.get_mismatches(rex)
+        ss_rex = self.get_data(sheet)
+        self.view.display(ss_rex)
+        self.mismatches = self.get_mismatches(ss_rex)
 
-        self.view.display(rex)
+    def get_data(self, sheet):
+        from models.spreadsheet_record import SpreadsheetRecord
+
+        rows = xl.get_sheet_data(sheet)
+        return [SpreadsheetRecord({
+            'name': fld['Name'],
+            'salary': fld['Salary'],
+            'fringe': round(fld['Fringe %'], 3),
+            'step_date': xl.to_date(fld['Step Sched. '])
+        }) for fld in rows]
 
     def get_mismatches(self, ss_rex):
         from fuzzywuzzy import process
 
-        emp_names = [e.name for e in self.emps]
+        emp_names = [e.name.upper() for e in self.emps]
         mismatches = {}
         for rec in ss_rex:
             matches = process.extract(rec.name, emp_names)
@@ -88,10 +86,15 @@ class ImportPresenter(object):
             dao.close()
 
     def match(self):
-        match = self.view.get_match_selection()
+        match, idx = self.view.get_match_selection()
         if not match:
             uil.show_error('No match selected!')
             return
+
+        if idx != 0:
+            if not uil.confirm(self.view, 'Not the highest score! Are you sure?'):
+                return
+
         objs = self.view.get_list()
         selection = self.view.get_list_selection()
         selection.matched = True

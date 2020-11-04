@@ -42,8 +42,8 @@ class ImportPanel(wx.Panel):
         panel.SetBackgroundColour(gbl.COLOR_SCHEME.tbBg)
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.get_file_btn = uil.toolbar_button(panel, 'Select File')
-        layout.Add(self.get_file_btn, 0, wx.ALL, 5)
+        self.import_btn = uil.toolbar_button(panel, 'Import Salary Data')
+        layout.Add(self.import_btn, 0, wx.ALL, 5)
 
         self.update_allocat_btn = uil.toolbar_button(panel, 'Update allocat')
         layout.Add(self.update_allocat_btn, 0, wx.ALL, 5)
@@ -166,7 +166,9 @@ class ImportPanel(wx.Panel):
         self.matches_ctrl.SetObjects(items)
 
     def get_match_selection(self):
-        return self.matches_ctrl.GetSelectedObject()
+        obj = self.matches_ctrl.GetSelectedObject()
+        idx = self.matches_ctrl.GetIndexOf(obj)
+        return obj, idx
 
     def set_match_selection(self, obj):
         self.matches_ctrl.SelectObject(obj, ensureVisible=True)
