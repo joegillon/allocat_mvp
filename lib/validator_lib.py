@@ -40,6 +40,9 @@ def validate_prj_full_name(value, match=None):
 
 
 def validate_timeframe(frum, thru):
+    if not frum or not thru:
+        return 'From, Thru dates required!'
+
     if not re.match(MONTH_PATTERN, frum):
         return 'From date invalid!'
 

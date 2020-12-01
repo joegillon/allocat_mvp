@@ -4,16 +4,16 @@ import globals as gbl
 class Employee(object):
     def __init__(self, d=None):
         self.id = None
-        self.name = ''
-        self.fte = ''
+        self.name = None
+        self.fte = None
         self.investigator = False
         self.intern = False
-        self.org = ''
-        self.va_email = ''
-        self.nonva_email = ''
-        self.salary = ''
-        self.fringe = ''
-        self.notes = ''
+        self.org = None
+        self.va_email = None
+        self.nonva_email = None
+        self.salary = None
+        self.fringe = None
+        self.notes = None
         self.active = 1
         self.asns = []
         if d:
@@ -23,6 +23,15 @@ class Employee(object):
             if missing:
                 raise AttributeError('Missing required fields ' + missing)
 
+    def _str_(self):
+        return self.name
+
+    def __eq__(self, other):
+        for attr in self.__dict__.keys():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+    
     def get_missing_flds(self):
         missing = []
         if not self.name:

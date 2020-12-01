@@ -9,6 +9,12 @@ class GrantAdmin(object):
             self.name = d['name']
             self.email = d['email']
 
+    def __eq__(self, other):
+        for attr in self.__dict__.keys():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+    
     @staticmethod
     def get_all(dao):
         sql = "SELECT * FROM grant_admins ORDER BY name"

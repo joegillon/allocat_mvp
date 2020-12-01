@@ -19,14 +19,13 @@ class TestLedgerPresenter(unittest.TestCase):
         self.frame = wx.Frame(None)
 
         gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
-        gbl.DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
         with patch('dal.dao.Dao._Dao__read') as mock_db:
             mock_db.side_effect = [
                 test_db.employees,
                 test_db.all_departments,
                 test_db.all_grant_admins,
-                test_db.ledger_rex_qtr_1
+                test_db.ledger_rex
             ]
             gbl.dataset = LedgerDataSet(None)
 
@@ -38,7 +37,7 @@ class TestLedgerPresenter(unittest.TestCase):
         self.app.Destroy()
 
     def testInitView(self):
-        # verify global dataset set populate
+        # verify global dataset set populated
         assertEqualListOfObjects(gbl.dataset.get_emp_data(), test_data.employee_obs)
         assertEqualListOfObjects(gbl.dataset.get_dept_data(), test_data.dept_objs)
         assertEqualListOfObjects(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
@@ -50,16 +49,16 @@ class TestLedgerPresenter(unittest.TestCase):
 
         # verify default query params
         today = datetime.today()
-        quarter = ml.get_quarter(ml.get_quarter(today.month)) - 1
+        quarter_choice = ml.get_quarter(ml.get_quarter(today.month)) - 1
         self.assertEqual(self.view.get_year(), today.year)
-        self.assertEqual(self.view.get_qtr(), quarter)
+        self.assertEqual(self.view.get_qtr(), quarter_choice)
         self.assertEqual(self.presenter.quarter, '')
 
     def testQueryNoAsnsNoEntries(self):
         assert gbl.dataset.get_ledger_entries() == []
 
         self.view.set_year(2019)
-        self.view.set_qtr(1)
+        self.view.set_qtr(4)
 
         with patch('dal.dao.Dao._Dao__read') as mock_db:
             mock_db.return_value  = []      # no billable assignments

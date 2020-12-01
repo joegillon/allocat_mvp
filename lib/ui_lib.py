@@ -42,10 +42,8 @@ def toolbar_button(panel, label):
 
 def get_month_ctrl(panel, value):
     import wx.lib.masked as masked
-    import lib.month_lib as ml
 
     ctl = masked.TextCtrl(panel, -1, mask='##/##',
-                          defaultValue=ml.prettify(value),
                           size=(50, -1),
                           formatcodes='0>')
     ctl.SetFont(wx.Font(9, 70, 90, 90))
@@ -201,3 +199,14 @@ def frum_money(value):
     return value.replace(',', '')
 
 
+def clear_panel(panel):
+    from wx._core import TextCtrl
+    import ObjectListView as olv
+
+    for ctrl in list(panel.Children):
+        if isinstance(ctrl, TextCtrl):
+            ctrl.SetValue('')
+        elif isinstance(ctrl, ObjComboBox):
+            ctrl.Select(0)
+        elif isinstance(ctrl, olv.ObjectListView):
+            ctrl.DeleteAllItems()

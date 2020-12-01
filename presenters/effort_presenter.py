@@ -56,7 +56,8 @@ class EffortPresenter(object):
 
     def build_dataset(self, frum, thru, months):
         rows = []
-        ugly_months = [ml.uglify(month) for month in months]
+        ugly_months = months
+        # ugly_months = [ml.uglify(month) for month in months]
         for emp in self.emp_rex:
             row = EffRow(emp)
             for month in ugly_months:

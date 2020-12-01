@@ -30,6 +30,12 @@ class Ledger(object):
             for attr in d:
                 setattr(self, attr, d[attr])
 
+    def __eq__(self, other):
+        for attr in self.__dict__.keys():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+    
     # @staticmethod
     # def get_rex(dao, quarter):
     #     sql = ("SELECT ledger.*, "

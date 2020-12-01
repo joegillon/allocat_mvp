@@ -49,7 +49,7 @@ class TabPanel(wx.Panel):
         name_fltr_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
         layout.Add(name_fltr_lbl, 0, wx.ALL, 5)
         self.name_fltr_ctrl = wx.SearchCtrl(panel, wx.ID_ANY, '',
-                                            style=wx.TE_PROCESS_ENTER, name='nameFltrCtrl')
+                                            style=wx.TE_PROCESS_ENTER, name='name_fltr_ctrl')
         self.name_fltr_ctrl.ShowCancelButton(True)
         layout.Add(self.name_fltr_ctrl, 0, wx.ALL, 5)
 
@@ -58,7 +58,7 @@ class TabPanel(wx.Panel):
         layout.Add(notes_fltr_lbl, 0, wx.ALL, 5)
 
         self.notes_fltr_ctrl = wx.SearchCtrl(panel, wx.ID_ANY,
-                                             style=wx.TE_PROCESS_ENTER, name='notesFltrCtrl')
+                                             style=wx.TE_PROCESS_ENTER, name='notes_fltr_ctrl')
         self.notes_fltr_ctrl.ShowCancelButton(True)
         layout.Add(self.notes_fltr_ctrl, 0, wx.ALL, 5)
 
@@ -227,10 +227,13 @@ class TabPanel(wx.Panel):
         self.Thaw()
 
     def set_name(self, value):
+        if not value:
+            value = ''
         self.name_ctrl.SetValue(value)
 
     def get_name(self):
-        return self.name_ctrl.GetValue()
+        value = self.name_ctrl.GetValue()
+        return value if value else None
 
     def set_notes(self, value):
         if not value:
@@ -238,7 +241,8 @@ class TabPanel(wx.Panel):
         self.notes_ctrl.SetValue(value)
 
     def get_notes(self):
-        return self.notes_ctrl.GetValue()
+        notes = self.notes_ctrl.GetValue()
+        return notes if notes else None
 
     def set_selected_idx(self, idx):
         self.selected_idx = idx
@@ -296,3 +300,7 @@ class TabPanel(wx.Panel):
             self.asn_list_ctrl.SetTextColour('gray')
             self.clear_btn.Disable()
             self.save_btn.Disable()
+
+    def clear_details(self):
+        uil.clear_panel(self.fm_panel)
+        uil.clear_panel(self.asn_panel.Children[1])

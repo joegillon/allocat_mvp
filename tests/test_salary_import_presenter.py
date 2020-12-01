@@ -17,15 +17,16 @@ class TestImportPresenter(unittest.TestCase):
         self.frame = wx.Frame(None)
 
         gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
+        gbl.DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.side_effect = [
-                test_db.employees,
-                test_db.all_departments,
-                test_db.all_grant_admins,
-                test_db.ledger_rex
-            ]
-            gbl.dataset = LedgerDataSet(None)
+        # with patch('dal.dao.Dao._Dao__read') as mock_db:
+        #     mock_db.side_effect = [
+        #         test_db.employees,
+        #         test_db.all_departments,
+        #         test_db.all_grant_admins,
+        #         test_db.ledger_rex
+        #     ]
+        gbl.dataset = LedgerDataSet(None)
 
         self.presenter = ImportPresenter(self.frame)
         self.view = self.presenter.view
@@ -33,6 +34,13 @@ class TestImportPresenter(unittest.TestCase):
     def tearDown(self):
         self.frame.Destroy()
         self.app.Destroy()
+
+    def testDataset(self):
+        # verify global dataset set populated
+        assertEqualListOfObjects(gbl.dataset.get_emp_data(), test_data.employees)
+        assertEqualListOfObjects(gbl.dataset.get_dept_data(), test_data.dept_objs)
+        assertEqualListOfObjects(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
+        assertEqualListOfObjects(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
 
     def testGetData(self):
         expected_items = sorted(test_xl_data.ss_rex, key=lambda k: k.name)

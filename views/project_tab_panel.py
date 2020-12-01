@@ -77,28 +77,31 @@ class ProjectTabPanel(TabPanel):
         return olv.ColumnDefn('Employee', 'left', 200, 'employee')
 
     def set_full_name(self, value):
+        if not value:
+            value = ''
         self.full_name_ctrl.SetValue(value)
 
     def get_full_name(self):
-        return self.full_name_ctrl.GetValue()
+        value = self.full_name_ctrl.GetValue()
+        return value if value else None
 
     def set_frum(self, value):
         self.frum_ctrl.SetValue(ml.prettify(value))
 
     def get_frum(self):
-        value = ml.uglify(self.frum_ctrl.GetValue())
-        if value == '0000':
-            value = ''
-        return value
+        value = self.frum_ctrl.GetValue()
+        if value == '00/00':
+            return None
+        return ml.uglify(value)
 
     def set_thru(self, value):
         self.thru_ctrl.SetValue(ml.prettify(value))
 
     def get_thru(self):
-        value = ml.uglify(self.thru_ctrl.GetValue())
-        if value == '0000':
-            value = ''
-        return value
+        value = self.thru_ctrl.GetValue()
+        if value == '00/00':
+            return None
+        return ml.uglify(value)
 
     def load_pi(self, investigators):
         self.pi_ctrl.set_choices(investigators, 'name')

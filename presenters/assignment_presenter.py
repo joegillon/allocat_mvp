@@ -22,8 +22,8 @@ class AssignmentPresenter(object):
         self.view.set_owner(self.owner.name)
         self.view.set_assignee(self.assignee)
         if self.asn:
-            self.view.set_frum(ml.prettify(self.asn.frum))
-            self.view.set_thru(ml.prettify(self.asn.thru))
+            self.view.set_frum(self.asn.frum)
+            self.view.set_thru(self.asn.thru)
             self.view.set_effort(self.asn.effort)
             self.view.set_notes(self.asn.notes)
             self.view.frum_ctrl.SetFocus()
@@ -59,7 +59,6 @@ class AssignmentPresenter(object):
         from dal.dao import Dao
         from models.assignment import Assignment
         import wx
-        import globals as gbl
 
         form_values = self.get_form_values()
         if self.is_valid(form_values):
@@ -89,7 +88,8 @@ class AssignmentPresenter(object):
             if type(self.assignee) == str:
                 employee_id = self.asn.employee_id
             else:
-                employee_id = self.assignee.get_selection().id
+                emp = self.assignee.get_selection()
+                employee_id = emp.id if emp else None
             project_id = self.owner.id
         return {
             'employee_id': employee_id,

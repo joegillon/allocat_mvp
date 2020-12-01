@@ -7,6 +7,12 @@ class Department(object):
             self.id = d['id']
             self.name = d['name']
 
+    def __eq__(self, other):
+        for attr in self.__dict__.keys():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+    
     @staticmethod
     def get_all(dao):
         sql = "SELECT * FROM departments ORDER BY name"

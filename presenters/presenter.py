@@ -59,17 +59,17 @@ class Presenter(object):
         return self.view.get_selection()
 
     def apply_filter(self, ctrl, c, target):
-        if not c.isalpha():
-            if c == '\b':
-                target = target[:-1]
+        self.view.clear_details()
+        if c == '\b':
+            target = target[:-1]
         else:
             target += c
         the_list = self.view.list_ctrl
-        col = the_list.columns[0:1]
+        col = the_list.columns[0]
         if ctrl == 'notes_fltr_ctrl':
-            col = the_list.columns[4:1]
+            col = the_list.columns[6]
         the_list.SetFilter(olv.Filter.TextSearch(
-            the_list, columns=col, text=target))
+            the_list, columns=[col], text=target))
         the_list.RepopulateList()
         self.view.set_selection(0)
 
@@ -81,11 +81,8 @@ class Presenter(object):
         self.view.set_selection(0)
 
     def clear(self):
+        self.view.clear_details()
         self.view.clear_selection()
-        self.view.set_name('')
-        self.clear_model_values()
-        self.view.set_notes('')
-        self.view.set_asn_list([])
         self.view.set_save_button_label('Add ' + self.model_name)
 
     def clear_model_values(self):

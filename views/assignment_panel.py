@@ -105,29 +105,30 @@ class AssignmentPanel(wx.Panel):
         return None if type(self.assignee) == str else self.assignee.get_selection()
 
     def set_frum(self, value):
-        self.frum_ctrl.SetValue(value)
+        self.frum_ctrl.SetValue(ml.prettify(value))
 
     def get_frum(self):
-        value = ml.uglify(self.frum_ctrl.GetValue())
-        if value == '0000':
-            value = ''
-        return value
+        value = self.frum_ctrl.GetValue()
+        if value == '  /  ':
+            return None
+        return ml.uglify(value)
 
     def set_thru(self, value):
-        self.thru_ctrl.SetValue(value)
+        self.thru_ctrl.SetValue(ml.prettify(value))
 
     def get_thru(self):
-        value = ml.uglify(self.thru_ctrl.GetValue())
-        if value == '0000':
-            value = ''
-        return value
+        value = self.thru_ctrl.GetValue()
+        if value == '  /  ':
+            return None
+        return ml.uglify(value)
 
     def set_effort(self, value):
         value = str(value) if value else ''
         self.effort_ctrl.SetValue(value)
 
     def get_effort(self):
-        return self.effort_ctrl.GetValue()
+        value = self.effort_ctrl.GetValue()
+        return value if value else None
 
     def set_notes(self, value):
         if not value:
@@ -135,4 +136,5 @@ class AssignmentPanel(wx.Panel):
         self.notes_ctrl.SetValue(value)
 
     def get_notes(self):
-        return self.notes_ctrl.GetValue().strip()
+        value = self.notes_ctrl.GetValue().strip()
+        return value if value else None

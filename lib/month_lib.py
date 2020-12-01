@@ -1,18 +1,23 @@
 import datetime as dt
+import re
 
 MONTH_FORMAT = '%y%m'
 
 
+# Assumes input is yymm
 def prettify(month):
-    if len(month) != 4:
-        return month
-    return month[2:] + '/' + month[0:2]
+    pattern = r"^[0-9]{2}(0[1-9]|1[0-2])$"
+    if month and re.match(pattern, month):
+        return month[2:] + '/' + month[0:2]
+    raise ValueError('Invalid ugly month!')
 
 
+# Assumes input is mm/yy
 def uglify(month):
-    if len(month) != 5:
-        return month
-    return (month[3:] + month[0:2]).strip()
+    pattern = r"^(0[1-9]|1[0-2])\/([0-9]{2})$"
+    if month and re.match(pattern, month):
+        return (month[3:] + month[0:2]).strip()
+    raise ValueError("Invalid pretty month!")
 
 
 def get_months(frum, thru):
@@ -63,13 +68,13 @@ def get_timeframe_edges(lst):
 
 
 def get_quarter(month):
-    if month in [10, 12]:
+    if month in [10, 11, 12]:
         return 1
-    if month in [1, 3]:
+    if month in [1, 2, 3]:
         return 2
-    if month in [4, 6]:
+    if month in [4, 5, 6]:
         return 3
-    if month in [7, 9]:
+    if month in [7, 8, 9]:
         return 4
     return None
 

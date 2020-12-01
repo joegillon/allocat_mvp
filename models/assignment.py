@@ -16,6 +16,17 @@ class Assignment(object):
         if d:
             self.from_dict(d)
 
+    def __str__(self):
+        return '%s, project %s from %s to %s' % (
+            self.employee, self.project, self.frum, self.thru
+        )
+
+    def __eq__(self, other):
+        for attr in self.__dict__.keys():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+
     def from_dict(self, d):
         for attr in d:
             setattr(self, attr, d[attr])

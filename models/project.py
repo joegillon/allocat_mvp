@@ -22,6 +22,15 @@ class Project(object):
             if missing:
                 raise AttributeError('Missing required fields ' + missing)
 
+    def __str__(self):
+        return self.name
+
+    def __eq__(self, other):
+        for attr in self.__dict__.keys():
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return True
+    
     def get_missing_flds(self):
         missing = []
         if not self.name:

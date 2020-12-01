@@ -25,10 +25,10 @@ def click_list_ctrl(ctrl, idx):
 
 def dbl_click_list_ctrl(ctrl, idx):
     ctrl.Select(idx)
-    # evt = wx.ListEvent(wx.EVT_LIST_ITEM_ACTIVATED.typeId)
-    # evt.SetEventObject(ctrl)
-    # evt.SetId(ctrl.GetId())
-    # ctrl.GetEventHandler().ProcessEvent(evt)
+    evt = wx.ListEvent(wx.EVT_LIST_ITEM_ACTIVATED.typeId)
+    evt.SetEventObject(ctrl)
+    evt.SetId(ctrl.GetId())
+    ctrl.GetEventHandler().ProcessEvent(evt)
 
 
 def click_multi_list_ctrl(ctrl, objs):
@@ -63,7 +63,9 @@ def assertEqualObjects(obj1, obj2):
     for attr in list(vars(obj1)):
         val1 = getattr(obj1, attr)
         val2 = getattr(obj2, attr)
-        if val1 != val2:
+        if isinstance(val1, list):
+            assertEqualListOfObjects(val1, val2)
+        elif val1 != val2:
             msg = "%s: %s != %s" % (attr, str(val1), str(val2))
             assert False, msg
 

@@ -2,6 +2,8 @@ import unittest
 from unittest.mock import patch
 from tests.helpers import *
 import globals as gbl
+import tests.allocat_data.test_db as test_db
+import tests.allocat_data.test_data as test_data
 from models.dataset import AllocatDataSet
 from presenters.project_presenter import ProjectPresenter
 
@@ -9,12 +11,13 @@ from presenters.project_presenter import ProjectPresenter
 class TestProjectPresenter(unittest.TestCase):
 
     def setUp(self):
-        gbl.dataset = AllocatDataSet(db_path='c:/bench/allocat/tests/allocat.db')
         self.app = wx.App()
         self.frame = wx.Frame(None)
 
         gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
         gbl.DB_PATH = 'c:/bench/allocat/tests/allocat.db'
+
+        gbl.dataset = AllocatDataSet(None)
 
         self.presenter = ProjectPresenter(self.frame)
         self.presenter.init_view()
@@ -29,448 +32,413 @@ class TestProjectPresenter(unittest.TestCase):
     def testViewLoadedPIAndPM(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 0
+        # Check the project list (also their assignments)
+        self.assertEqual(list_ctrl.GetObjects(), test_data.projects)
 
-        # No list click made
+        # Check that the dropdowns are populated
+        self.assertEqual(view.pi_ctrl.GetItems(), test_data.pi_list_items)
+        self.assertEqual(view.pm_ctrl.GetItems(), test_data.pm_iist_items)
 
-        # Check the project list
-        list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 30
-        item = list_items[model_idx]
-        assert item.id == 303
-        assert item.name == 'Biosimilar Merit_Waljee'
-        assert item.full_name == 'Effectiveness, Safety, and Patient Preferences of Infliximab Biosimilar Medications for Inflammatory Bowel Disease'
-        assert item.investigator == 'WALJEE,AKBAR, MD'
-        assert item.manager == 'ARASIM,MARIA E'
-        assert list_ctrl.GetItemText(model_idx, 1) == '01/20'
-        assert list_ctrl.GetItemText(model_idx, 2) == '12/25'
-        assert item.frum == '2001'
-        assert item.thru == '2512'
-        assert model[model_idx].frum == '2001'
-        assert model[model_idx].thru == '2512'
+        # Check that the first project has been selected by default
+        model_idx = view.get_selected_idx()
+        self.assertEqual(model_idx, 0)
+
+        # No list click
 
         # Check the details form
-        assert view.get_name() == 'Biosimilar Merit_Waljee'
-        assert view.get_full_name() == 'Effectiveness, Safety, and Patient Preferences of Infliximab Biosimilar Medications for Inflammatory Bowel Disease'
-        assert view.frum_ctrl.GetValue() == '01/20'
-        assert view.thru_ctrl.GetValue() == '12/25'
-        assert view.get_frum() == '2001'
-        assert view.get_thru() == '2512'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'WALJEE,AKBAR, MD'
-        assert view.pi_ctrl.get_selection_id() == 67
-        assert view.get_pm().name == 'ARASIM,MARIA E'
-        assert view.pm_ctrl.get_selection_id() == 80
-        assert view.get_save_button_label() == 'Update Project'
+        expected = {
+            'name': 'Prj 297',
+            'full_name': 'Prj Full Name 297',
+            'frum': '1901',
+            'thru': '1912',
+            'pi': gbl.dataset.get_emp_rec(76),
+            'pm': gbl.dataset.get_emp_rec(56),
+            'notes': 'Note 297'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        
+        # Check dates displayed properly
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '12/19')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
+
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
 
     def testPrjListSelectPIAndPM(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 1
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 313
-        assert item.name == 'CFIR V2 LIP'
-        assert item.full_name == 'Updating the Consolidated Framework for Implementation Research (CFIR V2)'
-        assert item.investigator == 'DAMSCHRODER,LAURA J'
-        assert item.manager == 'REARDON,CAITLIN M'
-        assert list_ctrl.GetItemText(model_idx, 1) == '10/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/20'
-        assert item.frum == '1910'
-        assert item.thru == '2009'
-        assert model[model_idx].frum == '1910'
-        assert model[model_idx].thru == '2009'
-        assert view.get_save_button_label() == 'Update Project'
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
 
         # Check the details form
-        assert view.get_name() == 'CFIR V2 LIP'
-        assert view.get_full_name() == 'Updating the Consolidated Framework for Implementation Research (CFIR V2)'
-        assert view.frum_ctrl.GetValue() == '10/19'
-        assert view.thru_ctrl.GetValue() == '09/20'
-        assert view.get_frum() == '1910'
-        assert view.get_thru() == '2009'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'DAMSCHRODER,LAURA J'
-        assert view.pi_ctrl.get_selection_id() == 57
-        assert view.get_pm().name == 'REARDON,CAITLIN M'
-        assert view.pm_ctrl.get_selection_id() == 31
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'OPRA,MARILLA'
-        assert asn_items[0].employee_id == 302
-        assert model[model_idx].asns[0].frum == '1911'
-        assert model[model_idx].asns[0].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '11/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 2), '02/20')
 
-    def testPrjListSelectNoPI(self):
+    def testPrjListSelectNoPINoAsns(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 4
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 293
-        assert item.name == 'IIR 17-269 Morphomics (Su)'
-        assert item.full_name == 'Morphomics (Su)'
-        assert item.investigator == None
-        assert item.manager == 'YOULES,BRADLEY W'
-        assert list_ctrl.GetItemText(model_idx, 1) == '05/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/30'
-        assert item.frum == '1905'
-        assert item.thru == '3009'
-        assert model[model_idx].frum == '1905'
-        assert model[model_idx].thru == '3009'
-        assert view.get_save_button_label() == 'Update Project'
+        model_idx = 1
+        click_list_ctrl(list_ctrl, model_idx)
 
         # Check the details form
-        assert view.get_name() == 'IIR 17-269 Morphomics (Su)'
-        assert view.get_full_name() == 'Morphomics (Su)'
-        assert view.frum_ctrl.GetValue() == '05/19'
-        assert view.thru_ctrl.GetValue() == '09/30'
-        assert view.get_frum() == '1905'
-        assert view.get_thru() == '3009'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
-        assert view.get_pm().name == 'YOULES,BRADLEY W'
-        assert view.pm_ctrl.get_selection_id() == 86
+        expected = {
+            'name': 'Prj 298',
+            'full_name': 'Prj Full Name 298',
+            'frum': '1907',
+            'thru': '2406',
+            'pi': None,
+            'pm': gbl.dataset.get_emp_rec(56),
+            'notes': 'Note 298'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '07/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '06/24')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 6
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 6
-        asn_ids = [2196, 2197, 2240, 2296, 2305, 2306]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'MYERS,AIMEE'
-        assert asn_items[asn_idx].employee_id == 212
-        assert model[model_idx].asns[asn_idx].frum == '1905'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '05/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
-
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
 
     def testPrjListSelectNoPM(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 10
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 308
-        assert item.name == 'LIP 20-120 (Sears)'
-        assert item.full_name == 'Assessing Utilization and Access in Surgical Episodes Across Differing Healthcare Delivery Settings (Sears)'
-        assert item.investigator == 'SEARS,ERICA, MD.'
-        assert item.manager == None
-        assert list_ctrl.GetItemText(model_idx, 1) == '10/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/20'
-        assert item.frum == '1910'
-        assert item.thru == '2009'
-        assert model[model_idx].frum == '1910'
-        assert model[model_idx].thru == '2009'
-        assert view.get_save_button_label() == 'Update Project'
+        model_idx = 2
+        click_list_ctrl(list_ctrl, model_idx)
 
         # Check the details form
-        assert view.get_name() == 'LIP 20-120 (Sears)'
-        assert view.get_full_name() == 'Assessing Utilization and Access in Surgical Episodes Across Differing Healthcare Delivery Settings (Sears)'
-        assert view.frum_ctrl.GetValue() == '10/19'
-        assert view.thru_ctrl.GetValue() == '09/20'
-        assert view.get_frum() == '1910'
-        assert view.get_thru() == '2009'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'SEARS,ERICA, MD.'
-        assert view.pi_ctrl.get_selection_id() == 279
-        assert view.get_pm() == None
-        assert view.pm_ctrl.get_selection_id() == None
+        expected = {
+            'name': 'Prj 299',
+            'full_name': 'Prj Full Name 299',
+            'frum': '1907',
+            'thru': '2106',
+            'pi': gbl.dataset.get_emp_rec(76),
+            'pm': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '07/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '06/21')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'EVANS,RICHARD'
-        assert asn_items[0].employee_id == 256
-        assert model[model_idx].asns[0].frum == '1910'
-        assert model[model_idx].asns[0].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '10/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
-
-    def testPrjListSelectNoAsns(self):
-        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
-
-        model_idx = 24
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 282
-        assert item.name == 'UM MTOP (Saini)'
-        assert item.full_name == 'UM Michigan Treatment Optimization Program_Evaluation (Saini)'
-        assert item.investigator == 'SAINI,SAMEER, MD'
-        assert item.manager == 'SAFFAR,DARCY A'
-        assert list_ctrl.GetItemText(model_idx, 1) == '01/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/19'
-        assert item.frum == '1901'
-        assert item.thru == '1909'
-        assert model[model_idx].frum == '1901'
-        assert model[model_idx].thru == '1909'
-        assert view.get_save_button_label() == 'Update Project'
-
-        # Check the details form
-        assert view.get_name() == 'UM MTOP (Saini)'
-        assert view.get_full_name() == 'UM Michigan Treatment Optimization Program_Evaluation (Saini)'
-        assert view.frum_ctrl.GetValue() == '01/19'
-        assert view.thru_ctrl.GetValue() == '09/19'
-        assert view.get_frum() == '1901'
-        assert view.get_thru() == '1909'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'SAINI,SAMEER, MD'
-        assert view.pi_ctrl.get_selection_id() == 63
-        assert view.get_pm().name == 'SAFFAR,DARCY A'
-        assert view.pm_ctrl.get_selection_id() == 22
-
-        # Check the assignments list
-        assert len(model[model_idx].asns) == 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 0
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '03/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '07/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '06/21')
 
     def testPrjNameFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
+        # Search with no matches
         self.presenter.apply_filter('name_fltr_ctrl', 'x', '')
-        assert list_ctrl.GetItemCount() == 1
-        obj = list_ctrl.GetFilteredObjects()[0]
-        assert obj.id == 312
-        model_idx = view.get_selected_idx()
-        assert model_idx == 0
 
-        item = view.get_selection()
-        assert item.id == 312
-        assert item.name == 'UM ICU Expansion OPTION 2 (SAINT)'
-        assert item.full_name == 'UM Expanding the Comprehensive Unit-based Safety Program (CUSP) to Reduce Central Line-Associated Blood Stream Infections (CLABSI) and Catheter-Associated Urinary Tract Infections (CAUTI) in Intensive Care Units (ICU) with Persistently Elevated Infection Rates - OPTION 1'
-        assert item.investigator == None
-        assert item.manager == 'FOWLER,KAREN E'
-        assert list_ctrl.GetItemText(model_idx, 1) == '09/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/21'
-        assert item.frum == '1909'
-        assert item.thru == '2109'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(list_ctrl.GetItemCount(), 0)
+        
+        # Check empty details form
+        expected = {
+            'name': None,
+            'full_name': None,
+            'frum': None,
+            'thru': None,
+            'pi': None,
+            'pm': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        
+        # Check empty assignment list
+        self.assertEqual(len(asn_list_ctrl.GetObjects()), 0)
 
-        # Check the details form
-        assert view.get_name() == 'UM ICU Expansion OPTION 2 (SAINT)'
-        assert view.get_full_name() == 'UM Expanding the Comprehensive Unit-based Safety Program (CUSP) to Reduce Central Line-Associated Blood Stream Infections (CLABSI) and Catheter-Associated Urinary Tract Infections (CAUTI) in Intensive Care Units (ICU) with Persistently Elevated Infection Rates - OPTION 1'
-        assert view.frum_ctrl.GetValue() == '09/19'
-        assert view.thru_ctrl.GetValue() == '09/21'
-        assert view.get_frum() == '1909'
-        assert view.get_thru() == '2109'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
-        assert view.get_pm().name == 'FOWLER,KAREN E'
-        assert view.pm_ctrl.get_selection_id() == 15
+        # Search for all projects with '3'
+        self.presenter.apply_filter('name_fltr_ctrl', '3', '')
+
+        expected = [p for p in gbl.dataset.get_prj_data() if '3' in p.name]
+        self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
+        
+        # Check details
+        expected = {
+            'name': 'Prj 301',
+            'full_name': 'Prj Full Name 301',
+            'frum': '1904',
+            'thru': '1909',
+            'pi': None,
+            'pm': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '04/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/19')
 
         # Check the assignments list
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'FOWLER,KAREN E'
-        assert asn_items[0].employee_id == 15
-        assert asn_list_ctrl.GetItemText(0, 1) == '10/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        expected = gbl.dataset.get_prj_rec(301).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
 
-    def testCancelPrjNameFilter(self):
-        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+        # Filter for '31'
+        self.presenter.apply_filter('name_fltr_ctrl', '1', '3')
 
+        expected = [p for p in gbl.dataset.get_prj_data() if '31' in p.name]
+        self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
+
+        # Check details
+        expected = {
+            'name': 'Prj 311',
+            'full_name': 'Prj Full Name 311',
+            'frum': '1910',
+            'thru': '2009',
+            'pi': None,
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '10/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
+
+        # Check the assignments list
+        expected = gbl.dataset.get_prj_rec(311).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
+        
+        # And now backspace
+        self.presenter.apply_filter('name_fltr_ctrl', '\b', '31')
+
+        expected = [p for p in gbl.dataset.get_prj_data() if '3' in p.name]
+        self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
+        
+        # Check details
+        expected = {
+            'name': 'Prj 301',
+            'full_name': 'Prj Full Name 301',
+            'frum': '1904',
+            'thru': '1909',
+            'pi': None,
+            'pm': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '04/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/19')
+
+        # Check the assignments list
+        expected = gbl.dataset.get_prj_rec(301).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
+
+        # And now Cancel
         click_search_ctrl(view.name_fltr_ctrl)
 
-        model_idx = view.get_selected_idx()
-        list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 30
-        item = list_items[model_idx]
-        assert item.id == 303
-        assert item.name == 'Biosimilar Merit_Waljee'
-        assert item.full_name == 'Effectiveness, Safety, and Patient Preferences of Infliximab Biosimilar Medications for Inflammatory Bowel Disease'
-        assert item.investigator == 'WALJEE,AKBAR, MD'
-        assert item.manager == 'ARASIM,MARIA E'
-        assert list_ctrl.GetItemText(model_idx, 1) == '01/20'
-        assert list_ctrl.GetItemText(model_idx, 2) == '12/25'
-        assert item.frum == '2001'
-        assert item.thru == '2512'
-        assert model[model_idx].frum == '2001'
-        assert model[model_idx].thru == '2512'
-        assert view.get_save_button_label() == 'Update Project'
+        # Check the project list
+        self.assertEqual(list_ctrl.GetObjects(), test_data.projects)
+
+        # Check that the first project has been selected by default
+        model_idx = 0
+
+        # No list click made
 
         # Check the details form
-        assert view.get_name() == 'Biosimilar Merit_Waljee'
-        assert view.get_full_name() == 'Effectiveness, Safety, and Patient Preferences of Infliximab Biosimilar Medications for Inflammatory Bowel Disease'
-        assert view.frum_ctrl.GetValue() == '01/20'
-        assert view.thru_ctrl.GetValue() == '12/25'
-        assert view.get_frum() == '2001'
-        assert view.get_thru() == '2512'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'WALJEE,AKBAR, MD'
-        assert view.pi_ctrl.get_selection_id() == 67
-        assert view.get_pm().name == 'ARASIM,MARIA E'
-        assert view.pm_ctrl.get_selection_id() == 80
+        expected = {
+            'name': 'Prj 297',
+            'full_name': 'Prj Full Name 297',
+            'frum': '1901',
+            'thru': '1912',
+            'pi': gbl.dataset.get_emp_rec(76),
+            'pm': gbl.dataset.get_emp_rec(56),
+            'notes': 'Note 297'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+
+        # Check dates displayed properly
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '12/19')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
+
 
     def testPrjNotesFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        self.presenter.apply_filter('notes_fltr_ctrl', 'l', 'pau')
-        assert list_ctrl.GetItemCount() == 1
-        obj = list_ctrl.GetFilteredObjects()[0]
-        assert obj.id == 285
-        model_idx = view.get_selected_idx()
-        assert model_idx == 0
+        # Search with no matches
+        self.presenter.apply_filter('notes_fltr_ctrl', 'x', '')
 
-        item = view.get_selection()
-        assert item.id == 285
-        assert item.name == 'UM SPIRIT (Pfeiffer)'
-        assert item.full_name == 'UM Integrated Versus Referral Care for Complex Psychiatric Disorders'
-        assert item.investigator == 'PFEIFFER,PAUL, MD'
-        assert item.manager == None
-        assert list_ctrl.GetItemText(model_idx, 1) == '01/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '12/20'
-        assert item.frum == '1901'
-        assert item.thru == '2012'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(list_ctrl.GetItemCount(), 0)
 
-        # Check the details form
-        assert view.get_name() == 'UM SPIRIT (Pfeiffer)'
-        assert view.get_full_name() == 'UM Integrated Versus Referral Care for Complex Psychiatric Disorders'
-        assert view.frum_ctrl.GetValue() == '01/19'
-        assert view.thru_ctrl.GetValue() == '12/20'
-        assert view.get_frum() == '1901'
-        assert view.get_thru() == '2012'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'PFEIFFER,PAUL, MD'
-        assert view.pi_ctrl.get_selection_id() == 75
-        assert view.get_pm() == None
-        assert view.pm_ctrl.get_selection_id() == None
+        # Check empty details form
+        expected = {
+            'name': None,
+            'full_name': None,
+            'frum': None,
+            'thru': None,
+            'pi': None,
+            'pm': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+
+        # Check empty assignment list
+        self.assertEqual(len(asn_list_ctrl.GetObjects()), 0)
+
+        # Match '3'
+        self.presenter.apply_filter('notes_fltr_ctrl', '3', '')
+
+        expected = [p for p in gbl.dataset.get_prj_data() if p.notes and '3' in p.notes]
+        self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
+
+        # Check details
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
 
         # Check the assignments list
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'TAKAMINE,LINDA'
-        assert asn_items[0].employee_id == 248
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '12/20'
+        expected = gbl.dataset.get_prj_rec(309).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
 
-    def testCancelNotesFilter(self):
-        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+        # Filter for '31'
+        self.presenter.apply_filter('notes_fltr_ctrl', '1', '3')
 
+        expected = [p for p in gbl.dataset.get_prj_data() if p.notes and '31' in p.notes]
+        self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
+
+        # Check details
+        expected = {
+            'name': 'Prj 312',
+            'full_name': 'Prj Full Name 312',
+            'frum': '1909',
+            'thru': '2109',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': None,
+            'notes': 'Note 312'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '09/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/21')
+
+        # Check the assignments list
+        expected = gbl.dataset.get_prj_rec(312).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
+
+        # And now backspace
+        self.presenter.apply_filter('notes_fltr_ctrl', '\b', '31')
+
+        expected = [p for p in gbl.dataset.get_prj_data() if p.notes and '3' in p.notes]
+        self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
+
+        # Check details
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
+
+        # Check the assignments list
+        expected = gbl.dataset.get_prj_rec(309).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
+
+        # And now Cancel
         click_search_ctrl(view.notes_fltr_ctrl)
 
-        model_idx = view.get_selected_idx()
-        list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 30
-        item = list_items[model_idx]
-        assert item.id == 303
-        assert item.name == 'Biosimilar Merit_Waljee'
-        assert item.full_name == 'Effectiveness, Safety, and Patient Preferences of Infliximab Biosimilar Medications for Inflammatory Bowel Disease'
-        assert item.investigator == 'WALJEE,AKBAR, MD'
-        assert item.manager == 'ARASIM,MARIA E'
-        assert list_ctrl.GetItemText(model_idx, 1) == '01/20'
-        assert list_ctrl.GetItemText(model_idx, 2) == '12/25'
-        assert item.frum == '2001'
-        assert item.thru == '2512'
-        assert model[model_idx].frum == '2001'
-        assert model[model_idx].thru == '2512'
-        assert view.get_save_button_label() == 'Update Project'
+        # Check the project list
+        self.assertEqual(list_ctrl.GetObjects(), test_data.projects)
+
+        # Check that the first project has been selected by default
+        model_idx = 0
+
+        # No list click made
 
         # Check the details form
-        assert view.get_name() == 'Biosimilar Merit_Waljee'
-        assert view.get_full_name() == 'Effectiveness, Safety, and Patient Preferences of Infliximab Biosimilar Medications for Inflammatory Bowel Disease'
-        assert view.frum_ctrl.GetValue() == '01/20'
-        assert view.thru_ctrl.GetValue() == '12/25'
-        assert view.get_frum() == '2001'
-        assert view.get_thru() == '2512'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'WALJEE,AKBAR, MD'
-        assert view.pi_ctrl.get_selection_id() == 67
-        assert view.get_pm().name == 'ARASIM,MARIA E'
-        assert view.pm_ctrl.get_selection_id() == 80
+        expected = {
+            'name': 'Prj 297',
+            'full_name': 'Prj Full Name 297',
+            'frum': '1901',
+            'thru': '1912',
+            'pi': gbl.dataset.get_emp_rec(76),
+            'pm': gbl.dataset.get_emp_rec(56),
+            'notes': 'Note 297'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+
+        # Check dates displayed properly
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '12/19')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
 
     def testClearForm(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         click_button(view.clear_btn)
 
-        assert view.get_selected_idx() == -1
-        assert view.get_name() == ''
-        assert view.get_full_name() == ''
-        assert view.get_frum() == ''
-        assert view.get_thru() == ''
-        assert view.get_pi() == None
-        assert view.pi_ctrl.CurrentSelection == 0
-        assert view.get_pm() == None
-        assert view.pm_ctrl.CurrentSelection == 0
-        assert view.get_notes() == ''
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 0
-        assert view.get_save_button_label() == 'Add Project'
+        self.assertEqual(view.get_selected_idx(), -1)
+        expected = {
+            'name': None,
+            'full_name': None,
+            'frum': None,
+            'thru': None,
+            'pi': None,
+            'pm': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+
+        self.assertEqual(view.pi_ctrl.CurrentSelection, 0)
+        self.assertEqual(view.pm_ctrl.CurrentSelection, 0)
+        self.assertEqual(len(asn_list_ctrl.GetObjects()), 0)
+
+        self.assertEqual(view.get_save_button_label(), 'Add Project')
 
     def testButtonLabelChange(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
         click_button(view.clear_btn)
-        assert view.get_save_button_label() == 'Add Project'
+        self.assertEqual(view.get_save_button_label(), 'Add Project')
         dbl_click_list_ctrl(list_ctrl, 1)
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
 
     def testValidateProjectFormOnAdd(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -479,139 +447,163 @@ class TestProjectPresenter(unittest.TestCase):
 
         # No project name entered
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project name required!'
+        self.assertEqual(err_msg, 'Project name required!')
 
         # Duplicate project name
-        view.set_name('CFIR V2 LIP')
+        view.set_name('Prj 309')
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project name not unique!'
+        self.assertEqual(err_msg, 'Project name not unique!')
 
+        view.set_name('PRJ 309')
+        err_msg = self.presenter.validate()
+        self.assertEqual(err_msg, 'Project name not unique!')
+
+        # Set to unique name
         view.set_name('Test Prj 1')
 
         # No full name entered
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project full name required!'
+        self.assertEqual(err_msg, 'Project full name required!')
 
         # Duplicate full name
-        view.set_full_name('Morphomics (Su)')
+        view.set_full_name('Prj full name 297')
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project full name not unique!'
+        self.assertEqual(err_msg, 'Project full name not unique!')
 
+        # Set to unique full name
         view.set_full_name('Test Project One')
 
         # No frum date
+        # The control defaults to 00/00, so validate can be called without a
+        # call to prettify via set_frum, set_thru. Also the user can enter 00/00.
         err_msg = self.presenter.validate()
-        assert err_msg == 'From date invalid!'
+        self.assertEqual(err_msg, 'From, Thru dates required!')
 
-        # Bogus from dates (UI always gets 4 digits)
-        view.set_frum('0000')       # month 00
+        # Bogus and empty from, thru dates tested in test_month_lib.py
+        # prettify throws exception
+
+        # Set a valid frum date, thru date still empty
+        view.set_thru('2001')
+
+        # See above not re 00/00 default
         err_msg = self.presenter.validate()
-        assert err_msg == 'From date invalid!'
+        self.assertEqual(err_msg, 'From, Thru dates required!')
 
-        view.set_frum('0013')       # month 13
-        err_msg = self.presenter.validate()
-        assert err_msg == 'From date invalid!'
-
-        view.set_frum('2001')
-
-        # Bogus thru dates (UI always gets 4 digits)
-        view.set_thru('0000')       # month 00
-        err_msg = self.presenter.validate()
-        assert err_msg == 'Thru date invalid!'
-
-        view.set_thru('0013')       # month 13
-        err_msg = self.presenter.validate()
-        assert err_msg == 'Thru date invalid!'
+        # Any date set by the user passes thru prettify and so only valid
+        # dates need to be tested here.
 
         # Frum date later than thru date
+        view.set_frum('2001')
         view.set_thru('1912')
         err_msg = self.presenter.validate()
-        assert err_msg == 'From date must precede thru date!'
+        self.assertEqual(err_msg, 'From date must precede thru date!')
 
         view.set_thru('2001')   # 1 month project
         err_msg = self.presenter.validate()
-        assert err_msg == None
+        self.assertIsNone(err_msg)
+        self.assertEqual(view.get_frum(), '2001')
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/20')
+        self.assertEqual(view.get_thru(), '2001')
+        self.assertEqual(view.thru_ctrl.GetValue(), '01/20')
+
+        view.set_thru('2002')
+        err_msg = self.presenter.validate()
+        self.assertIsNone(err_msg)
+        self.assertEqual(view.get_thru(), '2002')
+        self.assertEqual(view.thru_ctrl.GetValue(), '02/20')
 
     def testValidateProjectFormOnUpdate(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         dbl_click_list_ctrl(list_ctrl, 1)
-        assert view.get_name() == 'CFIR V2 LIP'
+        self.assertEqual(view.get_name(), 'Prj 298')
 
         # No project name entered
         view.set_name('')
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project name required!'
+        self.assertEqual(err_msg, 'Project name required!')
 
         # Can't steal name from another project
-        view.set_name('LIP 20-121 (Saint)')
+        view.set_name('PRJ299')
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project name not unique!'
+        self.assertEqual(err_msg, 'Project name not unique!')
 
         # Duplicate project name OK since it's the same project
-        view.set_name('CFIR V2 LIP')
+        view.set_name('PRJ298')
         err_msg = self.presenter.validate()
-        assert err_msg == None
+        self.assertEqual(err_msg, None)
 
         # Can rename the project with a unique name
         view.set_name('Test Prj 1')
         err_msg = self.presenter.validate()
-        assert err_msg == None
+        self.assertEqual(err_msg, None)
 
         # No project full name entered
         view.set_full_name('')
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project full name required!'
+        self.assertEqual(err_msg, 'Project full name required!')
 
         # Can't steal full name from another project
-        view.set_full_name('Morphomics (Su)')
+        view.set_full_name('PRJFULLNAME309')
         err_msg = self.presenter.validate()
-        assert err_msg == 'Project full name not unique!'
+        self.assertEqual(err_msg, 'Project full name not unique!')
 
         # Duplicate project frull name OK since it's the same project
-        view.set_full_name('Updating the Consolidated Framework for Implementation Research (CFIR V2)')
+        view.set_full_name('prjfullname298')
         err_msg = self.presenter.validate()
-        assert err_msg == None
+        self.assertEqual(err_msg, None)
 
         # Can rename the project with a unique name
         view.set_full_name('Test Project One')
         err_msg = self.presenter.validate()
-        assert err_msg == None
+        self.assertEqual(err_msg, None)
 
-        # No frum date
-        view.set_frum('0000')
+        # User enters 00/00
+        view.frum_ctrl.SetValue('0000')
         err_msg = self.presenter.validate()
-        assert err_msg == 'From date invalid!'
+        self.assertEqual(err_msg, 'From, Thru dates required!')
 
-        view.set_frum('0013')       # month 13
+        # Bogus and empty from, thru dates tested in test_month_lib.py
+        # prettify throws exception
+
+        # Set a valid frum date, thru date still empty
+        view.set_thru('2001')
+
+        # See above not re 00/00 default
         err_msg = self.presenter.validate()
-        assert err_msg == 'From date invalid!'
+        self.assertEqual(err_msg, 'From, Thru dates required!')
 
-        view.set_frum('2001')
-
-        # Bogus thru dates (UI always gets 4 digits)
-        view.set_thru('0000')       # month 00
-        err_msg = self.presenter.validate()
-        assert err_msg == 'Thru date invalid!'
-
-        view.set_thru('0013')       # month 13
-        err_msg = self.presenter.validate()
-        assert err_msg == 'Thru date invalid!'
+        # Any date set by the user passes thru prettify and so only valid
+        # dates need to be tested here.
 
         # Frum date later than thru date
+        view.set_frum('2001')
         view.set_thru('1912')
         err_msg = self.presenter.validate()
-        assert err_msg == 'From date must precede thru date!'
+        self.assertEqual(err_msg, 'From date must precede thru date!')
+
+        # TODO: test for dates outside assignment dates
 
         view.set_thru('2001')   # 1 month project
         err_msg = self.presenter.validate()
-        assert err_msg == None
+        self.assertIsNone(err_msg)
+        self.assertEqual(view.get_frum(), '2001')
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/20')
+        self.assertEqual(view.get_thru(), '2001')
+        self.assertEqual(view.thru_ctrl.GetValue(), '01/20')
+
+        view.set_thru('2002')
+        err_msg = self.presenter.validate()
+        self.assertIsNone(err_msg)
+        self.assertEqual(view.get_thru(), '2002')
+        self.assertEqual(view.thru_ctrl.GetValue(), '02/20')
 
     # This test has all valid data. See above invalid tests
-    @patch('presenters.presenter.uil.show_msg', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=317)
-    def testAddUpdatesModelAndView(self, write_mock):
+    def testAdd(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        self.assertEqual(view.list_ctrl.GetItemCount(), 8)
+        self.assertIsNone(gbl.dataset.get_prj_rec(316))
 
         click_button(view.clear_btn)
 
@@ -619,790 +611,629 @@ class TestProjectPresenter(unittest.TestCase):
         view.set_full_name('Test Project Five')
         view.set_frum('1911')
         view.set_thru('2004')
-        view.set_pi('KERR,EVE,MD')
-        view.set_pm('GILLON,LEAH R')
+        view.set_pi('EMP 73')
+        view.set_pm('EMP 20')
         view.set_notes('This is a comment.')
 
-        click_button(view.save_btn)
+        with patch('lib.ui_lib.show_msg') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 316
+                click_button(view.save_btn)
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == 'INSERT INTO projects (name,full_name,frum,thru,investigator_id,manager_id,notes,active) VALUES (?,?,?,?,?,?,?,?)'
-        assert args[1] == ['Test Prj 5', 'Test Project Five', '1911', '2004', 7, 52, 'This is a comment.', 1]
+        # Check the call to the DB
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        sql = ("INSERT INTO projects "
+               "(name,full_name,frum,thru,investigator_id,manager_id,notes,active) "
+               "VALUES (?,?,?,?,?,?,?,?)")
+        vals = [
+            'Test Prj 5', 'Test Project Five',
+            '1911', '2004',
+            73, 20, 'This is a comment.', 1
+        ]
+        self.assertEqual(args[0], sql)
+        self.assertEqual(args[1] , vals)
 
-        list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 31
-        model_idx = view.get_selected_idx()
-        item = list_items[model_idx]
-        assert item.id == 317
-        assert item.name == 'Test Prj 5'
-        assert item.full_name == 'Test Project Five'
-        assert item.investigator == 'KERR,EVE,MD'
-        assert item.manager == 'GILLON,LEAH R'
-        assert list_ctrl.GetItemText(model_idx, 1) == '11/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '04/20'
-        assert item.frum == '1911'
-        assert item.thru == '2004'
+        # Check model and list have been updated
+        model = gbl.dataset.get_prj_rec(316)
+        item = view.get_selection()
+        self.assertEqual(model, item)
+        self.assertEqual(view.list_ctrl.GetItemCount(), 9)
+        item_idx = view.get_selected_idx()
+        self.assertEqual(list_ctrl.GetItemText(item_idx, 1), '11/19')
+        self.assertEqual(list_ctrl.GetItemText(item_idx, 2), '04/20')
 
-        prj_model = self.presenter.model[model_idx]
-        assert prj_model.id == 317
-        assert prj_model.name == 'Test Prj 5'
-        assert prj_model.full_name == 'Test Project Five'
-        assert prj_model.frum == '1911'
-        assert prj_model.thru == '2004'
-        assert prj_model.investigator == 'KERR,EVE,MD'
-        assert prj_model.investigator_id == 7
-        assert prj_model.manager == 'GILLON,LEAH R'
-        assert prj_model.manager_id == 52
-        assert prj_model.notes == 'This is a comment.'
-        assert prj_model.active == 1
-        assert prj_model.asns == []
+        # No assignments
+        self.assertEqual(asn_list_ctrl.GetItemCount(), 0)
 
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 0
+        mock_popup.assert_called_once_with('Project added!', 'Hallelujah!')
 
     # This test has all valid data. See above invalid tests
-    @patch('presenters.presenter.uil.show_msg', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
-    def testUpdateUpdatesModelAndView(self, write_mock):
+    def testUpdate(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 6
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 279
-        assert item.name == 'LIP 19-111 (Prescott)'
-        assert item.full_name == 'LIP 19-111 Prescott'
-        assert item.investigator == None
-        assert item.manager == 'LUGINBILL,KAITLYN A'
-        assert list_ctrl.GetItemText(model_idx, 1) == '04/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/19'
-        assert item.frum == '1904'
-        assert item.thru == '1909'
-        assert model[model_idx].frum == '1904'
-        assert model[model_idx].thru == '1909'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(view.list_ctrl.GetItemCount(), 8)
+
+        # Select a project
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+
+        prj = gbl.dataset.get_prj_rec(309)
+        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
+
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
 
         # Check the details form
-        assert view.get_name() == 'LIP 19-111 (Prescott)'
-        assert view.get_full_name() == 'LIP 19-111 Prescott'
-        assert view.frum_ctrl.GetValue() == '04/19'
-        assert view.thru_ctrl.GetValue() == '09/19'
-        assert view.get_frum() == '1904'
-        assert view.get_thru() == '1909'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
-        assert view.get_pm().name == 'LUGINBILL,KAITLYN A'
-        assert view.pm_ctrl.get_selection_id() == 120
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'SEEYLE,SARAH'
-        assert asn_items[0].employee_id == 278
-        assert model[model_idx].asns[0].frum == '1904'
-        assert model[model_idx].asns[0].thru == '1909'
-        assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
+        self.assertEqual(asn_list_ctrl.GetObjects(), prj.asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 2), '02/20')
 
+        # Edit the form
         view.set_name('Test Prj 5')
         view.set_full_name('Test Project Five')
         view.set_frum('1905')
-        view.set_thru('1908')
-        view.set_pi('KERR,EVE,MD')
-        view.set_pm('GILLON,LEAH R')
+        view.set_thru('2009')
+        view.set_pi('EMP 76')
+        view.set_pm('EMP 106')
         view.set_notes('This is a comment.')
 
-        click_button(view.save_btn)
+        # Mock the save
+        with patch('lib.ui_lib.show_msg') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.save_btn)
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) ==0
-        assert args[0] == 'UPDATE projects SET name=?,full_name=?,frum=?,thru=?,notes=?,investigator_id=?,manager_id=? WHERE id=?;'
-        assert args[1] == ['Test Prj 5', 'Test Project Five', '1905', '1908', 'This is a comment.', 7, 52, 279]
+        # Check the SQL
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        sql = ("UPDATE projects "
+               "SET name=?,full_name=?,frum=?,thru=?,notes=?,investigator_id=?,manager_id=? "
+               "WHERE id=?;")
+        vals = [
+            'Test Prj 5', 'Test Project Five',
+            '1905', '2009',
+            'This is a comment.',
+            76, 106, 309
+        ]
+        self.assertEqual(args[0], sql)
+        self.assertEqual(args[1], vals)
 
-        list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 30
-        model_idx = view.get_selected_idx()
-        assert model_idx == 6
-        item = list_items[model_idx]
-        assert item.id == 279
-        assert item.name == 'Test Prj 5'
-        assert item.full_name == 'Test Project Five'
-        assert item.investigator == 'KERR,EVE,MD'
-        assert item.manager == 'GILLON,LEAH R'
-        assert list_ctrl.GetItemText(model_idx, 1) == '05/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '08/19'
-        assert item.frum == '1905'
-        assert item.thru == '1908'
+        # Check model and list have been updated
+        model = gbl.dataset.get_prj_rec(309)
+        item = view.get_selection()
+        self.assertEqual(model, item)
+        self.assertEqual(view.list_ctrl.GetItemCount(), 8)
+        item_idx = view.get_selected_idx()
+        self.assertEqual(list_ctrl.GetItemText(item_idx, 1), '05/19')
+        self.assertEqual(list_ctrl.GetItemText(item_idx, 2), '09/20')
 
-        prj_model = self.presenter.model[model_idx]
-        assert prj_model.id == 279
-        assert prj_model.name == 'Test Prj 5'
-        assert prj_model.full_name == 'Test Project Five'
-        assert prj_model.frum == '1905'
-        assert prj_model.thru == '1908'
-        assert prj_model.investigator == 'KERR,EVE,MD'
-        assert prj_model.investigator_id == 7
-        assert prj_model.manager == 'GILLON,LEAH R'
-        assert prj_model.manager_id == 52
-        assert prj_model.notes == 'This is a comment.'
-        assert prj_model.active == 1
+        # Check assignments
+        self.assertEqual(asn_list_ctrl.GetItemCount(), 3)
+        self.assertEqual(prj.asns, model.asns)
+        self.assertEqual(model.asns, asn_list_ctrl.GetObjects())
 
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'SEEYLE,SARAH'
-        assert asn_items[0].employee_id == 278
-        assert model[model_idx].asns[0].frum == '1904'
-        assert model[model_idx].asns[0].thru == '1909'
-        assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
+        mock_popup.assert_called_once_with('Project updated!', 'Hallelujah!')
 
     # This time update with no name, full name change and no PI or PM
-    @patch('presenters.presenter.uil.show_msg', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
-    def testUpdateUpdatesModelAndView2(self, write_mock):
+    def testUpdate2(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 6
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 279
-        assert item.name == 'LIP 19-111 (Prescott)'
-        assert item.full_name == 'LIP 19-111 Prescott'
-        assert item.investigator == None
-        assert item.manager == 'LUGINBILL,KAITLYN A'
-        assert list_ctrl.GetItemText(model_idx, 1) == '04/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/19'
-        assert item.frum == '1904'
-        assert item.thru == '1909'
-        assert model[model_idx].frum == '1904'
-        assert model[model_idx].thru == '1909'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(view.list_ctrl.GetItemCount(), 8)
+
+        # Select a project
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+
+        prj = gbl.dataset.get_prj_rec(309)
+        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
+
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
 
         # Check the details form
-        assert view.get_name() == 'LIP 19-111 (Prescott)'
-        assert view.get_full_name() == 'LIP 19-111 Prescott'
-        assert view.frum_ctrl.GetValue() == '04/19'
-        assert view.thru_ctrl.GetValue() == '09/19'
-        assert view.get_frum() == '1904'
-        assert view.get_thru() == '1909'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
-        assert view.get_pm().name == 'LUGINBILL,KAITLYN A'
-        assert view.pm_ctrl.get_selection_id() == 120
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'SEEYLE,SARAH'
-        assert asn_items[0].employee_id == 278
-        assert model[model_idx].asns[0].frum == '1904'
-        assert model[model_idx].asns[0].thru == '1909'
-        assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
+        self.assertEqual(asn_list_ctrl.GetObjects(), prj.asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 2), '02/20')
 
+        # Edit the form
         view.set_frum('1905')
-        view.set_thru('1908')
+        view.set_thru('2009')
         view.set_pi(None)
         view.set_pm(None)
         view.set_notes('This is a comment.')
 
-        click_button(view.save_btn)
+        # Mock the save
+        with patch('lib.ui_lib.show_msg') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.save_btn)
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) ==0
-        assert args[0] == 'UPDATE projects SET frum=?,thru=?,notes=?,investigator_id=?,manager_id=? WHERE id=?;'
-        assert args[1] == ['1905', '1908', 'This is a comment.', None, None, 279]
+        # Check the SQL
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        sql = ("UPDATE projects "
+               "SET frum=?,thru=?,notes=?,investigator_id=?,manager_id=? "
+               "WHERE id=?;")
+        vals = [
+            '1905', '2009',
+            'This is a comment.',
+            None, None, 309
+        ]
+        self.assertEqual(args[0], sql)
+        self.assertEqual(args[1], vals)
 
-        list_items = list_ctrl.GetObjects()
-        assert len(list_items) == 30
-        model_idx = view.get_selected_idx()
-        assert model_idx == 6
-        item = list_items[model_idx]
-        assert item.id == 279
-        assert item.name == 'LIP 19-111 (Prescott)'
-        assert item.full_name == 'LIP 19-111 Prescott'
-        assert item.investigator == None
-        assert item.manager == None
-        assert list_ctrl.GetItemText(model_idx, 1) == '05/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '08/19'
-        assert item.frum == '1905'
-        assert item.thru == '1908'
+        # Check model and list have been updated
+        model = gbl.dataset.get_prj_rec(309)
+        item = view.get_selection()
+        self.assertEqual(model, item)
+        self.assertEqual(view.list_ctrl.GetItemCount(), 8)
+        item_idx = view.get_selected_idx()
+        self.assertEqual(list_ctrl.GetItemText(item_idx, 1), '05/19')
+        self.assertEqual(list_ctrl.GetItemText(item_idx, 2), '09/20')
 
-        prj_model = self.presenter.model[model_idx]
-        assert prj_model.id == 279
-        assert prj_model.name == 'LIP 19-111 (Prescott)'
-        assert prj_model.full_name == 'LIP 19-111 Prescott'
-        assert prj_model.frum == '1905'
-        assert prj_model.thru == '1908'
-        assert prj_model.investigator == None
-        assert prj_model.investigator_id == None
-        assert prj_model.manager == None
-        assert prj_model.manager_id == None
-        assert prj_model.notes == 'This is a comment.'
-        assert prj_model.active == 1
+        # Check assignments
+        self.assertEqual(asn_list_ctrl.GetItemCount(), 3)
+        self.assertEqual(prj.asns, model.asns)
+        self.assertEqual(model.asns, asn_list_ctrl.GetObjects())
 
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'SEEYLE,SARAH'
-        assert asn_items[0].employee_id == 278
-        assert model[model_idx].asns[0].frum == '1904'
-        assert model[model_idx].asns[0].thru == '1909'
-        assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
+        mock_popup.assert_called_once_with('Project updated!', 'Hallelujah!')
 
-    @patch('presenters.presenter.uil.confirm', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
-    def testDropUpdatesModelAndView(self, write_mock, confirm_mock):
+    def testDrop(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 6
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 279
-        assert item.name == 'LIP 19-111 (Prescott)'
-        assert item.full_name == 'LIP 19-111 Prescott'
-        assert item.investigator == None
-        assert item.manager == 'LUGINBILL,KAITLYN A'
-        assert list_ctrl.GetItemText(model_idx, 1) == '04/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/19'
-        assert item.frum == '1904'
-        assert item.thru == '1909'
-        assert model[model_idx].frum == '1904'
-        assert model[model_idx].thru == '1909'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(view.list_ctrl.GetItemCount(), 8)
+        self.assertEqual(len(gbl.dataset.get_prj_data()), 8)
+
+        # Select a project
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+
+        prj = gbl.dataset.get_prj_rec(309)
+        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
+
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
 
         # Check the details form
-        assert view.get_name() == 'LIP 19-111 (Prescott)'
-        assert view.get_full_name() == 'LIP 19-111 Prescott'
-        assert view.frum_ctrl.GetValue() == '04/19'
-        assert view.thru_ctrl.GetValue() == '09/19'
-        assert view.get_frum() == '1904'
-        assert view.get_thru() == '1909'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
-        assert view.get_pm().name == 'LUGINBILL,KAITLYN A'
-        assert view.pm_ctrl.get_selection_id() == 120
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'SEEYLE,SARAH'
-        assert asn_items[0].employee_id == 278
-        assert model[model_idx].asns[0].frum == '1904'
-        assert model[model_idx].asns[0].thru == '1909'
-        assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
+        self.assertEqual(asn_list_ctrl.GetObjects(), prj.asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 2), '02/20')
 
-        click_button(view.drop_btn)
+        # User changes mind, cancels deletion
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = False
+            click_button(view.drop_btn)
 
-        assert confirm_mock.call_count == 1
-        args, kwargs = confirm_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[1] == 'Drop selected project?'
+        mock_popup.assert_called_once_with(view, 'Drop selected project?')
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) ==0
-        assert args[0] == 'UPDATE projects SET active=0 WHERE id=?'
-        assert args[1] == (279,)
+        # Check no change
+        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
+        self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
 
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
+
+        # Check the details form
+        expected = {
+            'name': 'Prj 309',
+            'full_name': 'Prj Full Name 309',
+            'frum': '1908',
+            'thru': '2009',
+            'pi': gbl.dataset.get_emp_rec(73),
+            'pm': gbl.dataset.get_emp_rec(211),
+            'notes': 'Note 309'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+        self.assertEqual(view.frum_ctrl.GetValue(), '08/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '09/20')
+
+        # Check the assignments list
+        self.assertEqual(asn_list_ctrl.GetObjects(), prj.asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '09/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 1), '02/20')
+        self.assertEqual(asn_list_ctrl.GetItemText(2, 2), '02/20')
+
+        # User confirms deletion
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.drop_btn)
+
+        # Check the confirmation
+        mock_popup.assert_called_once_with(view, 'Drop selected project?')
+
+        # Check the SQL
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        self.assertEqual(args[0], 'UPDATE projects SET active=0 WHERE id=?')
+        self.assertEqual(args[1], (309,))
+
+        # Check that project removed from dataset
+        self.assertEqual(len(gbl.dataset.get_prj_data()), 7)
+        self.assertIsNone(gbl.dataset.get_prj_rec(309))
+
+        # Check that project removed from list
+        self.assertEqual(view.list_ctrl.GetItemCount(), 7)
+        prj_ids = [p.id for p in view.list_ctrl.GetObjects()]
+        self.assertNotIn(309, prj_ids)
+
+        # Check that first project is now selected
         model_idx = view.get_selected_idx()
-        item = view.get_selection()
-        assert item.id == 280
-        assert item.name == 'LIP 19-112 (Kullgren-DeWitt) Visceral MDM'
-        assert item.full_name == 'LIP 19-112 Understanding the Influence of Patient and Provider Visceral Factors on Clinical Decision-Making (Kullgren-DeWitt)'
-        assert item.investigator == None
-        assert item.manager == 'DEWITT,JEFFREY,POSTDOC'
-        assert list_ctrl.GetItemText(model_idx, 1) == '03/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/20'
-        assert item.frum == '1903'
-        assert item.thru == '2009'
-        assert model[model_idx].frum == '1903'
-        assert model[model_idx].thru == '2009'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(model_idx, 0)
 
         # Check the details form
-        assert view.get_name() == 'LIP 19-112 (Kullgren-DeWitt) Visceral MDM'
-        assert view.get_full_name() == 'LIP 19-112 Understanding the Influence of Patient and Provider Visceral Factors on Clinical Decision-Making (Kullgren-DeWitt)'
-        assert view.frum_ctrl.GetValue() == '03/19'
-        assert view.thru_ctrl.GetValue() == '09/20'
-        assert view.get_frum() == '1903'
-        assert view.get_thru() == '2009'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() == None
-        assert view.pi_ctrl.get_selection_id() == None
-        assert view.get_pm().name == 'DEWITT,JEFFREY,POSTDOC'
-        assert view.pm_ctrl.get_selection_id() == 284
+        expected = {
+            'name': 'Prj 297',
+            'full_name': 'Prj Full Name 297',
+            'frum': '1901',
+            'thru': '1912',
+            'pi': gbl.dataset.get_emp_rec(76),
+            'pm': gbl.dataset.get_emp_rec(56),
+            'notes': 'Note 297'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+
+        # Check dates displayed properly
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '12/19')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2055, 2056, 2057, 2058, 2400]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'DEWITT,JEFFREY,POSTDOC'
-        assert asn_items[asn_idx].employee_id == 284
-        assert model[model_idx].asns[asn_idx].frum == '1903'
-        assert model[model_idx].asns[asn_idx].thru == '1909'
-        assert asn_list_ctrl.GetItemText(0, 1) == '03/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/19'
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
 
-    @patch('presenters.presenter.uil.confirm', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=1)
-    def testDropLastRecUpdatesModelAndView(self, write_mock, confirm_mock):
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
+
+    def testDropLastRec(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 29
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 300
-        assert item.name == 'VERAM CHRT (Adams)'
-        assert item.full_name == 'VERAM Assessing the Capacity of Community-based Providers to Care for Older Veterans (Adams)'
-        assert item.investigator == None
-        assert item.manager == 'SAFFAR,DARCY A'
-        assert list_ctrl.GetItemText(model_idx, 1) == '04/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '09/19'
-        assert item.frum == '1904'
-        assert item.thru == '1909'
-        assert model[model_idx].frum == '1904'
-        assert model[model_idx].thru == '1909'
-        assert view.get_save_button_label() == 'Update Project'
+        model_idx = len(gbl.dataset.get_prj_data()) - 1
+        click_list_ctrl(list_ctrl, model_idx)
 
-        # Check the details form
-        assert view.get_name() == 'VERAM CHRT (Adams)'
-        assert view.get_full_name() == 'VERAM Assessing the Capacity of Community-based Providers to Care for Older Veterans (Adams)'
-        assert view.frum_ctrl.GetValue() == '04/19'
-        assert view.thru_ctrl.GetValue() == '09/19'
-        assert view.get_frum() == '1904'
-        assert view.get_thru() == '1909'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi() is None
-        assert view.pi_ctrl.get_selection_id() is None
-        assert view.get_pm().name == 'SAFFAR,DARCY A'
-        assert view.pm_ctrl.get_selection_id() == 22
+        # User confirms deletion
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.drop_btn)
 
-        # Check the assignments list
-        # There are 5 but only 2 are active and being displayed
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 2
-        asn_ids = [2290, 2291, 2292, 2293, 2398]
-        assert [asn.id for asn in asn_items] == [2291, 2292]
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'GAO,YUQUING'
-        assert asn_items[asn_idx].employee_id == 264
-        assert model[model_idx].asns[asn_idx].frum == '1904'
-        assert model[model_idx].asns[asn_idx].thru == '1904'
-        assert asn_list_ctrl.GetItemText(0, 1) == '04/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '04/19'
+        # Check the confirmation
+        mock_popup.assert_called_once_with(view, 'Drop selected project?')
 
-        click_button(view.drop_btn)
+        # Check the SQL
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        self.assertEqual(args[0], 'UPDATE projects SET active=0 WHERE id=?')
+        self.assertEqual(args[1], (315,))
 
-        assert confirm_mock.call_count == 1
-        args, kwargs = confirm_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[1] == 'Drop selected project?'
+        # Check that project removed from dataset
+        self.assertEqual(len(gbl.dataset.get_prj_data()), 7)
+        self.assertIsNone(gbl.dataset.get_prj_rec(315))
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == 'UPDATE projects SET active=0 WHERE id=?'
-        assert args[1] == (300,)
+        # Check that project removed from list
+        self.assertEqual(view.list_ctrl.GetItemCount(), 7)
+        prj_ids = [p.id for p in view.list_ctrl.GetObjects()]
+        self.assertNotIn(315, prj_ids)
 
+        # Check that first project is now selected
         model_idx = view.get_selected_idx()
-        item = view.get_selection()
-        assert item.id == 310
-        assert item.name == 'UM_RO1 (Ilgen & LIn)'
-        assert item.full_name == 'Enhancing the impact of behavioral pain management on MAT outcomes (Ilgen & Lin)'
-        assert item.investigator == 'ILGEN,MARK PHD'
-        assert item.manager == 'LEWIS (STINCHOMB),MANDY'
-        assert list_ctrl.GetItemText(model_idx, 1) == '09/19'
-        assert list_ctrl.GetItemText(model_idx, 2) == '08/23'
-        assert item.frum == '1909'
-        assert item.thru == '2308'
-        assert model[model_idx].frum == '1909'
-        assert model[model_idx].thru == '2308'
-        assert view.get_save_button_label() == 'Update Project'
+        self.assertEqual(model_idx, 0)
 
         # Check the details form
-        assert view.get_name() == 'UM_RO1 (Ilgen & LIn)'
-        assert view.get_full_name() == 'Enhancing the impact of behavioral pain management on MAT outcomes (Ilgen & Lin)'
-        assert view.frum_ctrl.GetValue() == '09/19'
-        assert view.thru_ctrl.GetValue() == '08/23'
-        assert view.get_frum() == '1909'
-        assert view.get_thru() == '2308'
-        assert view.pi_ctrl.GetCount() == 29
-        assert view.pm_ctrl.GetCount() == 128
-        assert view.get_pi().name == 'ILGEN,MARK PHD'
-        assert view.pi_ctrl.get_selection_id() == 73
-        assert view.get_pm().name == 'LEWIS (STINCHOMB),MANDY'
-        assert view.pm_ctrl.get_selection_id() == 250
+        expected = {
+            'name': 'Prj 297',
+            'full_name': 'Prj Full Name 297',
+            'frum': '1901',
+            'thru': '1912',
+            'pi': gbl.dataset.get_emp_rec(76),
+            'pm': gbl.dataset.get_emp_rec(56),
+            'notes': 'Note 297'
+        }
+        self.assertEqual(self.presenter.get_form_values(), expected)
+
+        # Check dates displayed properly
+        self.assertEqual(view.frum_ctrl.GetValue(), '01/19')
+        self.assertEqual(view.thru_ctrl.GetValue(), '12/19')
 
         # Check the assignments list
-        assert len(model[model_idx].asns) == 1
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 1
-        assert asn_items[0].employee == 'LEWIS (STINCHOMB),MANDY'
-        assert asn_items[0].employee_id == 250
-        assert model[model_idx].asns[0].frum == '1910'
-        assert model[model_idx].asns[0].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '10/19'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
 
-    @patch('presenters.presenter.AsnDlg.ShowModal')
-    def testAddAsnLoadsForm(self, show_modal_mock):
+        self.assertEqual(view.get_save_button_label(), 'Update Project')
+
+    def testAddAsnLoadsForm(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 6
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 279
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
 
-        click_button(view.add_asn_btn)
+        with patch('views.asn_dlg.AsnDlg.ShowModal') as mock_modal:
+            click_button(view.add_asn_btn)
 
-        assert view.Children[2].Name == 'AsnDlg'
+        mock_modal.assert_called_once()
+
         asn_view = self.presenter.asn_presenter.view
-        assert asn_view.Name == 'AssignmentPanel'
+        self.assertEqual(asn_view.Name, 'AssignmentPanel')
 
-        assert asn_view.owner_lbl.GetLabelText() == 'LIP 19-111 (Prescott)'
-        assert asn_view.assignee_lbl.GetLabelText() == 'Employee: '
-        assert not isinstance(asn_view.assignee, str)
-        assert asn_view.assignee.Count == 156
-        assert asn_view.assignee.CurrentSelection == -1
-        assert asn_view.get_frum() == ''
-        assert asn_view.get_thru() == ''
-        assert asn_view.get_effort() == ''
-        assert asn_view.get_notes() == ''
+        self.assertEqual(asn_view.owner_lbl.GetLabelText(), 'Prj 309')
+        self.assertEqual(asn_view.assignee_lbl.GetLabelText(), 'Employee: ')
+        self.assertNotIsInstance(asn_view.assignee, str)
+        assignees = [''] + [e.name for e in gbl.dataset.get_emp_data()]
+        self.assertEqual(asn_view.assignee.GetItems(), assignees)
+        self.assertEqual(asn_view.assignee.CurrentSelection, -1)
 
-    @patch('presenters.presenter.AsnDlg.ShowModal')
-    def testEditAsnLoadsForm(self, show_modal_mock):
+        expected = {
+            'employee_id': None,
+            'project_id': 309,
+            'frum': None,
+            'thru': None,
+            'effort': None,
+            'notes': None
+        }
+        self.assertEqual(self.presenter.asn_presenter.get_form_values(), expected)
+
+    def testEditAsnLoadsForm(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = 0
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 303
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
 
-        dbl_click_list_ctrl(asn_list_ctrl, 2)
+        with patch('views.asn_dlg.AsnDlg.ShowModal') as mock_modal:
+            dbl_click_list_ctrl(asn_list_ctrl, 2)
 
-        assert view.Children[2].Name == 'AsnDlg'
+        mock_modal.assert_called_once()
+
         asn_view = self.presenter.asn_presenter.view
-        assert asn_view.Name == 'AssignmentPanel'
+        self.assertEqual(asn_view.Name, 'AssignmentPanel')
 
-        assert asn_view.owner_lbl.GetLabelText() == 'Biosimilar Merit_Waljee'
-        assert asn_view.assignee_lbl.GetLabelText() == 'Employee: WIITALA,WYNDY L'
-        assert isinstance(asn_view.assignee, str)
-        assert asn_view.get_frum() == '2001'
-        assert asn_view.get_thru() == '2009'
-        assert asn_view.get_effort() == '2'
-        assert asn_view.get_notes() == 'Per set form submitted 9/25'
+        self.assertEqual(asn_view.owner_lbl.GetLabelText(), 'Prj 309')
+        self.assertEqual(asn_view.assignee_lbl.GetLabelText(), 'Employee: EMP 76')
 
-    @patch('presenters.presenter.uil.show_error')
-    def testDropAsnNoneSelected(self, show_error_mock):
+        expected = {
+            'employee_id': 76,
+            'project_id': 309,
+            'frum': '2002',
+            'thru': '2002',
+            'effort': '10',
+            'notes': 'Yawn'
+        }
+        self.assertEqual(self.presenter.asn_presenter.get_form_values(), expected)
+
+        self.assertEqual(asn_view.frum_ctrl.GetValue(), '02/20')
+        self.assertEqual(asn_view.thru_ctrl.GetValue(), '02/20')
+
+    # @patch('presenters.presenter.uil.show_error')
+    def testDropAsnNoneSelected(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         # Select project
-        model_idx = 0
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 303
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+
+        # Check assignments
+        expected = gbl.dataset.get_prj_rec(309).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
 
         # Make no selection
 
-        # Check assignments
-        asn_idx = 0
-        assert len(model[model_idx].asns) == 5
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        with patch('lib.ui_lib.show_error') as mock_popup:
+            mock_popup.return_value = None
+            click_button(view.drop_asn_btn)
 
-        click_button(view.drop_asn_btn)
-
-        args, kwargs = show_error_mock.call_args
-        assert len(args) == 1
-        assert len(kwargs) == 0
-        assert args[0] == 'No assignments selected!'
+        mock_popup.assert_called_once_with('No assignments selected!')
 
         # No change in assignments
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
 
-    @patch('presenters.presenter.uil.confirm', return_value=False)
-    def testDropAsnCancel(self, confirm_mock):
+    # @patch('presenters.presenter.uil.confirm', return_value=False)
+    def testDropAsnCancel(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         # Select project
-        model_idx = 0
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 303
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
 
-        # Select assignment
-        asn_list_ctrl = asn_list_ctrl
+        # Check assignments
+        expected = gbl.dataset.get_prj_rec(309).asns
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
+
+        # Select an assignment
         asn_list_ctrl.Select(2)
 
-        # Check assignments
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = False
+            click_button(view.drop_asn_btn)
 
-        click_button(view.drop_asn_btn)
+        mock_popup.assert_called_once_with(view, 'Drop selected assignments?')
 
-        assert confirm_mock.call_count == 1
-        args, kwargs = confirm_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[1] == 'Drop selected assignments?'
+        # No change in assignments
 
-        # Check assignments
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        self.assertEqual(asn_list_ctrl.GetObjects(), expected)
 
-    @patch('presenters.presenter.uil.confirm', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=None)
-    def testDropOneAsnUpdatesViewAndModel(self, write_mock, confirm_mock):
+    def testDropOneAsn(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         # Select project
-        model_idx = 0
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 303
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
 
-        # Select assignment
-        asn_list_ctrl = asn_list_ctrl
+        # Check assignments
+        before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]
+        self.assertEqual(asn_list_ctrl.GetObjects(), before_asns)
+
+        # Select an assignment
+        asn_list_ctrl.Select(1)
+
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.drop_asn_btn)
+
+        mock_popup.assert_called_once_with(view, 'Drop selected assignments?')
+
+        # Check DB call
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        self.assertEqual(args[0], 'UPDATE assignments SET active=0 WHERE id IN (?)')
+        self.assertEqual(args[1], [2375])
+
+        # Check gbl.dataset
+        after_asns = [a for a in before_asns if a.id != 2375]
+        self.assertEqual(asn_list_ctrl.GetObjects(), after_asns)
+
+    def testDropLastAsn(self):
+        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
+
+        # Select project
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+
+        # Check assignments
+        before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]
+        self.assertEqual(asn_list_ctrl.GetObjects(), before_asns)
+
+        # Select an assignment
         asn_list_ctrl.Select(2)
 
-        # Check assignments
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.drop_asn_btn)
 
-        click_button(view.drop_asn_btn)
+        mock_popup.assert_called_once_with(view, 'Drop selected assignments?')
 
-        assert confirm_mock.call_count == 1
-        calls = confirm_mock.call_args_list[0][0]
-        prompt = 'Drop selected assignments?'
-        assert calls[1] == prompt
+        # Check DB call
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        self.assertEqual(args[0], 'UPDATE assignments SET active=0 WHERE id IN (?)')
+        self.assertEqual(args[1], [2382])
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) ==0
-        assert args[0] == 'UPDATE assignments SET active=0 WHERE id IN (?)'
-        assert args[1] == [2322]
+        # Check gbl.dataset
+        after_asns = [a for a in before_asns if a.id != 2382]
+        self.assertEqual(asn_list_ctrl.GetObjects(), after_asns)
 
-        # Check assignments
-        assert len(model[model_idx].asns) == 4
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 4
-        asn_ids = [2320, 2321, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
-
-    @patch('presenters.presenter.uil.confirm', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=None)
-    def testDropLastAsnUpdatesViewAndModel(self, write_mock, confirm_mock):
+    def testDropMultipleAsns(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         # Select project
-        model_idx = 0
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 303
-
-        # Select assignment
-        asn_list_ctrl = asn_list_ctrl
-        asn_list_ctrl.Select(4)
+        model_idx = 4
+        click_list_ctrl(list_ctrl, model_idx)
+        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
 
         # Check assignments
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]
+        self.assertEqual(asn_list_ctrl.GetObjects(), before_asns)
 
-        click_button(view.drop_asn_btn)
+        # Select an assignment
+        asn_list_ctrl.SelectObjects([before_asns[0], before_asns[2]])
 
-        assert confirm_mock.call_count == 1
-        args, kwargs = confirm_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[1] == 'Drop selected assignments?'
+        with patch('lib.ui_lib.confirm') as mock_popup:
+            mock_popup.return_value = True
+            with patch('dal.dao.Dao._Dao__write') as mock_write:
+                mock_write.return_value = 1
+                click_button(view.drop_asn_btn)
 
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) ==0
-        assert args[0] == 'UPDATE assignments SET active=0 WHERE id IN (?)'
-        assert args[1] == [2324]
+        mock_popup.assert_called_once_with(view, 'Drop selected assignments?')
 
-        # Check assignments
-        assert len(model[model_idx].asns) == 4
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 4
-        asn_ids = [2320, 2321, 2322, 2323]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        # Check DB call
+        self.assertEqual(mock_write.call_count, 1)
+        args, kwargs = mock_write.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        self.assertEqual(args[0], 'UPDATE assignments SET active=0 WHERE id IN (?,?)')
+        self.assertEqual(args[1], [2365, 2382])
 
-    @patch('presenters.presenter.uil.confirm', return_value=True)
-    @patch('presenters.presenter.Dao._Dao__write', return_value=None)
-    def testDropMultipleAsnsUpdatesViewAndModel(self, write_mock, confirm_mock):
-        view, model, list_ctrl, asn_list_ctrl = self.get_vars()
-
-        # Select project
-        model_idx = 0
-        dbl_click_list_ctrl(list_ctrl, model_idx)
-        item = view.get_selection()
-        assert item.id == 303
-
-        # Select assignment
-        asn_list_ctrl = asn_list_ctrl
-        asn_list_ctrl.SelectObjects([
-            model[model_idx].asns[1],
-            model[model_idx].asns[3]
-        ])
-
-        # Check assignments
-        assert len(model[model_idx].asns) == 5
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 5
-        asn_ids = [2320, 2321, 2322, 2323, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
-
-        click_button(view.drop_asn_btn)
-
-        assert confirm_mock.call_count == 1
-        args, kwargs = confirm_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[1] == 'Drop selected assignments?'
-
-        assert write_mock.call_count == 1
-        args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) ==0
-        assert args[0] == 'UPDATE assignments SET active=0 WHERE id IN (?,?)'
-        assert args[1] == [2321, 2323]
-
-        # Check assignments
-        assert len(model[model_idx].asns) == 3
-        asn_idx = 0
-        asn_items = asn_list_ctrl.GetObjects()
-        assert len(asn_items) == 3
-        asn_ids = [2320, 2322, 2324]
-        assert [asn.id for asn in asn_items] == asn_ids
-        assert [asn.id for asn in model[model_idx].asns] == asn_ids
-        assert asn_items[asn_idx].employee == 'ARASIM,MARIA E'
-        assert asn_items[asn_idx].employee_id == 80
-        assert model[model_idx].asns[asn_idx].frum == '2001'
-        assert model[model_idx].asns[asn_idx].thru == '2009'
-        assert asn_list_ctrl.GetItemText(0, 1) == '01/20'
-        assert asn_list_ctrl.GetItemText(0, 2) == '09/20'
+        # Check gbl.dataset
+        self.assertEqual(asn_list_ctrl.GetObjects(), [before_asns[1]])

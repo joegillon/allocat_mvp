@@ -41,6 +41,9 @@ class LedgerDataSet(object):
     def get_emp_rec_by_name(self, name):
         return next((rec for rec in self._emp_rex if rec.name == name), None)
 
+    def get_asn_rec(self, id):
+        return next((rec for rec in self._asn_rex if rec.id == id), None)
+        
     def get_dept_data(self):
         return self._dept_rex
 
