@@ -95,8 +95,8 @@ def validate_fte(value):
 
 def validate_email(value):
     if value and (not re.search(EMAIL_PATTERN, value)):
-        return False
-    return True
+        return 'Invalid email!'
+    return None
 
 
 def validate_va_email(value):
@@ -104,7 +104,7 @@ def validate_va_email(value):
         return None
 
     if not re.search(EMAIL_PATTERN, value):
-        return 'Invalid VA email'
+        return 'Invalid VA email!'
 
     parts = value.split('@')
     if parts[1].lower() != 'va.gov':

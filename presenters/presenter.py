@@ -67,7 +67,7 @@ class Presenter(object):
         the_list = self.view.list_ctrl
         col = the_list.columns[0]
         if ctrl == 'notes_fltr_ctrl':
-            col = the_list.columns[6]
+            col = [c for c in the_list.columns if c.title == 'Notes'][0]
         the_list.SetFilter(olv.Filter.TextSearch(
             the_list, columns=[col], text=target))
         the_list.RepopulateList()

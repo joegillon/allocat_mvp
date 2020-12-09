@@ -1,4 +1,3 @@
-import lib.month_lib as ml
 import lib.validator_lib as vl
 from views.assignment_panel import AssignmentPanel
 from event_handlers.assignment_event_handler import AssignmentInteractor
@@ -39,7 +38,7 @@ class AssignmentPresenter(object):
             vl.show_errmsg(None, 'Project is required!')
             return False
 
-        prj = [p for p in gbl.dataset._prj_rex if p.id == form_values['project_id']][0]
+        prj = [p for p in gbl.dataset.get_prj_data() if p.id == form_values['project_id']][0]
         err_msg = vl.validate_asn_timeframe(
             form_values['frum'], form_values['thru'], prj)
         if err_msg:
@@ -80,17 +79,21 @@ class AssignmentPresenter(object):
         self.view.Parent.Close()
 
     def get_form_values(self):
-        if hasattr(self.owner, 'fte'):
-            employee_id = self.owner.id
-            prj = self.assignee.get_selection()
-            project_id = prj.id if prj else None
-        else:
-            if type(self.assignee) == str:
+        if 'Project' in str(type(self.owner)):
+            project_id = self.owner.id
+            if isinstance(self.assignee, str):
                 employee_id = self.asn.employee_id
             else:
                 emp = self.assignee.get_selection()
                 employee_id = emp.id if emp else None
-            project_id = self.owner.id
+        else:
+            employee_id = self.owner.id
+            if isinstance(self.assignee, str):
+                project_id = self.asn.project_id
+            else:
+                prj = self.assignee.get_selection()
+                project_id = prj.id if prj else None
+
         return {
             'employee_id': employee_id,
             'project_id': project_id,

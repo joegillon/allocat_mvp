@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch
 from tests.helpers import *
 import globals as gbl
-import tests.allocat_data.test_db as test_db
 import tests.allocat_data.test_data as test_data
 from models.dataset import AllocatDataSet
 from presenters.project_presenter import ProjectPresenter
@@ -33,11 +32,14 @@ class TestProjectPresenter(unittest.TestCase):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         # Check the project list (also their assignments)
-        self.assertEqual(list_ctrl.GetObjects(), test_data.projects)
+        self.assertEqual(list_ctrl.GetObjects(), model)
 
         # Check that the dropdowns are populated
-        self.assertEqual(view.pi_ctrl.GetItems(), test_data.pi_list_items)
-        self.assertEqual(view.pm_ctrl.GetItems(), test_data.pm_iist_items)
+        emps = gbl.dataset.get_emp_data()
+        expected = [''] + [e.name for e in emps if e.investigator]
+        self.assertEqual(view.pi_ctrl.GetItems(), expected)
+        expected = [''] + [e.name for e in emps if e.pm]
+        self.assertEqual(view.pm_ctrl.GetItems(), expected)
 
         # Check that the first project has been selected by default
         model_idx = view.get_selected_idx()
@@ -51,8 +53,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 297',
             'frum': '1901',
             'thru': '1912',
-            'pi': gbl.dataset.get_emp_rec(76),
-            'pm': gbl.dataset.get_emp_rec(56),
+            'pi': gbl.dataset.get_emp_rec(24),
+            'pm': gbl.dataset.get_emp_rec(5),
             'notes': 'Note 297'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -66,7 +68,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
         self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
         self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '12/19')
 
         self.assertEqual(view.get_save_button_label(), 'Update Project')
 
@@ -82,8 +84,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -112,7 +114,7 @@ class TestProjectPresenter(unittest.TestCase):
             'frum': '1907',
             'thru': '2406',
             'pi': None,
-            'pm': gbl.dataset.get_emp_rec(56),
+            'pm': gbl.dataset.get_emp_rec(5),
             'notes': 'Note 298'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -134,7 +136,7 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 299',
             'frum': '1907',
             'thru': '2106',
-            'pi': gbl.dataset.get_emp_rec(76),
+            'pi': gbl.dataset.get_emp_rec(24),
             'pm': None,
             'notes': None
         }
@@ -175,7 +177,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Search for all projects with '3'
         self.presenter.apply_filter('name_fltr_ctrl', '3', '')
 
-        expected = [p for p in gbl.dataset.get_prj_data() if '3' in p.name]
+        expected = [p for p in model if '3' in p.name]
         self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
         
         # Check details
@@ -199,7 +201,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Filter for '31'
         self.presenter.apply_filter('name_fltr_ctrl', '1', '3')
 
-        expected = [p for p in gbl.dataset.get_prj_data() if '31' in p.name]
+        expected = [p for p in model if '31' in p.name]
         self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
 
         # Check details
@@ -209,7 +211,7 @@ class TestProjectPresenter(unittest.TestCase):
             'frum': '1910',
             'thru': '2009',
             'pi': None,
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': None
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -223,7 +225,7 @@ class TestProjectPresenter(unittest.TestCase):
         # And now backspace
         self.presenter.apply_filter('name_fltr_ctrl', '\b', '31')
 
-        expected = [p for p in gbl.dataset.get_prj_data() if '3' in p.name]
+        expected = [p for p in model if '3' in p.name]
         self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
         
         # Check details
@@ -248,7 +250,7 @@ class TestProjectPresenter(unittest.TestCase):
         click_search_ctrl(view.name_fltr_ctrl)
 
         # Check the project list
-        self.assertEqual(list_ctrl.GetObjects(), test_data.projects)
+        self.assertEqual(list_ctrl.GetObjects(), model)
 
         # Check that the first project has been selected by default
         model_idx = 0
@@ -261,8 +263,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 297',
             'frum': '1901',
             'thru': '1912',
-            'pi': gbl.dataset.get_emp_rec(76),
-            'pm': gbl.dataset.get_emp_rec(56),
+            'pi': gbl.dataset.get_emp_rec(24),
+            'pm': gbl.dataset.get_emp_rec(5),
             'notes': 'Note 297'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -276,8 +278,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
         self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
         self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
-
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '12/19')
 
     def testPrjNotesFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
@@ -305,7 +306,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Match '3'
         self.presenter.apply_filter('notes_fltr_ctrl', '3', '')
 
-        expected = [p for p in gbl.dataset.get_prj_data() if p.notes and '3' in p.notes]
+        expected = [p for p in model if p.notes and '3' in p.notes]
         self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
 
         # Check details
@@ -314,8 +315,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -329,7 +330,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Filter for '31'
         self.presenter.apply_filter('notes_fltr_ctrl', '1', '3')
 
-        expected = [p for p in gbl.dataset.get_prj_data() if p.notes and '31' in p.notes]
+        expected = [p for p in model if p.notes and '31' in p.notes]
         self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
 
         # Check details
@@ -338,7 +339,7 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 312',
             'frum': '1909',
             'thru': '2109',
-            'pi': gbl.dataset.get_emp_rec(73),
+            'pi': gbl.dataset.get_emp_rec(9),
             'pm': None,
             'notes': 'Note 312'
         }
@@ -353,7 +354,7 @@ class TestProjectPresenter(unittest.TestCase):
         # And now backspace
         self.presenter.apply_filter('notes_fltr_ctrl', '\b', '31')
 
-        expected = [p for p in gbl.dataset.get_prj_data() if p.notes and '3' in p.notes]
+        expected = [p for p in model if p.notes and '3' in p.notes]
         self.assertEqual(list_ctrl.GetFilteredObjects(), expected)
 
         # Check details
@@ -362,8 +363,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -378,7 +379,7 @@ class TestProjectPresenter(unittest.TestCase):
         click_search_ctrl(view.notes_fltr_ctrl)
 
         # Check the project list
-        self.assertEqual(list_ctrl.GetObjects(), test_data.projects)
+        self.assertEqual(list_ctrl.GetObjects(), model)
 
         # Check that the first project has been selected by default
         model_idx = 0
@@ -391,8 +392,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 297',
             'frum': '1901',
             'thru': '1912',
-            'pi': gbl.dataset.get_emp_rec(76),
-            'pm': gbl.dataset.get_emp_rec(56),
+            'pi': gbl.dataset.get_emp_rec(24),
+            'pm': gbl.dataset.get_emp_rec(5),
             'notes': 'Note 297'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -406,14 +407,17 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
         self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
         self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '12/19')
 
     def testClearForm(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         click_button(view.clear_btn)
 
+        # Check list has no selection
         self.assertEqual(view.get_selected_idx(), -1)
+
+        # Check the form is cleared
         expected = {
             'name': None,
             'full_name': None,
@@ -451,10 +455,6 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Duplicate project name
         view.set_name('Prj 309')
-        err_msg = self.presenter.validate()
-        self.assertEqual(err_msg, 'Project name not unique!')
-
-        view.set_name('PRJ 309')
         err_msg = self.presenter.validate()
         self.assertEqual(err_msg, 'Project name not unique!')
 
@@ -599,7 +599,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(view.thru_ctrl.GetValue(), '02/20')
 
     # This test has all valid data. See above invalid tests
-    def testAdd(self):
+    def testAddPrj(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
@@ -611,8 +611,8 @@ class TestProjectPresenter(unittest.TestCase):
         view.set_full_name('Test Project Five')
         view.set_frum('1911')
         view.set_thru('2004')
-        view.set_pi('EMP 73')
-        view.set_pm('EMP 20')
+        view.set_pi('WILLIAMS,THEODORE')
+        view.set_pm('RUTH,GEORGE HERMAN')
         view.set_notes('This is a comment.')
 
         with patch('lib.ui_lib.show_msg') as mock_popup:
@@ -632,10 +632,10 @@ class TestProjectPresenter(unittest.TestCase):
         vals = [
             'Test Prj 5', 'Test Project Five',
             '1911', '2004',
-            73, 20, 'This is a comment.', 1
+            9, 3, 'This is a comment.', 1
         ]
         self.assertEqual(args[0], sql)
-        self.assertEqual(args[1] , vals)
+        self.assertEqual(args[1], vals)
 
         # Check model and list have been updated
         model = gbl.dataset.get_prj_rec(316)
@@ -652,7 +652,7 @@ class TestProjectPresenter(unittest.TestCase):
         mock_popup.assert_called_once_with('Project added!', 'Hallelujah!')
 
     # This test has all valid data. See above invalid tests
-    def testUpdate(self):
+    def testUpdatePrj(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
@@ -661,7 +661,7 @@ class TestProjectPresenter(unittest.TestCase):
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
 
-        prj = gbl.dataset.get_prj_rec(309)
+        prj = model[model_idx]
         self.assertEqual(view.get_selection(), prj)
         self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
         self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
@@ -674,8 +674,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -696,8 +696,8 @@ class TestProjectPresenter(unittest.TestCase):
         view.set_full_name('Test Project Five')
         view.set_frum('1905')
         view.set_thru('2009')
-        view.set_pi('EMP 76')
-        view.set_pm('EMP 106')
+        view.set_pi('MAYS,WILLIE HOWARD JR')
+        view.set_pm('RUTH,GEORGE HERMAN')
         view.set_notes('This is a comment.')
 
         # Mock the save
@@ -719,15 +719,15 @@ class TestProjectPresenter(unittest.TestCase):
             'Test Prj 5', 'Test Project Five',
             '1905', '2009',
             'This is a comment.',
-            76, 106, 309
+            24, 3, 309
         ]
         self.assertEqual(args[0], sql)
         self.assertEqual(args[1], vals)
 
         # Check model and list have been updated
-        model = gbl.dataset.get_prj_rec(309)
+        updated_prj = gbl.dataset.get_prj_rec(309)
         item = view.get_selection()
-        self.assertEqual(model, item)
+        self.assertEqual(updated_prj, item)
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
         item_idx = view.get_selected_idx()
         self.assertEqual(list_ctrl.GetItemText(item_idx, 1), '05/19')
@@ -735,13 +735,13 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Check assignments
         self.assertEqual(asn_list_ctrl.GetItemCount(), 3)
-        self.assertEqual(prj.asns, model.asns)
-        self.assertEqual(model.asns, asn_list_ctrl.GetObjects())
+        self.assertEqual(prj.asns, updated_prj.asns)
+        self.assertEqual(updated_prj.asns, asn_list_ctrl.GetObjects())
 
         mock_popup.assert_called_once_with('Project updated!', 'Hallelujah!')
 
     # This time update with no name, full name change and no PI or PM
-    def testUpdate2(self):
+    def testUpdatePrj2(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
@@ -763,8 +763,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -826,11 +826,11 @@ class TestProjectPresenter(unittest.TestCase):
 
         mock_popup.assert_called_once_with('Project updated!', 'Hallelujah!')
 
-    def testDrop(self):
+    def testDropPrj(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
-        self.assertEqual(len(gbl.dataset.get_prj_data()), 8)
+        self.assertEqual(len(model), 8)
 
         # Select a project
         model_idx = 4
@@ -849,8 +849,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -886,8 +886,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 309',
             'frum': '1908',
             'thru': '2009',
-            'pi': gbl.dataset.get_emp_rec(73),
-            'pm': gbl.dataset.get_emp_rec(211),
+            'pi': gbl.dataset.get_emp_rec(9),
+            'pm': gbl.dataset.get_emp_rec(32),
             'notes': 'Note 309'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -922,6 +922,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(args[1], (309,))
 
         # Check that project removed from dataset
+        # Need to test against new prj model in global dataset
         self.assertEqual(len(gbl.dataset.get_prj_data()), 7)
         self.assertIsNone(gbl.dataset.get_prj_rec(309))
 
@@ -940,8 +941,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 297',
             'frum': '1901',
             'thru': '1912',
-            'pi': gbl.dataset.get_emp_rec(76),
-            'pm': gbl.dataset.get_emp_rec(56),
+            'pi': gbl.dataset.get_emp_rec(24),
+            'pm': gbl.dataset.get_emp_rec(5),
             'notes': 'Note 297'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -955,14 +956,14 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
         self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
         self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '12/19')
 
         self.assertEqual(view.get_save_button_label(), 'Update Project')
 
     def testDropLastRec(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
-        model_idx = len(gbl.dataset.get_prj_data()) - 1
+        model_idx = len(model) - 1
         click_list_ctrl(list_ctrl, model_idx)
 
         # User confirms deletion
@@ -984,6 +985,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(args[1], (315,))
 
         # Check that project removed from dataset
+        # Need to test against new prj model in global dataset
         self.assertEqual(len(gbl.dataset.get_prj_data()), 7)
         self.assertIsNone(gbl.dataset.get_prj_rec(315))
 
@@ -1002,8 +1004,8 @@ class TestProjectPresenter(unittest.TestCase):
             'full_name': 'Prj Full Name 297',
             'frum': '1901',
             'thru': '1912',
-            'pi': gbl.dataset.get_emp_rec(76),
-            'pm': gbl.dataset.get_emp_rec(56),
+            'pi': gbl.dataset.get_emp_rec(24),
+            'pm': gbl.dataset.get_emp_rec(5),
             'notes': 'Note 297'
         }
         self.assertEqual(self.presenter.get_form_values(), expected)
@@ -1017,7 +1019,7 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '10/19')
         self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '12/19')
         self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '10/19')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '12/19')
 
         self.assertEqual(view.get_save_button_label(), 'Update Project')
 
@@ -1069,10 +1071,10 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_view.Name, 'AssignmentPanel')
 
         self.assertEqual(asn_view.owner_lbl.GetLabelText(), 'Prj 309')
-        self.assertEqual(asn_view.assignee_lbl.GetLabelText(), 'Employee: EMP 76')
+        self.assertEqual(asn_view.assignee_lbl.GetLabelText(), 'Employee: MAYS,WILLIE HOWARD JR')
 
         expected = {
-            'employee_id': 76,
+            'employee_id': 24,
             'project_id': 309,
             'frum': '2002',
             'thru': '2002',
@@ -1084,7 +1086,6 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_view.frum_ctrl.GetValue(), '02/20')
         self.assertEqual(asn_view.thru_ctrl.GetValue(), '02/20')
 
-    # @patch('presenters.presenter.uil.show_error')
     def testDropAsnNoneSelected(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
@@ -1108,7 +1109,6 @@ class TestProjectPresenter(unittest.TestCase):
         # No change in assignments
         self.assertEqual(asn_list_ctrl.GetObjects(), expected)
 
-    # @patch('presenters.presenter.uil.confirm', return_value=False)
     def testDropAsnCancel(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
 
@@ -1216,13 +1216,13 @@ class TestProjectPresenter(unittest.TestCase):
         before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]
         self.assertEqual(asn_list_ctrl.GetObjects(), before_asns)
 
-        # Select an assignment
+        # Select assignments
         asn_list_ctrl.SelectObjects([before_asns[0], before_asns[2]])
 
         with patch('lib.ui_lib.confirm') as mock_popup:
             mock_popup.return_value = True
             with patch('dal.dao.Dao._Dao__write') as mock_write:
-                mock_write.return_value = 1
+                mock_write.return_value = 2
                 click_button(view.drop_asn_btn)
 
         mock_popup.assert_called_once_with(view, 'Drop selected assignments?')

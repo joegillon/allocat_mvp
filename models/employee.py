@@ -8,6 +8,7 @@ class Employee(object):
         self.fte = None
         self.investigator = False
         self.intern = False
+        self.pm = False
         self.org = None
         self.va_email = None
         self.nonva_email = None
@@ -23,7 +24,7 @@ class Employee(object):
             if missing:
                 raise AttributeError('Missing required fields ' + missing)
 
-    def _str_(self):
+    def __str__(self):
         return self.name
 
     def __eq__(self, other):
@@ -63,14 +64,14 @@ class Employee(object):
         if missing:
             s = ','.join(missing)
             raise AttributeError('Missing required fields ' + s)
-        flds = 'name,fte,investigator,intern,org,va_email, nonva_email, notes,active'
-        sql = "INSERT INTO employees (%s) VALUES (%s)" % (
-            flds, ('?,' * len(flds))[0:-1]
-        )
+        flds = 'name,fte,investigator,intern,pm,org,notes,active'
         vals = [
-            self.name, self.fte, self.investigator, self.intern,
-            self.org, self.va_email, self.nonva_email, self.notes, 1
+            self.name.replace(', ', ','), self.fte, self.investigator, self.intern, self.pm,
+            self.org, self.notes, 1
         ]
+        sql = "INSERT INTO employees (%s) VALUES (%s)" % (
+            flds, ('?,' * len(vals))[0:-1]
+        )
         try:
             self.id = dao.execute(sql, vals)
             gbl.dataset.add_emp(self)
@@ -93,6 +94,7 @@ class Employee(object):
         gbl.dataset.update_emp(old_self, self)
 
     def do_update(self, dao, new_values):
+        new_values['name'] = new_values['name'].replace(', ', ',')
         sql = ("UPDATE employees "
                "SET %s "
                "WHERE id=?;") % (

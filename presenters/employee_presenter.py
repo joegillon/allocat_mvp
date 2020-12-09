@@ -26,9 +26,10 @@ class EmployeePresenter(Presenter):
             self.view.set_fte(item.fte)
             self.view.set_investigator(item.investigator)
             self.view.set_intern(item.intern)
+            self.view.set_pm(item.pm)
             self.view.set_org(item.org)
-            self.view.set_va_email(item.va_email)
-            self.view.set_nonva_email(item.nonva_email)
+            # self.view.set_va_email(item.va_email)
+            # self.view.set_nonva_email(item.nonva_email)
             self.view.set_notes(item.notes)
             self.view.set_asn_list(item.asns)
             self.view.set_save_button_label('Update Employee')
@@ -48,9 +49,10 @@ class EmployeePresenter(Presenter):
             'fte': self.view.get_fte(),
             'investigator': self.view.get_investigator(),
             'intern': self.view.get_intern(),
+            'pm': self.view.get_pm(),
             'org': self.view.get_org(),
-            'va_email': self.view.get_va_email(),
-            'nonva_email': self.view.get_nonva_email(),
+            # 'va_email': self.view.get_va_email(),
+            # 'nonva_email': self.view.get_nonva_email(),
             'notes': self.view.get_notes()
         }
 
@@ -70,13 +72,13 @@ class EmployeePresenter(Presenter):
         if err_msg:
             return err_msg
 
-        err_msg = vl.validate_va_email(values['va_email'])
-        if err_msg:
-            return err_msg
-
-        err_msg = vl.validate_email(values['nonva_email'])
-        if err_msg:
-            return err_msg
+        # err_msg = vl.validate_va_email(values['va_email'])
+        # if err_msg:
+        #     return err_msg
+        #
+        # err_msg = vl.validate_email(values['nonva_email'])
+        # if err_msg:
+        #     return err_msg
 
         return None
 
@@ -88,9 +90,10 @@ class EmployeePresenter(Presenter):
         model.fte = form_values['fte']
         model.investigator = form_values['investigator']
         model.intern = form_values['intern']
+        model.pm = form_values['pm']
         model.org = form_values['org']
-        model.va_email = form_values['va_email']
-        model.nonva_email = form_values['nonva_email']
+        # model.va_email = form_values['va_email']
+        # model.nonva_email = form_values['nonva_email']
         model.notes = form_values['notes']
 
     def get_assignee_ctrl(self):
@@ -114,7 +117,7 @@ class EmployeePresenter(Presenter):
             uil.show_error(str(ex))
             return
 
-        uil.show_msg('Employee saved!', 'Hallelujah!')
+        uil.show_msg('Employee added!', 'Hallelujah!')
 
     def update_model(self, form_values):
         model = self.model[self.view.get_selected_idx()]

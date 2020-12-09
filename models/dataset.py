@@ -77,6 +77,9 @@ class AllocatDataSet(object):
             return [rec for rec in self._asn_rex if rec.active]
         return self._asn_rex
 
+    def get_asn_rec(self, id):
+        return next((rec for rec in self._asn_rex if rec.id == id), None)
+
     def bind_to(self, tbl, callback):
         self._observers[tbl].append(callback)
 
@@ -154,22 +157,28 @@ class AllocatDataSet(object):
         self.notify('assignments')
 
     def drop_asns(self, ids):
-        asn_id = ids[0]
-        asn = [rec for rec in self._asn_rex if rec.id == asn_id][0]
-        prj_id = asn.project_id
-        emp_id = asn.employee_id
+        # asn_id = ids[0]
+        # asn = [rec for rec in self._asn_rex if rec.id == asn_id][0]
+        asn = self.get_asn_rec(ids[0])
+        # prj_id = asn.project_id
+        # emp_id = asn.employee_id
 
-        prj = [rec for rec in self._prj_rex if rec.id == prj_id][0]
-        for asn in prj.asns:
-            if asn.id in ids:
-                prj.asns.remove(asn)
+        # prj = [rec for rec in self._prj_rex if rec.id == prj_id][0]
+        prj = self.get_prj_rec(asn.project_id)
+        prj.asns = [a for a in prj.asns if a.id not in ids]
+        # for asn in prj.asns:
+        #     if asn.id in ids:
+        #         prj.asns.remove(asn)
 
-        emp = [rec for rec in self._emp_rex if rec.id == emp_id][0]
-        for asn in emp.asns:
-            if asn.id in ids:
-                emp.asns.remove(asn)
+        # emp = [rec for rec in self._emp_rex if rec.id == emp_id][0]
+        emp = self.get_emp_rec(asn.employee_id)
+        emp.asns = [a for a in emp.asns if a.id not in ids]
+        # for asn in emp.asns:
+        #     if asn.id in ids:
+        #         emp.asns.remove(asn)
 
-        for asn in [rec for rec in self._asn_rex if rec.id in ids]:
-            self._asn_rex.remove(asn)
+        self._asn_rex = [a for a in self._asn_rex if a.id not in ids]
+        # for asn in [rec for rec in self._asn_rex if rec.id in ids]:
+        #     self._asn_rex.remove(asn)
 
         self.notify('assignments')
