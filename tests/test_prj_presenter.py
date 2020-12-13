@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch
 from tests.helpers import *
 import globals as gbl
-import tests.allocat_data.test_data as test_data
 from models.dataset import AllocatDataSet
 from presenters.project_presenter import ProjectPresenter
 

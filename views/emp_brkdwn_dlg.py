@@ -3,7 +3,7 @@ import globals as gbl
 import lib.ui_lib as uil
 
 
-class EmployeeBreakdownDlg(wx.Dialog):
+class EmployeeBreakdownDialog(wx.Dialog):
 
     def __init__(self, parent, winId, items):
         self.ht = (len(items) + 1) * 25

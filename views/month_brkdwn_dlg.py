@@ -26,9 +26,9 @@ class MonthBreakdownDialog(wx.Dialog):
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
         s = '%s @ %s' % (employee, month)
-        lbl = uil.get_toolbar_label(panel, s)
-        lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
-        layout.Add(lbl, 0, wx.ALL, 5)
+        self.lbl = uil.get_toolbar_label(panel, s)
+        self.lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
+        layout.Add(self.lbl, 0, wx.ALL, 5)
 
         panel.SetSizerAndFit(layout)
 

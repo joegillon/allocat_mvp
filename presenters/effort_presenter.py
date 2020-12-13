@@ -48,8 +48,19 @@ class EffortPresenter(object):
         return ml.d2month(frum), ml.d2month(thru)
 
     def run_query(self):
-        frum = self.view.get_frum()
-        thru = self.view.get_thru()
+        try:
+            frum = self.view.get_frum()
+        except ValueError:
+            uil.show_error('Invalid From Month!')
+            return
+        try:
+            thru = self.view.get_thru()
+        except ValueError:
+            uil.show_error('Invalid Thru Month!')
+            return
+        if not ml.is_valid_span(frum, thru):
+            uil.show_error('Invalid time frame!')
+            return
         months = ml.get_months(frum, thru)
         rows, self.breakdowns = self.build_dataset(frum, thru, months)
         self.view.load_grid(months, rows)
@@ -83,11 +94,11 @@ class EffortPresenter(object):
         return d
 
     def show_emp_breakdown(self, row):
-        from views.emp_brkdwn_dlg import EmployeeBreakdownDlg
+        from views.emp_brkdwn_dlg import EmployeeBreakdownDialog
 
         emp_id = self.view.get_emp_id(row)
         if not self.emp_dict[emp_id].asns:
-            uil.show_error('No assignments!')
+            uil.show_msg('No assignments!', 'allocat')
             return
 
         asns = [asn for asn in self.emp_dict[emp_id].asns if asn.active]
@@ -102,7 +113,7 @@ class EffortPresenter(object):
                 asn.effort))
             total += asn.effort
 
-        dlg = EmployeeBreakdownDlg(self.view, -1, items)
+        dlg = EmployeeBreakdownDialog(self.view, -1, items)
         s = '%d assignments for %s' % (len(asns), self.emp_dict[emp_id].name)
         dlg.set_name_lbl(s)
 
@@ -119,6 +130,9 @@ class EffortPresenter(object):
         empName = self.view.get_emp_name(row)
         month = self.view.get_selected_month(col)
         key = str(emp_id) + ':' + month
+        if not self.breakdowns[key]:
+            uil.show_msg('No assignments!', 'allocat')
+            return
         dlg = MonthBreakdownDialog(self.view, -1, empName, ml.prettify(month), self.breakdowns[key])
         dlg.ShowModal()
         dlg.Destroy()

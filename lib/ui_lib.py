@@ -1,5 +1,6 @@
 import wx
 import wx.lib.newevent
+import wx.lib.masked as masked
 from collections import namedtuple
 import globals as gbl
 from lib.custom_button import CustomButton
@@ -38,16 +39,6 @@ def toolbar_button(panel, label):
     btn.set_padding((5, 10, 5, 10))
 
     return btn
-
-
-def get_month_ctrl(panel, value):
-    import wx.lib.masked as masked
-
-    ctl = masked.TextCtrl(panel, -1, mask='##/##',
-                          size=(50, -1),
-                          formatcodes='0>')
-    ctl.SetFont(wx.Font(9, 70, 90, 90))
-    return ctl
 
 
 def get_help_btn(parent):
@@ -210,3 +201,22 @@ def clear_panel(panel):
             ctrl.Select(0)
         elif isinstance(ctrl, olv.ObjectListView):
             ctrl.DeleteAllItems()
+
+
+class MonthCtrl(masked.TextCtrl):
+    def __init__(self, parent, name):
+        masked.TextCtrl.__init__(self, parent, wx.ID_ANY, "",
+                                 name=name,
+                                 mask='##/##',
+                                 formatcodes='0>',
+                                 size=(50, -1)
+                                 )
+
+        choices=[
+            '01', '02', '03', '04', '05', '06',
+            '07', '08', '09', '10', '11', '12'
+        ]
+        self.SetFieldParameters(0,
+                                choices=choices,
+                                choiceRequired=True)
+        self.SetFont(wx.Font(9, 70, 90, 90))

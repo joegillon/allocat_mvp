@@ -74,3 +74,53 @@ def assertEqualListOfObjects(lst1, lst2):
         assert False, 'Lists of different lengths!'
     for idx in range(0, len(lst1)):
         assertEqualObjects(lst1[idx], lst2[idx])
+
+
+def get_grid_header(grid):
+    result = []
+    for col in range(0, grid.GetNumberCols()):
+        result.append(grid.GetColLabelValue(col))
+    return result
+
+
+def get_grid_row(grid, rownum):
+    result = []
+    for colnum in range(0, grid.GetNumberCols()):
+        result.append(grid.GetCellValue(rownum, colnum))
+    return result
+
+
+def grid_to_list(grid):
+    hdr = get_grid_header(grid)
+    rows = []
+    for rownum in range(0, grid.GetNumberRows()):
+        rows.append(get_grid_row(grid, rownum))
+    return [hdr] + rows
+
+
+def get_grid_colors(grid):
+    rows = []
+    for rownum in range(0, grid.GetNumberRows()):
+        row = []
+        for colnum in range(0, grid.GetNumberCols()):
+            row.append(grid.GetCellTextColour(rownum, colnum).RGB)
+        rows.append(row)
+    return rows
+
+def click_grid_cell(grid, rownum, colnum):
+    evt = wx.CommandEvent(wx.grid.EVT_GRID_CELL_LEFT_CLICK.typeId)
+    evt.Col = colnum
+    evt.Row = rownum
+    evt.SetEventObject(grid)
+    evt.SetId(grid.GetId())
+    grid.GetEventHandler().ProcessEvent(evt)
+
+
+def get_list_items(lst):
+    items = []
+    for rownum in range(0, lst.GetItemCount()):
+        row = []
+        for colnum in range(0, lst.GetColumnCount()):
+            row.append(lst.GetItem(rownum, colnum).GetText())
+        items.append(row)
+    return items

@@ -31,14 +31,14 @@ class EffTab(wx.Panel):
         frum_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
         layout.Add(frum_lbl, 0, wx.ALL, 5)
 
-        self.frum_ctrl = uil.get_month_ctrl(panel, '')
+        self.frum_ctrl = uil.MonthCtrl(panel, 'frum_ctrl')
         layout.Add(self.frum_ctrl, 0, wx.ALL, 5)
 
         thru_lbl = uil.get_toolbar_label(panel, 'Thru:')
         thru_lbl.SetForegroundColour(wx.Colour(gbl.COLOR_SCHEME.tbFg))
         layout.Add(thru_lbl, 0, wx.ALL, 5)
 
-        self.thru_ctrl = uil.get_month_ctrl(panel, '')
+        self.thru_ctrl = uil.MonthCtrl(panel, 'thru_ctrl')
         layout.Add(self.thru_ctrl, 0, wx.ALL, 5)
 
         self.run_btn = uil.toolbar_button(panel, 'Run Query')
