@@ -113,7 +113,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check form
         expected = {
-            'name': 'BERRA,LAWRENCE P',
+            'name': 'BERRA,YOGI',
             'fte': 80,
             'investigator': False,
             'intern': False,
@@ -138,7 +138,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check form
         expected = {
-            'name': 'BERRA,LAWRENCE P',
+            'name': 'BERRA,YOGI',
             'fte': 80,
             'investigator': False,
             'intern': False,
@@ -213,7 +213,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check form
         expected = {
-            'name': 'FORD,EDWARD C',
+            'name': 'FORD,WHITEY',
             'fte': 100,
             'investigator': False,
             'intern': False,
@@ -549,7 +549,7 @@ class TestEmployeePresenter(unittest.TestCase):
         self.assertEqual(err_msg, 'Employee name required!')
 
         # Duplicate name
-        view.set_name('FORD,EDWARDC')
+        view.set_name('FORD,WHITEY')
         err_msg = self.presenter.validate()
         self.assertEqual(err_msg, 'Employee name not unique!')
 

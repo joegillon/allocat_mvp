@@ -4,102 +4,94 @@ from models.spreadsheet_record import SpreadsheetRecord
 
 ss_rex = [
     SpreadsheetRecord({
-        'name': 'EMP 107',
+        'name': 'AARON,HENRY',
         'salary': 74971,
         'fringe': .46,
         'step_date': dt.date(2020, 12, 10),
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMP 264',
+        'name': 'FORD,EDWARD C',
         'salary': 70286,
         'fringe': .261,
         'step_date': None,
-        'matched': True
+        'matched': False
     }),
     SpreadsheetRecord({
-        'name': 'EMP 211',
+        'name': 'KOUFAX,SANFORD',
         'salary': 50657,
         'fringe': .229,
         'step_date': dt.date(2021, 7, 8),
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'VA EMP 73',
+        'name': 'WILLIAMS,THEODORE',
         'salary': 117082,
         'fringe': .352,
         'step_date': dt.date(2019, 12, 1),
-        'matched': False
+        'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMP 76',
+        'name': 'MAYS,WILLIE HOWARD JR',
         'salary': 142052,
         'fringe': .317,
         'step_date': None,
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMP 62',
+        'name': 'BERRA,LAWRENCE P',
         'salary': 53822,
         'fringe': .077,
         'step_date': None,
-        'matched': True
+        'matched': False
     }),
     SpreadsheetRecord({
-        'name': 'EMP 20',
+        'name': 'RUTH,GEORGE HERMAN',
         'salary': 61965,
         'fringe': .357,
         'step_date': dt.date(2021, 6, 10),
-        'matched': True
+        'matched': False
     }),
     SpreadsheetRecord({
-        'name': 'EMP 15',
+        'name': 'JETER,DEREK',
         'salary': 52239,
         'fringe': .388,
         'step_date': dt.date(2020, 1, 2),
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMP 106',
+        'name': 'KALINE,ALBERT W',
         'salary': 67834,
         'fringe': .243,
         'step_date': None,
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMP 282',
+        'name': 'BANKS,ERNEST',
         'salary': 44444,
         'fringe': .044,
         'step_date': None,
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMP 52',
+        'name': 'GEHRIG,HENRY LOUIS',
         'salary': 107070,
         'fringe': .335,
         'step_date': dt.date(2019, 10, 1),
         'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMPL 61',
+        'name': 'MANTLE,MICKEY',
         'salary': 37122,
         'fringe': .189,
         'step_date': None,
-        'matched': False
+        'matched': True
     }),
     SpreadsheetRecord({
-        'name': 'EMPL 56',
+        'name': 'DIMAGGIO,JOSEPH P',
         'salary': 76470,
         'fringe': .422,
         'step_date': dt.date(2019, 11, 1),
-        'matched': False
+        'matched': True
     })
 ]
-
-matched_rec = SpreadsheetRecord({
-        'name': 'VA EMP 73',
-        'salary': 117082,
-        'fringe': .352,
-        'step_date': dt.date(2019, 12, 1),
-        'matched': True
-})

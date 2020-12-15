@@ -611,7 +611,7 @@ class TestProjectPresenter(unittest.TestCase):
         view.set_frum('1911')
         view.set_thru('2004')
         view.set_pi('WILLIAMS,THEODORE')
-        view.set_pm('RUTH,GEORGE HERMAN')
+        view.set_pm('RUTH,BABE')
         view.set_notes('This is a comment.')
 
         with patch('lib.ui_lib.show_msg') as mock_popup:
@@ -696,7 +696,7 @@ class TestProjectPresenter(unittest.TestCase):
         view.set_frum('1905')
         view.set_thru('2009')
         view.set_pi('MAYS,WILLIE HOWARD JR')
-        view.set_pm('RUTH,GEORGE HERMAN')
+        view.set_pm('RUTH,BABE')
         view.set_notes('This is a comment.')
 
         # Mock the save

@@ -19,13 +19,6 @@ class TestImportPresenter(unittest.TestCase):
         gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
         gbl.DB_PATH = 'c:/bench/allocat/tests/allocat.db'
 
-        # with patch('dal.dao.Dao._Dao__read') as mock_db:
-        #     mock_db.side_effect = [
-        #         test_db.employees,
-        #         test_db.all_departments,
-        #         test_db.all_grant_admins,
-        #         test_db.ledger_rex
-        #     ]
         gbl.dataset = LedgerDataSet(None)
 
         self.presenter = ImportPresenter(self.frame)
@@ -37,26 +30,47 @@ class TestImportPresenter(unittest.TestCase):
 
     def testDataset(self):
         # verify global dataset set populated
-        assertEqualListOfObjects(gbl.dataset.get_emp_data(), test_data.employees)
-        assertEqualListOfObjects(gbl.dataset.get_dept_data(), test_data.dept_objs)
-        assertEqualListOfObjects(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
-        assertEqualListOfObjects(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
+        self.assertEqual(gbl.dataset.get_emp_data(), test_data.employees)
+        self.assertEqual(gbl.dataset.get_dept_data(), test_data.dept_objs)
+        self.assertEqual(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
+        self.assertEqual(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
 
     def testGetData(self):
         expected_items = sorted(test_xl_data.ss_rex, key=lambda k: k.name)
         expected_mismatches = {
-            'EMPL 56': [('EMP 56', 92), ('EMP 15', 77), ('EMP 52', 77), ('EMP 61', 77), ('EMP 62', 77)],
-            'EMPL 61': [('EMP 61', 92), ('EMP 15', 77), ('EMP 56', 77), ('EMP 62', 77), ('EMP 76', 77)],
-            'VA EMP 73': [('EMP 73', 90), ('EMP 15', 86), ('EMP 20', 86), ('EMP 52', 86), ('EMP 56', 86)]
+            'BERRA,LAWRENCE P': [
+                ('BERRA,YOGI', 86),
+                ('KALINE,ALBERT W', 49),
+                ('BANKS,ERNEST', 43),
+                ('RUTH,BABE', 40),
+                ('AARON,HENRY', 37)
+            ],
+            'FORD,EDWARD C': [
+                ('FORD,WHITEY', 50),
+                ('KOUFAX,SANFORD', 42),
+                ('MAYS,WILLIE HOWARD JR', 41),
+                ('AARON,HENRY', 33),
+                ('BERRA,YOGI', 33)
+            ],
+            'RUTH,GEORGE HERMAN': [
+                ('RUTH,BABE', 86),
+                ('GEHRIG,HENRY LOUIS', 53),
+                ('JETER,DEREK', 47),
+                ('AARON,HENRY', 41),
+                ('FORD,WHITEY', 40)
+            ]
         }
 
         with patch('lib.excel_lib.get_file') as mock_get_file_dlg:
             mock_get_file_dlg.return_value = 'c:/bench/allocat/data/test_salary_notes.xls'
             click_button(self.view.import_btn)
 
-        assertEqualListOfObjects(expected_items, self.view.list_ctrl.GetObjects())
-        assert expected_mismatches.keys() == self.presenter.mismatches.keys()
-        assert list(expected_mismatches.values()) == list(self.presenter.mismatches.values())
+        # Don't know why this doesn't work
+        # self.assertEqual(self.view.list_ctrl.GetObjects(), expected_items)
+        assertEqualListOfObjects(self.view.list_ctrl.GetObjects(), expected_items)
+
+        self.assertEqual(self.presenter.mismatches.keys(), expected_mismatches.keys())
+        self.assertEqual(list(self.presenter.mismatches.values()), list(expected_mismatches.values()))
 
     def testLoadMismatchList_NoListOnMatch(self):
         with patch('lib.excel_lib.get_file') as mock_get_file_dlg:
@@ -66,7 +80,7 @@ class TestImportPresenter(unittest.TestCase):
         # first item is a match
         click_list_ctrl(self.view.list_ctrl, 0)
 
-        assert self.view.matches_ctrl.GetObjects() == []
+        self.assertEqual(self.view.matches_ctrl.GetObjects(), [])
 
     def testLoadMismatchList_NonMatch(self):
         with patch('lib.excel_lib.get_file') as mock_get_file_dlg:
@@ -74,24 +88,24 @@ class TestImportPresenter(unittest.TestCase):
             click_button(self.view.import_btn)
 
         expected = [
-            {'name': 'EMP 73', 'score': 90},
-            {'name': 'EMP 15', 'score': 86},
-            {'name': 'EMP 20', 'score': 86},
-            {'name': 'EMP 52', 'score': 86},
-            {'name': 'EMP 56', 'score': 86}
+            {'name': 'BERRA,YOGI', 'score': 86},
+            {'name': 'KALINE,ALBERT W', 'score': 49},
+            {'name': 'BANKS,ERNEST', 'score': 43},
+            {'name': 'RUTH,BABE', 'score': 40},
+            {'name': 'AARON,HENRY', 'score': 37}
         ]
 
         # last item is a mismatch
-        click_list_ctrl(self.view.list_ctrl, 12)
+        click_list_ctrl(self.view.list_ctrl, 2)
 
-        assert self.view.matches_ctrl.GetObjects() == expected
+        self.assertEqual(self.view.matches_ctrl.GetObjects(), expected)
 
     def testMatch_NoSelection(self):
         with patch('lib.excel_lib.get_file') as mock_get_file_dlg:
             mock_get_file_dlg.return_value = 'c:/bench/allocat/data/test_salary_notes.xls'
             click_button(self.view.import_btn)
 
-        click_list_ctrl(self.view.list_ctrl, 12)
+        click_list_ctrl(self.view.list_ctrl, 2)
 
         # No match list selection
 
@@ -108,7 +122,7 @@ class TestImportPresenter(unittest.TestCase):
             mock_get_file_dlg.return_value = 'c:/bench/allocat/data/test_salary_notes.xls'
             click_button(self.view.import_btn)
 
-        click_list_ctrl(self.view.list_ctrl, 12)
+        click_list_ctrl(self.view.list_ctrl, 2)
 
         # Select not best match
         click_list_ctrl(self.view.matches_ctrl, 1)
@@ -122,11 +136,13 @@ class TestImportPresenter(unittest.TestCase):
         mock_emp_update.assert_not_called()
 
     def testMatch_TopSelection(self):
+        from models.spreadsheet_record import SpreadsheetRecord
+
         with patch('lib.excel_lib.get_file') as mock_get_file_dlg:
             mock_get_file_dlg.return_value = 'c:/bench/allocat/data/test_salary_notes.xls'
             click_button(self.view.import_btn)
 
-        click_list_ctrl(self.view.list_ctrl, 12)
+        click_list_ctrl(self.view.list_ctrl, 2)
 
         # Select best match
         click_list_ctrl(self.view.matches_ctrl, 0)
@@ -140,11 +156,20 @@ class TestImportPresenter(unittest.TestCase):
         mock_err_popup.assert_not_called()
         mock_confirm_popup.assert_not_called()
 
-        assert mock_emp_update.call_count == 1
+        self.assertEqual(mock_emp_update.call_count, 1)
         args, kwargs = mock_emp_update.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == "UPDATE employees SET name=? WHERE name=?"
-        assert args[1] == ('VA EMP 73', 'EMP 73')
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        self.assertEqual(args[0], "UPDATE employees SET name=? WHERE name=?")
+        self.assertEqual(args[1], ('BERRA,LAWRENCE P', 'BERRA,YOGI'))
 
-        assertEqualObjects(self.view.list_ctrl.GetObjectAt(12), test_xl_data.matched_rec)
+        new_rec = SpreadsheetRecord({
+            'name': 'BERRA,LAWRENCE P',
+            'salary': 53822,
+            'fringe': .077,
+            'step_date': None,
+            'matched': True
+        })
+
+        # Again, self.assertEqual doesn't work
+        assertEqualObjects(self.view.list_ctrl.GetObjectAt(2), new_rec)
