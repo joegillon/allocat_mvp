@@ -68,25 +68,25 @@ class ValidationTestSuite(unittest.TestCase):
         from models.project import Project
 
         result = validate_timeframe('', '')
-        self.assertEqual(result, 'From date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('00', '')
-        self.assertEqual(result, 'From date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('01', '')
-        self.assertEqual(result, 'From date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('010', '')
-        self.assertEqual(result, 'From date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('0000', '')
-        self.assertEqual(result, 'From date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('0013', '')
-        self.assertEqual(result, 'From date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('0001', '')
-        self.assertEqual(result, 'Thru date invalid!')
+        self.assertEqual(result, 'From, Thru dates required!')
 
         result = validate_timeframe('0001', '00')
         self.assertEqual(result, 'Thru date invalid!')

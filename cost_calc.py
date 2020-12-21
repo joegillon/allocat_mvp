@@ -8,7 +8,7 @@ if __name__ == '__main__':
     import sys
 
     s = int(sys.argv[1])
-    f = round(int(sys.argv[2]) * .001, 3)
+    f = float(sys.argv[2])
     e = int(sys.argv[3])
     d = int(sys.argv[4])
     print(calculate_cost(s, f, e, d))

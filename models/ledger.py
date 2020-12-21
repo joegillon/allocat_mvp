@@ -28,7 +28,10 @@ class Ledger(object):
         self.grant_admin_email = ''
         if d:
             for attr in d:
-                setattr(self, attr, d[attr])
+                if attr in ['admin_approved', 'va_approved', 'paid']:
+                    setattr(self, attr, True if d[attr] else False)
+                else:
+                    setattr(self, attr, d[attr])
 
     def __eq__(self, other):
         for attr in self.__dict__.keys():
@@ -77,13 +80,16 @@ class Ledger(object):
         return [Ledger(rec) for rec in rex] if rex else []
 
     def add(self, dao):
-        vals = self.get_updatable_values()
-        del vals['id']
-        vals = self.stringify_values(vals)
+        self_copy = copy.copy(self)
+        my_items = self.stringify_values(vars(self_copy))
+        del my_items['id']
+        keys = my_items.keys()
+        vals = my_items.values()
+
         sql = ("INSERT INTO ledger "
                "(%s) "
-               "VALUES (%s)" % (','.join(vals.keys()), ('?,' * len(vals))[0:-1]))
-        self.id = dao.execute(sql, list(vals.values()))
+               "VALUES (%s)" % (','.join(keys), ('?,' * len(vals))[0:-1]))
+        self.id = dao.execute(sql, list(vals))
         return self.id
 
     def update(self, dao):
@@ -99,13 +105,20 @@ class Ledger(object):
 
     def get_updatable_values(self):
         self_copy = copy.copy(self)
-        for fld in ['project', 'employee', 'effort', 'frum', 'thru']:
+        for fld in [
+            'id', 'quarter', 'asn_id',
+            'project', 'employee', 'salary', 'fringe', 'total_day', 'effort', 'frum', 'thru',
+            'days', 'amount', 'paid', 'balance'
+        ]:
             delattr(self_copy, fld)
         return vars(self_copy)
 
     def stringify_values(self, vals):
         for k, v in vals.items():
-            vals[k] = str(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else v
+            if isinstance(v, bool):
+                vals[k] = '1' if v else '0'
+            elif isinstance(v, (int, float)):
+                vals[k] = str(v)
         return vals
 
     @staticmethod

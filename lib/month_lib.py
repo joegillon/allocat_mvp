@@ -154,8 +154,9 @@ def get_last_day_of_month(any_day):
     next_month = any_day.replace(day=28) + dt.timedelta(days=4)
     return next_month - dt.timedelta(days=next_month.day)
 
+
 def is_in_span(frum, thru, span_frum, span_thru):
-    if frum < span_frum or thru > span_thru:
-        return False
-    return True
+    if frum <= span_thru and thru >= span_frum:
+        return True
+    return False
 

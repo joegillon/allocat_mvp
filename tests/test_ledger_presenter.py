@@ -1,15 +1,12 @@
 import unittest
 import unittest.mock
 from unittest.mock import patch
-from datetime import datetime
 from tests.helpers import *
 import globals as gbl
 from models.ledger_dataset import LedgerDataSet
 from models.ledger import Ledger
 from presenters.ledger_presenter import LedgerPresenter
-import tests.ledger_data.test_db as test_db
 import tests.ledger_data.test_data as test_data
-import lib.month_lib as ml
 
 
 class TestLedgerPresenter(unittest.TestCase):
@@ -20,17 +17,12 @@ class TestLedgerPresenter(unittest.TestCase):
 
         gbl.COLOR_SCHEME = gbl.SKINS[gbl.pick_scheme()]
 
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.side_effect = [
-                test_db.employees,
-                test_db.all_departments,
-                test_db.all_grant_admins,
-                test_db.ledger_rex
-            ]
-            gbl.dataset = LedgerDataSet(None)
+        gbl.dataset = LedgerDataSet(None)
 
-        self.presenter = LedgerPresenter(self.frame)
-        self.view = self.presenter.view
+        with patch('presenters.ledger_presenter.LedgerPresenter.get_init_quarter') as mock_qtr:
+            mock_qtr.return_value = (2020, 1)
+            self.presenter = LedgerPresenter(self.frame)
+            self.view = self.presenter.view
 
     def tearDown(self):
         self.frame.Destroy()
@@ -38,319 +30,257 @@ class TestLedgerPresenter(unittest.TestCase):
 
     def testInitView(self):
         # verify global dataset set populated
-        assertEqualListOfObjects(gbl.dataset.get_emp_data(), test_data.employee_obs)
-        assertEqualListOfObjects(gbl.dataset.get_dept_data(), test_data.dept_objs)
-        assertEqualListOfObjects(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
-        assertEqualListOfObjects(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
+        self.assertEqual(gbl.dataset.get_emp_data(), test_data.employees)
+        self.assertEqual(gbl.dataset.get_dept_data(), test_data.dept_objs)
+        self.assertEqual(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
+        self.assertEqual(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
+        self.assertEqual(gbl.dataset.get_asn_data(), test_data.assignments)
 
         # verify dropdowns loaded
         self.assertEqual(self.view.dept_ctrl.GetItems(), test_data.department_items)
         self.assertEqual(self.view.grant_admin_ctrl.GetItems(), test_data.grant_admin_items)
 
         # verify default query params
-        today = datetime.today()
-        quarter_choice = ml.get_quarter(ml.get_quarter(today.month)) - 1
-        self.assertEqual(self.view.get_year(), today.year)
-        self.assertEqual(self.view.get_qtr(), quarter_choice)
+        self.assertEqual(self.view.get_year(), 2020)
+        self.assertEqual(self.view.get_qtr(), 1)
         self.assertEqual(self.presenter.quarter, '')
 
-    def testQueryNoAsnsNoEntries(self):
-        assert gbl.dataset.get_ledger_entries() == []
-
+    def testQueryNoAsnsNoLedger(self):
         self.view.set_year(2019)
-        self.view.set_qtr(4)
+        self.view.set_qtr(2)
 
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.return_value  = []      # no billable assignments
-            self.presenter.run_query()
-
-        # verify billables call
-        assert mock_db.call_count == 1
-        args, kwargs = mock_db.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == ("SELECT a.*, e.name AS employee, p.name AS project "
-                           "FROM assignments a "
-                           "JOIN employees e ON a.employee_id=e.id "
-                           "JOIN projects p ON a.project_id=p.id "
-                           "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
-        assert args[1] == ('1810', '1812', 1)
+        click_button(self.view.qry_btn)
 
         # verify global ledger entries is empty
-        assert gbl.dataset.get_ledger_entries() == []
+        self.assertEqual(gbl.dataset.get_ledger_entries(), [])
 
         # verify list has no entries
-        assert self.view.list_ctrl.GetObjects() == []
+        self.assertEqual(self.view.list_ctrl.GetObjects(), gbl.dataset.get_ledger_entries())
 
         # verify there is not list selection
-        assert self.view.get_selection() is None
+        self.assertIsNone(self.view.get_selection())
 
         # verify details form is blank
-        assert self.view.get_form_values() == test_data.blank_details_form
+        expected = {
+            'dept': None,
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': None,
+            'short_code': None,
+            'grant_admin': None,
+            'grant_admin_email': None
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
 
-    def testRunQuerySelectionNoLedgerRex(self):
-        assert gbl.dataset.get_ledger_entries() == []
-
-        # there are no ledger records in DB for quarter 20202
-        assert gbl.dataset.get_ledger_data('20202') == []
-
+    def testRunQueryWithAsnsNoLedgerRex(self):
         self.view.set_year(2020)
         self.view.set_qtr(2)
 
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.return_value = test_db.billable_assignments_qtr_2
-            self.presenter.run_query()
+        click_button(self.view.qry_btn)
 
-        # verify billables call
-        assert mock_db.call_count == 1
-        args, kwargs = mock_db.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == ("SELECT a.*, e.name AS employee, p.name AS project "
-                           "FROM assignments a "
-                           "JOIN employees e ON a.employee_id=e.id "
-                           "JOIN projects p ON a.project_id=p.id "
-                           "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
-        assert args[1] == ('2001', '2003', 1)
+        # verify global ledger data all built from billable assignments
+        self.assertEqual(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_2)
 
-        # verify global ledger data
-        assertEqualListOfObjects(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_2)
-
-        #verify global ledger data all built from billable assignments
-        asn_ids = [asn.id for asn in gbl.dataset.get_asn_data()]
-        ledger_asn_ids = [entry.asn_id for entry in gbl.dataset.get_ledger_entries()]
-        assert asn_ids.sort() == ledger_asn_ids.sort()
-
-        # verify list
-        assertEqualListOfObjects(self.view.list_ctrl.GetObjects(), test_data.ledger_items_qtr_2)
+        # verify display updated
+        self.assertEqual(self.view.list_ctrl.GetObjects(), gbl.dataset.get_ledger_entries())
 
         # verify there is not list selection
-        assert self.view.get_selection() is None
+        self.assertIsNone(self.view.get_selection())
 
         # verify details form is blank
-        assert self.view.get_form_values() == test_data.blank_details_form
-        items = self.view.list_ctrl.GetObjects()
-        self.assertEqual(len(items), 6)
+        expected = {
+            'dept': None,
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': None,
+            'short_code': None,
+            'grant_admin': None,
+            'grant_admin_email': None
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
 
-    def testRunQuerySelectionWithLedgerRex(self):
-        assert gbl.dataset.get_ledger_entries() == []
-
-        # there are ledger records in DB for quarter 20201
-        ledger_data = gbl.dataset.get_ledger_data('20201')
-        assertEqualListOfObjects(ledger_data, test_data.ledger_items_qtr_1)
-        assert [entry.asn_id for entry in ledger_data] == [2271, 2272, 2282]
-
+    def testRunQueryWithAsnsAndLedgerRex(self):
         self.view.set_year(2020)
         self.view.set_qtr(1)
 
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.return_value = test_db.billable_assignments_qtr_1
-            self.presenter.run_query()
+        click_button(self.view.qry_btn)
 
-        # verify billables call
-        assert mock_db.call_count == 1
-        args, kwargs = mock_db.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == ("SELECT a.*, e.name AS employee, p.name AS project "
-                           "FROM assignments a "
-                           "JOIN employees e ON a.employee_id=e.id "
-                           "JOIN projects p ON a.project_id=p.id "
-                           "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
-        assert args[1] == ('1910', '1912', 1)
+        # verify global ledger data all built from billable assignments
+        self.assertEqual(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_1)
 
-        # verify global ledger data
-        assertEqualListOfObjects(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_1)
-        asn_ids = [asn.id for asn in gbl.dataset.get_asn_data()]
-        ledger_asn_ids = [entry.asn_id for entry in gbl.dataset.get_ledger_entries()]
-        assert asn_ids.sort() == ledger_asn_ids.sort()
-
-        # verify list
-        assertEqualListOfObjects(self.view.list_ctrl.GetObjects(), test_data.ledger_items_qtr_1)
+        # verify display updated
+        self.assertEqual(self.view.list_ctrl.GetObjects(), gbl.dataset.get_ledger_entries())
 
         # verify there is not list selection
-        assert self.view.get_selection() is None
+        self.assertIsNone(self.view.get_selection())
 
         # verify details form is blank
-        assert self.view.get_form_values() == test_data.blank_details_form
-        items = self.view.list_ctrl.GetObjects()
-        self.assertEqual(len(items), 6)
+        expected = {
+            'dept': None,
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': None,
+            'short_code': None,
+            'grant_admin': None,
+            'grant_admin_email': None
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
 
     def testLoadDetails_No_Salary(self):
-        assert gbl.dataset.get_ledger_entries() == []
-
-        # there are ledger records in DB for quarter 20201
-        ledger_data = gbl.dataset.get_ledger_data('20201')
-        assertEqualListOfObjects(ledger_data, test_data.ledger_items_qtr_1)
-        assert [entry.asn_id for entry in ledger_data] == [2271, 2272, 2282]
-
         self.view.set_year(2020)
         self.view.set_qtr(1)
 
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.return_value = test_db.billable_assignments_qtr_1
-            self.presenter.run_query()
+        click_button(self.view.qry_btn)
 
-        # verify billables call
-        assert mock_db.call_count == 1
-        args, kwargs = mock_db.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == ("SELECT a.*, e.name AS employee, p.name AS project "
-                           "FROM assignments a "
-                           "JOIN employees e ON a.employee_id=e.id "
-                           "JOIN projects p ON a.project_id=p.id "
-                           "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
-        assert args[1] == ('1910', '1912', 1)
-
-        # verify global ledger data
-        assertEqualListOfObjects(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_1)
-        asn_ids = [asn.id for asn in gbl.dataset.get_asn_data()]
-        ledger_asn_ids = [entry.asn_id for entry in gbl.dataset.get_ledger_entries()]
-        assert asn_ids.sort() == ledger_asn_ids.sort()
-
-        # verify list
-        assertEqualListOfObjects(self.view.list_ctrl.GetObjects(), test_data.ledger_items_qtr_1)
-
-        # verify there is not list selection
-        assert self.view.get_selection() is None
-
-        # verify details form is blank
-        assert self.view.get_form_values() == test_data.blank_details_form
-        items = self.view.list_ctrl.GetObjects()
-        self.assertEqual(len(items), 6)
-
-        # select an entry
-        with patch('lib.ui_lib.show_error', return_value=None) as popup_mock:
-            click_list_ctrl(self.view.list_ctrl, 3)
-
-        # verify selection in the list
-        item = self.view.get_selection()
-        self.assertEqual(item.employee, 'Emp 61')
-        self.assertEqual(item.asn_id, 2282)
-
-        # verify no salary popup
-        popup_mock.assert_called_once_with('Emp 61 has no salary! Not imported?')
-
-        # verify details have been loaded
-        self.assertEqual(self.view.get_employee(), 'Emp 61')
-
-    def testLoadDetailsWithSalary(self):
-        assert gbl.dataset.get_ledger_entries() == []
-
-        # there are ledger records in DB for quarter 20201
-        ledger_data = gbl.dataset.get_ledger_data('20201')
-        assertEqualListOfObjects(ledger_data, test_data.ledger_items_qtr_1)
-        assert [entry.asn_id for entry in ledger_data] == [2271, 2272, 2282]
-
-        self.view.set_year(2020)
-        self.view.set_qtr(1)
-
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.return_value = test_db.billable_assignments_qtr_1
-            self.presenter.run_query()
-
-        # verify billables call
-        assert mock_db.call_count == 1
-        args, kwargs = mock_db.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == ("SELECT a.*, e.name AS employee, p.name AS project "
-                           "FROM assignments a "
-                           "JOIN employees e ON a.employee_id=e.id "
-                           "JOIN projects p ON a.project_id=p.id "
-                           "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
-        assert args[1] == ('1910', '1912', 1)
-
-        # verify global ledger data
-        assertEqualListOfObjects(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_1)
-        asn_ids = [asn.id for asn in gbl.dataset.get_asn_data()]
-        ledger_asn_ids = [entry.asn_id for entry in gbl.dataset.get_ledger_entries()]
-        assert asn_ids.sort() == ledger_asn_ids.sort()
-
-        # verify list
-        assertEqualListOfObjects(self.view.list_ctrl.GetObjects(), test_data.ledger_items_qtr_1)
-
-        # verify there is not list selection
-        assert self.view.get_selection() is None
-
-        # verify details form is blank
-        assert self.view.get_form_values() == test_data.blank_details_form
-        items = self.view.list_ctrl.GetObjects()
-        self.assertEqual(len(items), 6)
-
-        # select an entry
-        with patch('lib.ui_lib.show_error', return_value=None) as popup_mock:
+        with patch('lib.ui_lib.show_error') as mock_popup:
+            mock_popup.return_value = None
             click_list_ctrl(self.view.list_ctrl, 2)
 
-        # verify selection in the list
-        item = self.view.get_selection()
-        self.assertEqual(item.employee, 'Emp 52')
+        # verify popup
+        mock_popup.assert_called_once_with('MANTLE,MICKEY has no salary! Not imported?')
+
+        # verify details
+        expected = {
+            'dept': 'EPIDEMIOLOGY',
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': 'K0H1003',
+            'short_code': '556677',
+            'grant_admin': 'MARX,CHICO',
+            'grant_admin_email': 'chico@umich.edu'
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
+
+        # verify display only items
+        self.assertEqual(self.view.prj_ctrl.GetValue(), 'Prj 299')
+        self.assertEqual(self.view.emp_ctrl.GetValue(), 'MANTLE,MICKEY')
+        self.assertEqual(self.view.eff_ctrl.GetValue(), '10')
+        self.assertEqual(self.view.frum_ctrl.GetValue(), '10/19')
+        self.assertEqual(self.view.thru_ctrl.GetValue(), '11/19')
+        self.assertEqual(self.view.salary_ctrl.GetValue(), '')
+        self.assertEqual(self.view.fringe_ctrl.GetValue(), '')
+        self.assertEqual(self.view.total_ctrl.GetValue(), '')
+        self.assertEqual(self.view.days_ctrl.GetValue(), '61')
+        self.assertEqual(self.view.amt_ctrl.GetValue(), '')
+        self.assertEqual(self.view.paid_ctrl.GetValue(), False)
+        self.assertEqual(self.view.balance_ctrl.GetValue(), '')
+
+    def testLoadDetailsWithSalaryNoUserInput(self):
+        self.view.set_year(2020)
+        self.view.set_qtr(1)
+
+        click_button(self.view.qry_btn)
+
+        with patch('lib.ui_lib.show_error') as mock_popup:
+            mock_popup.return_value = None
+            click_list_ctrl(self.view.list_ctrl, 1)
+
+        # verify popup
+        mock_popup.assert_not_called()
+
+        # verify details
+        expected = {
+            'dept': None,
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': None,
+            'short_code': None,
+            'grant_admin': None,
+            'grant_admin_email': None
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
+
+        # verify display only items
+        self.assertEqual(self.view.prj_ctrl.GetValue(), 'Prj 297')
+        self.assertEqual(self.view.emp_ctrl.GetValue(), 'GEHRIG,HENRY LOUIS')
+        self.assertEqual(self.view.eff_ctrl.GetValue(), '10')
+        self.assertEqual(self.view.frum_ctrl.GetValue(), '10/19')
+        self.assertEqual(self.view.thru_ctrl.GetValue(), '12/19')
+        self.assertEqual(self.view.salary_ctrl.GetValue(), '104,971')
+        self.assertEqual(self.view.fringe_ctrl.GetValue(), '33.5')
+        self.assertEqual(self.view.total_ctrl.GetValue(), '537.18')
+        self.assertEqual(self.view.days_ctrl.GetValue(), '92')
+        self.assertEqual(self.view.amt_ctrl.GetValue(), '4,942.04')
+        self.assertEqual(self.view.paid_ctrl.GetValue(), False)
+        self.assertEqual(self.view.balance_ctrl.GetValue(), '4,942.04')
+
+    def testLoadDetailsWithSalaryAndUserInput(self):
+        self.view.set_year(2020)
+        self.view.set_qtr(1)
+
+        click_button(self.view.qry_btn)
+
+        with patch('lib.ui_lib.show_error') as mock_popup:
+            mock_popup.return_value = None
+            click_list_ctrl(self.view.list_ctrl, 0)
+
+        # verify popup
+        mock_popup.assert_not_called()
+
+        # verify details
+        expected = {
+            'dept': 'HEMATOLOGY',
+            'admin_approved': False,
+            'va_approved': True,
+            'invoice_num': 'K0H1001',
+            'short_code': '123456',
+            'grant_admin': 'MARX,GROUCHO',
+            'grant_admin_email': 'groucho@umich.edu'
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
+
+        # verify display only items
+        self.assertEqual(self.view.prj_ctrl.GetValue(), 'Prj 297')
+        self.assertEqual(self.view.emp_ctrl.GetValue(), 'BANKS,ERNEST')
+        self.assertEqual(self.view.eff_ctrl.GetValue(), '45')
+        self.assertEqual(self.view.frum_ctrl.GetValue(), '10/19')
+        self.assertEqual(self.view.thru_ctrl.GetValue(), '12/19')
+        self.assertEqual(self.view.salary_ctrl.GetValue(), '44,444')
+        self.assertEqual(self.view.fringe_ctrl.GetValue(), '4.4')
+        self.assertEqual(self.view.total_ctrl.GetValue(), '177.86')
+        self.assertEqual(self.view.days_ctrl.GetValue(), '92')
+        self.assertEqual(self.view.amt_ctrl.GetValue(), '7,363.45')
+        self.assertEqual(self.view.paid_ctrl.GetValue(), False)
+        self.assertEqual(self.view.balance_ctrl.GetValue(), '7,363.45')
+
+    def testAddEntry(self):
+        self.view.set_year(2020)
+        self.view.set_qtr(1)
+
+        self.presenter.run_query()
+
+        # select an entry
+        with patch('lib.ui_lib.show_error', return_value=None) as popup_mock:
+            click_list_ctrl(self.view.list_ctrl, 5)
 
         # verify no salary popup not called
         popup_mock.assert_not_called()
 
-        # verify details have been loaded
-        self.assertEqual(self.view.get_employee(), 'Emp 52')
+        # verify details
+        expected = {
+            'dept': None,
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': None,
+            'short_code': None,
+            'grant_admin': None,
+            'grant_admin_email': None
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
 
-    def testUpdateEntry(self):
-        assert gbl.dataset.get_ledger_entries() == []
-
-        # there are ledger records in DB for quarter 20201
-        ledger_data = gbl.dataset.get_ledger_data('20201')
-        assertEqualListOfObjects(ledger_data, test_data.ledger_items_qtr_1)
-        assert [entry.asn_id for entry in ledger_data] == [2271, 2272, 2282]
-
-        self.view.set_year(2020)
-        self.view.set_qtr(1)
-
-        with patch('dal.dao.Dao._Dao__read') as mock_db:
-            mock_db.return_value = test_db.billable_assignments_qtr_1
-            self.presenter.run_query()
-
-        # verify billables call
-        assert mock_db.call_count == 1
-        args, kwargs = mock_db.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == ("SELECT a.*, e.name AS employee, p.name AS project "
-                           "FROM assignments a "
-                           "JOIN employees e ON a.employee_id=e.id "
-                           "JOIN projects p ON a.project_id=p.id "
-                           "WHERE a.frum >= ? AND a.thru <= ? AND p.non_va=?")
-        assert args[1] == ('1910', '1912', 1)
-
-        # verify global ledger data
-        assertEqualListOfObjects(gbl.dataset.get_ledger_entries(), test_data.ledger_items_qtr_1)
-        asn_ids = [asn.id for asn in gbl.dataset.get_asn_data()]
-        ledger_asn_ids = [entry.asn_id for entry in gbl.dataset.get_ledger_entries()]
-        assert asn_ids.sort() == ledger_asn_ids.sort()
-
-        # verify list
-        assertEqualListOfObjects(self.view.list_ctrl.GetObjects(), test_data.ledger_items_qtr_1)
-
-        # verify there is not list selection
-        assert self.view.get_selection() is None
-
-        # verify details form is blank
-        assert self.view.get_form_values() == test_data.blank_details_form
-        items = self.view.list_ctrl.GetObjects()
-        self.assertEqual(len(items), 6)
-
-        # select an entry
-        with patch('lib.ui_lib.show_error', return_value=None) as popup_mock:
-            click_list_ctrl(self.view.list_ctrl, 2)
-
-        # verify selection in the list
-        item = self.view.get_selection()
-        self.assertEqual(item.employee, 'Emp 52')
-        self.assertEqual(item.asn_id, 2283)
-
-        # verify no salary popup not called
-        popup_mock.assert_not_called()
-
-        # verify details have been loaded
-        self.assertEqual(self.view.get_employee(), 'Emp 52')
+        # verify display only items
+        self.assertEqual(self.view.prj_ctrl.GetValue(), 'Prj 315')
+        self.assertEqual(self.view.emp_ctrl.GetValue(), 'BANKS,ERNEST')
+        self.assertEqual(self.view.eff_ctrl.GetValue(), '20')
+        self.assertEqual(self.view.frum_ctrl.GetValue(), '10/19')
+        self.assertEqual(self.view.thru_ctrl.GetValue(), '12/19')
+        self.assertEqual(self.view.salary_ctrl.GetValue(), '44,444')
+        self.assertEqual(self.view.fringe_ctrl.GetValue(), '4.4')
+        self.assertEqual(self.view.total_ctrl.GetValue(), '177.86')
+        self.assertEqual(self.view.days_ctrl.GetValue(), '92')
+        self.assertEqual(self.view.amt_ctrl.GetValue(), '3,272.65')
+        self.assertEqual(self.view.paid_ctrl.GetValue(), False)
+        self.assertEqual(self.view.balance_ctrl.GetValue(), '3,272.65')
 
         # edit details
         click_combobox_ctrl(self.view.dept_ctrl, 2)
@@ -361,7 +291,112 @@ class TestLedgerPresenter(unittest.TestCase):
         click_combobox_ctrl(self.view.grant_admin_ctrl, 3)
 
         # verify grant admin email is done
-        self.assertEqual(self.view.get_grant_admin_email(), 'chico@umich.edu')
+        self.assertEqual(self.view.get_grant_admin_email(), 'harpo@umich.edu')
+
+        with patch('dal.dao.Dao._Dao__write') as write_mock:
+            write_mock.return_value = 4
+            with patch('lib.ui_lib.show_msg') as popup_mock:
+                popup_mock.return_value = None
+                click_button(self.view.update_entry_btn)
+
+        # verify the DB call
+        self.assertEqual(write_mock.call_count, 1)
+        args, kwargs = write_mock.call_args
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        sql = ("INSERT INTO ledger "
+               "(quarter,dept,admin_approved,va_approved,invoice_num,"
+               "asn_id,project,employee,salary,fringe,total_day,frum,thru,"
+               "effort,days,amount,paid,balance,short_code,"
+               "grant_admin,grant_admin_email) "
+               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+        vals = ['20201', 'CARDIOLOGY', '1', '1', 'K0H0002',
+                '2396', 'Prj 315', 'BANKS,ERNEST', '44444', '4.4',
+                '177.86', '1910', '1912', '20', '92', '3272.65',
+                '0', '3272.65', '123456', 'MARX,HARPO', 'harpo@umich.edu'
+        ]
+        self.assertEqual(args[0], sql)
+        self.assertEqual(args[1], vals)
+
+        # verify user notification
+        popup_mock.assert_called_once_with('Ledger updated!', 'Hooray')
+
+        # verify list updated
+        expected_item = Ledger({
+            'admin_approved': True,
+            'amount': 3272.65,
+            'asn_id': 2396,
+            'balance': 3272.65,
+            'days': 92,
+            'dept': 'CARDIOLOGY',
+            'effort': 20,
+            'employee': 'BANKS,ERNEST',
+            'fringe': 4.4,
+            'frum': '1910',
+            'grant_admin': 'MARX,HARPO',
+            'grant_admin_email': 'harpo@umich.edu',
+            'id': 4,
+            'invoice_num': 'K0H0002',
+            'paid': False,
+            'project': 'Prj 315',
+            'quarter': 20201,
+            'salary': 44444,
+            'short_code': '123456',
+            'thru': '1912',
+            'total_day': 177.86,
+            'va_approved': True
+        })
+        self.assertEqual(self.view.get_selection(), expected_item)
+
+    def testUpdateEntry(self):
+        self.view.set_year(2020)
+        self.view.set_qtr(1)
+
+        self.presenter.run_query()
+
+        # select an entry
+        with patch('lib.ui_lib.show_error', return_value=None) as popup_mock:
+            click_list_ctrl(self.view.list_ctrl, 1)
+
+        # verify no salary popup not called
+        popup_mock.assert_not_called()
+
+        # verify details
+        expected = {
+            'dept': None,
+            'admin_approved': False,
+            'va_approved': False,
+            'invoice_num': None,
+            'short_code': None,
+            'grant_admin': None,
+            'grant_admin_email': None
+        }
+        self.assertEqual(self.view.get_form_values(), expected)
+
+        # verify display only items
+        self.assertEqual(self.view.prj_ctrl.GetValue(), 'Prj 297')
+        self.assertEqual(self.view.emp_ctrl.GetValue(), 'GEHRIG,HENRY LOUIS')
+        self.assertEqual(self.view.eff_ctrl.GetValue(), '10')
+        self.assertEqual(self.view.frum_ctrl.GetValue(), '10/19')
+        self.assertEqual(self.view.thru_ctrl.GetValue(), '12/19')
+        self.assertEqual(self.view.salary_ctrl.GetValue(), '104,971')
+        self.assertEqual(self.view.fringe_ctrl.GetValue(), '33.5')
+        self.assertEqual(self.view.total_ctrl.GetValue(), '537.18')
+        self.assertEqual(self.view.days_ctrl.GetValue(), '92')
+        self.assertEqual(self.view.amt_ctrl.GetValue(), '4,942.04')
+        self.assertEqual(self.view.paid_ctrl.GetValue(), False)
+        self.assertEqual(self.view.balance_ctrl.GetValue(), '4,942.04')
+
+        # edit details
+        click_combobox_ctrl(self.view.dept_ctrl, 2)
+        check_checkbox_ctrl(self.view.admin_approved_ctrl)
+        check_checkbox_ctrl(self.view.va_approved_ctrl)
+        enter_in_textbox_ctrl(self.view.invoice_ctrl, 'K0H0002')
+        enter_in_textbox_ctrl(self.view.short_code_ctrl, '123456')
+        click_combobox_ctrl(self.view.grant_admin_ctrl, 3)
+
+        # verify grant admin email is done
+        self.assertEqual(self.view.get_grant_admin_email(), 'harpo@umich.edu')
 
         with patch('dal.dao.Dao._Dao__write') as write_mock:
             write_mock.return_value = 1
@@ -370,71 +405,219 @@ class TestLedgerPresenter(unittest.TestCase):
                 click_button(self.view.update_entry_btn)
 
         # verify the DB call
-        assert write_mock.call_count == 1
+        self.assertEqual(write_mock.call_count, 1)
         args, kwargs = write_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        sql = ("INSERT INTO ledger "
-               "(quarter,dept,admin_approved,va_approved,invoice_num,"
-               "asn_id,salary,fringe,total_day,days,amount,paid,balance,short_code,"
-               "grant_admin,grant_admin_email) "
-               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-        assert args[0] == sql
-        assert args[1] == [
-            '20201', 'CARDIOLOGY', True, True, 'K0H0002', '2283', '104971', '33.5',
-            '13817.54', '92', '127121.41', False, '127121.41', '123456',
-            'MARX,CHICO', 'chico@umich.edu'
-        ]
+        self.assertEqual(len(args), 2)
+        self.assertEqual(len(kwargs), 0)
+        sql = ("UPDATE ledger "
+               "SET dept=?,admin_approved=?,va_approved=?,invoice_num=?,short_code=?,grant_admin=?,grant_admin_email=? "
+               "WHERE id=?;")
+        vals = ['CARDIOLOGY', '1', '1', 'K0H0002', '123456', 'MARX,HARPO', 'harpo@umich.edu', 2]
+        self.assertEqual(args[0], sql)
+        self.assertEqual(args[1], vals)
 
         # verify user notification
-        assert popup_mock.call_count == 1
-        args, kwargs = popup_mock.call_args
-        assert len(args) == 2
-        assert len(kwargs) == 0
-        assert args[0] == 'Ledger updated!'
-        assert args[1] == 'Hooray'
+        popup_mock.assert_called_once_with('Ledger updated!', 'Hooray')
 
         # verify list updated
         expected_item = Ledger({
             'admin_approved': True,
-            'amount': 127121.41,
-            'asn_id': 2271,
-            'balance': '127121.41',
+            'amount': 4942.04,
+            'asn_id': 2272,
+            'balance': 4942.04,
             'days': 92,
             'dept': 'CARDIOLOGY',
             'effort': 10,
-            'employee': 'GILLON,LEAH R',
-            'fringe': 31.7,
-            'frum': '10/1/19',
-            'grant_admin': 'DENSEN,BRAD',
-            'grant_admin_email': 'bdensen@umich.edu',
-            'id': 1,
-            'invoice_num': 'K0H0001',
+            'employee': 'GEHRIG,HENRY LOUIS',
+            'fringe': 33.5,
+            'frum': '1910',
+            'grant_admin': 'MARX,HARPO',
+            'grant_admin_email': 'harpo@umich.edu',
+            'id': 2,
+            'invoice_num': 'K0H0002',
             'paid': False,
-            'project': 'UM DOAC (Barnes/Sussman)',
-            'quarter': '20201',
-            'salary': 110234,
+            'project': 'Prj 297',
+            'quarter': 20201,
+            'salary': 104971,
             'short_code': '123456',
-            'thru': '12/31/19',
-            'total_day': 13817.54,
+            'thru': '1912',
+            'total_day': 537.18,
             'va_approved': True
         })
-        assertEqualObjects(expected_item, self.view.get_selection())
+        self.assertEqual(self.view.get_selection(), expected_item)
 
     def testGetTotalDays(self):
+        # Quarter 1, 2020
         q_frum = '1910'
         q_thru = '1912'
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, q_frum, q_thru) == 92
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, q_frum, '1911') == 61
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, q_frum, '2001') == 92
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1909', q_thru) == 92
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '1910') == 31
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '1911') == 61
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '2001') == 92
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1911', q_thru) == 61
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1911', '1911') == 30
-        assert self.presenter.get_total_days_asn(q_frum, q_thru, '1911', '2001') == 61
-        print('\n' + str(self.presenter.get_total_days_asn('2001', '2003', '2002', '2003')))
+
+        # First month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1910', '1910'), 31)
+
+        # Second month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1911', '1911'), 30)
+
+        # Third month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1912', '1912'), 31)
+
+        # First 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1910', '1911'), 61)
+
+        # Last 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1911', '1912'), 61)
+
+        # Full quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1910', '1912'), 92)
+
+        # Assignment starts before quarter, ends after first month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '1910'), 31)
+
+        # Assignment starts before quarter, ends after second month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '1911'), 61)
+
+        # Assignment starts before quarter, ends with quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '1912'), 92)
+
+        # Assignment starts in first month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1910', '2001'), 92)
+
+        # Assignment starts in second month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1911', '2001'), 61)
+
+        # Assignment starts in third month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1912', '2001'), 31)
+
+        # Assignment starts before quarter, ends after quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1909', '2001'), 92)
+
+        # Quarter 2, 2020 (leap year)
+        q_frum = '2001'
+        q_thru = '2003'
+
+        # First month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2001', '2001'), 31)
+
+        # Second month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2002', '2002'), 29)
+
+        # Third month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2003', '2003'), 31)
+
+        # First 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2001', '2002'), 60)
+
+        # Last 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2002', '2003'), 60)
+
+        # Full quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2001', '2003'), 91)
+
+        # Assignment starts before quarter, ends after first month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1912', '2001'), 31)
+
+        # Assignment starts before quarter, ends after second month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1912', '2002'), 60)
+
+        # Assignment starts before quarter, ends with quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1912', '2003'), 91)
+
+        # Assignment starts in first month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2001', '2004'), 91)
+
+        # Assignment starts in second month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2002', '2004'), 60)
+
+        # Assignment starts in third month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2003', '2004'), 31)
+
+        # Assignment starts before quarter, ends after quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1912', '2004'), 91)
+
+        # Quarter 2, 2019 (non-leap year)
+        q_frum = '1901'
+        q_thru = '1903'
+
+        # First month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1901', '1901'), 31)
+
+        # Second month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1902', '1902'), 28)
+
+        # Third month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1903', '1903'), 31)
+
+        # First 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1901', '1902'), 59)
+
+        # Last 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1902', '1903'), 59)
+
+        # Full quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1901', '1903'), 90)
+
+        # Assignment starts before quarter, ends after first month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1812', '1901'), 31)
+
+        # Assignment starts before quarter, ends after second month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1812', '1902'), 59)
+
+        # Assignment starts before quarter, ends with quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1812', '1903'), 90)
+
+        # Assignment starts in first month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1901', '1904'), 90)
+
+        # Assignment starts in second month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1902', '1904'), 59)
+
+        # Assignment starts in third month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1903', '1904'), 31)
+
+        # Assignment starts before quarter, ends after quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '1812', '1904'), 90)
+
+        # Quarter 3, 2020
+        q_frum = '2004'
+        q_thru = '2006'
+
+        # First month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2004', '2004'), 30)
+
+        # Second month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2005', '2005'), 31)
+
+        # Third month only
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2006', '2006'), 30)
+
+        # First 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2004', '2005'), 61)
+
+        # Last 2 months
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2005', '2006'), 61)
+
+        # Full quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2004', '2006'), 91)
+
+        # Assignment starts before quarter, ends after first month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2003', '2004'), 30)
+
+        # Assignment starts before quarter, ends after second month
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2003', '2005'), 61)
+
+        # Assignment starts before quarter, ends with quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2003', '2006'), 91)
+
+        # Assignment starts in first month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2004', '2007'), 91)
+
+        # Assignment starts in second month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2005', '2007'), 61)
+
+        # Assignment starts in third month, ends past quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2006', '2007'), 30)
+
+        # Assignment starts before quarter, ends after quarter
+        self.assertEqual(self.presenter.get_total_days_asn(q_frum, q_thru, '2003', '2007'), 91)
 
     def testCalculateCost(self):
         salary = 123554
@@ -471,3 +654,10 @@ class TestLedgerPresenter(unittest.TestCase):
         ndays = 28
         cost = self.presenter.calculate_cost(salary, fringe, effort, ndays)
         self.assertEqual(cost, (1883.09, 672.53))
+
+        salary = 74971
+        fringe = .439
+        effort = 45
+        ndays = 59
+        cost = self.presenter.calculate_cost(salary, fringe, effort, ndays)
+        self.assertEqual(cost, (10979.59, 413.54))

@@ -7,8 +7,8 @@ class LedgerDataSet(object):
         self._asn_rex = []
         self._dept_rex = []
         self._grant_admin_rex = []
-        self._ledger_rex = []
-        self._ledger_entries = []
+        self._ledger_rex = []       # Rex in DB
+        self._ledger_entries = []   # Working model
 
         self.build_dataset()
 
@@ -26,7 +26,7 @@ class LedgerDataSet(object):
         self._dept_rex = Department.get_all(dao)
         self._grant_admin_rex = GrantAdmin.get_all(dao)
         self._ledger_rex = Ledger.get_rex(dao)
-        # self._asn_rex = Assignment.get_billables(dao)
+        self._asn_rex = Assignment.get_billables(dao)
         dao.close()
 
     def build_dataset(self):
@@ -68,8 +68,9 @@ class LedgerDataSet(object):
         import lib.month_lib as ml
 
         if quarter:
-            yr = int(quarter[0:4])
-            qtr = int(quarter[4])
+            s_qtr = str(quarter)
+            yr = int(s_qtr[0:4])
+            qtr = int(s_qtr[4])
             frum, thru = ml.get_quarter_interval(yr, qtr)
             return [a for a in self._asn_rex if ml.is_in_span(a.frum, a.thru, frum, thru)]
         return self._asn_rex

@@ -3,7 +3,6 @@ import lib.month_lib as ml
 import lib.ui_lib as uil
 from dal.dao import Dao
 from models.ledger import Ledger
-from models.assignment import Assignment
 from views.ledger_panel import LedgerPanel
 from event_handlers.ledger_event_handler import LedgerInteractor
 
@@ -12,7 +11,6 @@ class LedgerPresenter(object):
 
     def __init__(self, panel):
         self.view = LedgerPanel(panel)
-        self.model = gbl.dataset
         actor = LedgerInteractor()
         actor.install(self, self.view)
 
@@ -21,45 +19,54 @@ class LedgerPresenter(object):
         self.init_view()
 
     def init_view(self):
+        yr, qtr = self.get_init_quarter()
+        self.view.set_year(yr)
+        self.view.set_qtr(qtr)
+
+        self.view.load_depts([d.name for d in gbl.dataset.get_dept_data()])
+        self.view.load_grant_admins([a.name for a in gbl.dataset.get_grant_admin_data()])
+
+    def get_init_quarter(self):
         from datetime import datetime
 
         today = datetime.today()
-        self.view.set_year(today.year)
-        self.view.set_qtr(ml.get_quarter(today.month))
-
-        self.view.load_depts([d.name for d in self.model.get_dept_data()])
-        self.view.load_grant_admins([a.name for a in self.model.get_grant_admin_data()])
+        return today.year, ml.get_quarter(today.month)
 
     def get_query_params(self):
         yr = self.view.get_year()
         qtr = self.view.get_qtr()
-        self.quarter = '%d%d' % (yr, qtr)
         frum, thru = ml.get_quarter_interval(yr, qtr)
-        return self.quarter, frum, thru
+        self.quarter = int('%d%d' % (yr, qtr))
+        return frum, thru
 
     def run_query(self):
-        qtr, frum, thru = self.get_query_params()
+        qtr_frum, qtr_thru = self.get_query_params()
 
-        ledger_rex = gbl.dataset.get_ledger_data(qtr)
-        ledgerized_asns = [rec.asn_id for rec in ledger_rex]
+        # Get ledger records for quarter
+        ledger_rex = gbl.dataset.get_ledger_data(self.quarter)
 
-        asns = Assignment.get_billables(Dao(), frum, thru)
-        gbl.dataset.set_asn_data(asns)
+        # Get the assignment ids for the assignments already in the ledger
+        ledger_asn_ids = [rec.asn_id for rec in ledger_rex]
 
-        asns = [a for a in asns if a.id not in ledgerized_asns]
+        # Get the billable assignments for quarter
+        asns = gbl.dataset.get_asn_data(self.quarter)
 
+        # Get the assignments not already in the ledger
+        asns = [a for a in asns if a.id not in ledger_asn_ids]
+
+        # Need new ledger records for assignments not already in the ledger
         new_rex = []
         for asn in asns:
             emp = gbl.dataset.get_emp_rec(asn.employee_id)
-            days = self.get_total_days_asn(frum, thru, asn.frum, asn.thru)
+            days = self.get_total_days_asn(qtr_frum, qtr_thru, asn.frum, asn.thru)
             amt, day_total = self.calculate_cost(emp.salary, emp.fringe, asn.effort, days)
             new_rec = Ledger({
                 'id': None,
                 'quarter': self.quarter,
-                'dept': '',
-                'admin_approved': False,
-                'va_approved': False,
-                'invoice_num': '',
+                'dept': None,
+                'admin_approved': 0,
+                'va_approved': 0,
+                'invoice_num': None,
                 'project': asn.project,
                 'employee': asn.employee,
                 'effort': asn.effort,
@@ -68,25 +75,28 @@ class LedgerPresenter(object):
                 'total_day': day_total,
                 'days': days,
                 'amount': amt,
-                'frum': ml.frum2str(asn.frum),
-                'thru': ml.thru2str(asn.thru),
-                'paid': False,
+                'frum': asn.frum if asn.frum > qtr_frum else qtr_frum,
+                'thru': asn.thru if asn.thru < qtr_thru else qtr_thru,
+                'paid': 0,
                 'balance': amt,
-                'short_code': '',
-                'grant_admin': '',
-                'grant_admin_email': '',
+                'short_code': None,
+                'grant_admin': None,
+                'grant_admin_email': None,
                 'asn_id': asn.id
             })
             new_rex.append(new_rec)
 
+        # Combine the records already in ledger with the new ones
         model = ledger_rex + new_rex
         gbl.dataset.set_ledger_entries(model)
+
+        # Update the view
         self.view.load_grid(model)
 
     def reload(self):
         new_data = Ledger.get_rex(Dao())
         gbl.dataset.set_ledger_data(new_data)
-        self.view.load_grid(self.model.get_ledger_data())
+        self.view.load_grid(gbl.dataset.get_ledger_data())
         uil.show_msg('Reloaded!','Try Again')
 
     def load_details(self):
@@ -94,7 +104,7 @@ class LedgerPresenter(object):
         if not item:
             return
         if not item.salary or not item.fringe:
-            emp_rec = gbl.dataset.get_emp_rec(item.employee)
+            emp_rec = gbl.dataset.get_emp_rec_by_name(item.employee)
             item.salary = emp_rec.salary
             if not item.salary:
                 uil.show_error('%s has no salary! Not imported?' % (item.employee,))
@@ -113,7 +123,7 @@ class LedgerPresenter(object):
         return ml.get_total_days(frum, thru)
 
     def set_grant_admin_email(self, name):
-        grant_admins = self.model.get_grant_admin_data()
+        grant_admins = gbl.dataset.get_grant_admin_data()
         email = [x.email for x in grant_admins if x.name == name]
         email = email[0] if email else ''
         self.view.set_grant_admin_email(email)
@@ -135,7 +145,7 @@ class LedgerPresenter(object):
         obj = self.view.get_selection()
         updatable_flds = [
             'dept', 'admin_approved', 'va_approved', 'invoice_num',
-            'paid', 'balance', 'short_code', 'grant_admin', 'grant_admin_email'
+            'short_code', 'grant_admin', 'grant_admin_email'
         ]
         for fld in updatable_flds:
             setattr(obj, fld, form_vals[fld])
@@ -150,8 +160,10 @@ class LedgerPresenter(object):
         uil.show_msg('Ledger updated!', 'Hooray')
 
     def calculate_cost(self, salary, fringe, effort, ndays):
-        if fringe > 0:
-            fringe = round(fringe * .001, 3)
+        if not salary or not fringe:
+            return None, None
+        if fringe > 1:
+            fringe = round(fringe * .01, 3)
         per_hr = (salary / 2087) * (1 + fringe)
         per_day = per_hr * 8
         per_asn = per_day * ndays

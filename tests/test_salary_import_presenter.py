@@ -5,7 +5,6 @@ from tests.helpers import *
 import globals as gbl
 from models.ledger_dataset import LedgerDataSet
 from presenters.import_presenter import ImportPresenter
-import tests.ledger_data.test_db as test_db
 import tests.ledger_data.test_salary_import as test_xl_data
 import tests.ledger_data.test_data as test_data
 

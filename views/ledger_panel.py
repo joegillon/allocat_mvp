@@ -2,6 +2,7 @@ import wx
 import ObjectListView as olv
 import globals as gbl
 import lib.ui_lib as uil
+import lib.month_lib as ml
 
 
 class LedgerPanel(wx.Panel):
@@ -336,7 +337,8 @@ class LedgerPanel(wx.Panel):
         self.dept_ctrl.SetValue(value)
 
     def get_dept(self):
-        return self.dept_ctrl.GetValue()
+        value = self.dept_ctrl.GetValue()
+        return value if value else None
 
     def set_admin_approved(self, value):
         if value == 'Y':
@@ -364,45 +366,51 @@ class LedgerPanel(wx.Panel):
         self.invoice_ctrl.SetValue(value)
 
     def get_invoice_num(self):
-        return self.invoice_ctrl.GetValue()
+        value = self.invoice_ctrl.GetValue()
+        return value if value else None
 
     def set_project(self, value):
         self.prj_ctrl.SetValue(value)
 
     def get_project(self):
-        return self.prj_ctrl.GetValue()
+        value = self.prj_ctrl.GetValue()
+        return value if value else None
 
     def set_employee(self, value):
         self.emp_ctrl.SetValue(value)
 
     def get_employee(self):
-        return self.emp_ctrl.GetValue()
+        value = self.emp_ctrl.GetValue()
+        return value if value else None
 
     def set_frum(self, value):
-        self.frum_ctrl.SetValue(value)
+        self.frum_ctrl.SetValue(ml.prettify(value))
 
     def get_frum(self):
-        return self.frum_ctrl.GetValue()
+        value = self.frum_ctrl.GetValue()
+        return value if value else None
 
     def set_thru(self, value):
-        self.thru_ctrl.SetValue(value)
+        self.thru_ctrl.SetValue(ml.prettify(value))
 
     def get_thru(self):
-        self.thru_ctrl.GetValue()
+        value = self.thru_ctrl.GetValue()
+        return value if value else None
 
     def set_effort(self, value):
         self.eff_ctrl.SetValue(str(value))
 
     def get_effort(self):
-        self.eff_ctrl.GetValue()
+        value = self.eff_ctrl.GetValue()
+        return int(value) if value else None
 
     def set_salary(self, value):
-        if not value:
-            value = '0.0'
-        self.salary_ctrl.SetValue(uil.to_money(value))
+        value = uil.to_money(value) if value else ''
+        self.salary_ctrl.SetValue(value)
 
     def get_salary(self):
-        return uil.frum_money(self.salary_ctrl.GetValue())
+        value = uil.frum_money(self.salary_ctrl.GetValue())
+        return float(value) if value else None
 
     def set_fringe(self, value):
         if not value:
@@ -410,29 +418,31 @@ class LedgerPanel(wx.Panel):
         self.fringe_ctrl.SetValue(str(value))
 
     def get_fringe(self):
-        return self.fringe_ctrl.GetValue()
+        value = self.fringe_ctrl.GetValue()
+        return float(value) if value else None
 
     def set_total(self, value):
-        if not value:
-            value = '0.0'
-        self.total_ctrl.SetValue(uil.to_money(value))
+        value = uil.to_money(value) if value else ''
+        self.total_ctrl.SetValue(value)
 
     def get_total(self):
-        return uil.frum_money(self.total_ctrl.GetValue())
+        value = uil.frum_money(self.total_ctrl.GetValue())
+        return float(value) if value else None
 
     def set_days(self, value):
         self.days_ctrl.SetValue(str(value))
 
     def get_days(self):
-        return self.days_ctrl.GetValue()
+        value = self.days_ctrl.GetValue()
+        return int(value) if value else None
 
     def set_amount(self, value):
-        if not value:
-            value = '0.0'
-        self.amt_ctrl.SetValue(uil.to_money(value))
+        value = uil.to_money(value) if value else ''
+        self.amt_ctrl.SetValue(value)
 
     def get_amount(self):
-        return uil.frum_money(self.amt_ctrl.GetValue())
+        value = uil.frum_money(self.amt_ctrl.GetValue())
+        return float(value) if value else None
 
     def set_paid(self, value):
         value = True if value == 'Y' else False
@@ -442,12 +452,12 @@ class LedgerPanel(wx.Panel):
         return self.paid_ctrl.GetValue()
 
     def set_balance(self, value):
-        if not value:
-            value = '0.0'
-        self.balance_ctrl.SetValue(str(value))
+        value = uil.to_money(value) if value else ''
+        self.balance_ctrl.SetValue(value)
 
     def get_balance(self):
-        return self.balance_ctrl.GetValue()
+        value = self.balance_ctrl.GetValue()
+        return float(value) if value else None
 
     def reset_balance(self):
         self.set_balance(self.get_selection().balance)
@@ -458,7 +468,8 @@ class LedgerPanel(wx.Panel):
         self.short_code_ctrl.SetValue(value)
 
     def get_short_code(self):
-        return self.short_code_ctrl.GetValue()
+        value = self.short_code_ctrl.GetValue()
+        return value if value else None
 
     def load_grant_admins(self, admins):
         choices = admins
@@ -471,7 +482,8 @@ class LedgerPanel(wx.Panel):
         self.grant_admin_ctrl.SetValue(value)
 
     def get_grant_admin(self):
-        return self.grant_admin_ctrl.GetValue()
+        value = self.grant_admin_ctrl.GetValue()
+        return value if value else None
 
     def set_grant_admin_email(self, value):
         if not value:
@@ -479,7 +491,8 @@ class LedgerPanel(wx.Panel):
         self.grant_admin_email_ctrl.SetValue(value)
 
     def get_grant_admin_email(self):
-        return self.grant_admin_email_ctrl.GetValue()
+        value = self.grant_admin_email_ctrl.GetValue()
+        return value if value else None
 
     def get_form_values(self):
         return {
@@ -488,13 +501,13 @@ class LedgerPanel(wx.Panel):
             'admin_approved': self.get_admin_approved(),
             'va_approved': self.get_va_approved(),
             'invoice_num': self.get_invoice_num(),
-            'salary': self.get_salary(),
-            'fringe': self.get_fringe(),
-            'total_day': self.get_total(),
-            'days': self.get_days(),
-            'amount': self.get_amount(),
-            'paid': self.get_paid(),
-            'balance': self.get_balance(),
+            # 'salary': self.get_salary(),
+            # 'fringe': self.get_fringe(),
+            # 'total_day': self.get_total(),
+            # 'days': self.get_days(),
+            # 'amount': self.get_amount(),
+            # 'paid': self.get_paid(),
+            # 'balance': self.get_balance(),
             'short_code': self.get_short_code(),
             'grant_admin': self.get_grant_admin(),
             'grant_admin_email': self.get_grant_admin_email()

@@ -147,8 +147,8 @@ class TestProjectPresenter(unittest.TestCase):
         self.assertEqual(asn_list_ctrl.GetObjects(), model[model_idx].asns)
         self.assertEqual(asn_list_ctrl.GetItemText(0, 1), '02/20')
         self.assertEqual(asn_list_ctrl.GetItemText(0, 2), '03/20')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '07/19')
-        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '06/21')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 1), '09/19')
+        self.assertEqual(asn_list_ctrl.GetItemText(1, 2), '11/19')
 
     def testPrjNameFilter(self):
         view, model, list_ctrl, asn_list_ctrl = self.get_vars()
