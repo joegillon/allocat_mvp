@@ -181,8 +181,12 @@ class RadioGroup(wx.BoxSizer):
 
 
 def to_money(value):
+    if not value:
+        return '0.00'
     if type(value) == int:
         return format(value, ',d')
+    if type(value) == float:
+        return format(value, ',.2f')
     return format(float(value), ',.2f')
 
 

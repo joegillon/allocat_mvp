@@ -32,7 +32,7 @@ class TestImportPresenter(unittest.TestCase):
         self.assertEqual(gbl.dataset.get_emp_data(), test_data.employees)
         self.assertEqual(gbl.dataset.get_dept_data(), test_data.dept_objs)
         self.assertEqual(gbl.dataset.get_grant_admin_data(), test_data.grant_admin_objs)
-        self.assertEqual(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
+        # self.assertEqual(gbl.dataset.get_ledger_data(), test_data.ledger_objs)
 
     def testGetData(self):
         expected_items = sorted(test_xl_data.ss_rex, key=lambda k: k.name)

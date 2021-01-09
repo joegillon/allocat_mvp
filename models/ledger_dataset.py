@@ -14,18 +14,20 @@ class LedgerDataSet(object):
 
     def _get_data(self):
         from dal.dao import Dao
+        from tests.ledger_data.test_data import invoices
 
         from models.employee import Employee
         from models.department import Department
         from models.grant_admin import GrantAdmin
-        from models.ledger import Ledger
+        from models.invoice import Invoice
         from models.assignment import Assignment
 
         dao = Dao(db_path=self.db_path, stateful=True)
         self._emp_rex = Employee.get_all(dao)
         self._dept_rex = Department.get_all(dao)
         self._grant_admin_rex = GrantAdmin.get_all(dao)
-        self._ledger_rex = Ledger.get_rex(dao)
+        # self._ledger_rex = Invoice.get_rex(dao)
+        self._ledger_rex = invoices
         self._asn_rex = Assignment.get_billables(dao)
         dao.close()
 
@@ -74,3 +76,9 @@ class LedgerDataSet(object):
             frum, thru = ml.get_quarter_interval(yr, qtr)
             return [a for a in self._asn_rex if ml.is_in_span(a.frum, a.thru, frum, thru)]
         return self._asn_rex
+
+    def get_invoice_rec(self, inv_num):
+        return next((rec for rec in self._ledger_rex if rec.invoice_num == inv_num), None)
+
+    def remove_invoices(self, inv_nums):
+        self._ledger_rex = [rec for rec in self._ledger_rex if rec.invoice_num not in inv_nums]

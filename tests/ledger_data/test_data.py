@@ -1,9 +1,10 @@
 from models.project import Project
 from models.employee import Employee
 from models.assignment import Assignment
-from models.ledger import Ledger
+from models.invoice import Invoice
 from models.department import Department
 from models.grant_admin import GrantAdmin
+from models.deposit import Deposit
 
 
 projects = [
@@ -405,8 +406,8 @@ grant_admin_objs = [
     GrantAdmin({'id': 4, 'name': 'MARX,ZEPPO', 'email': None})
 ]
 
-ledger_objs = [
-    Ledger({
+invoice_objs = [
+    Invoice({
         'id': 1,
         'quarter': 20201,
         'dept': 'HEMATOLOGY',
@@ -430,7 +431,7 @@ ledger_objs = [
         'grant_admin': 'MARX,GROUCHO',
         'grant_admin_email': 'groucho@umich.edu'
     }),
-    Ledger({
+    Invoice({
         'id': 2,
         'quarter': 20201,
         'dept': None,
@@ -454,7 +455,7 @@ ledger_objs = [
         'grant_admin': None,
         'grant_admin_email': None
     }),
-    Ledger({
+    Invoice({
         'id': 3,
         'quarter': 20201,
         'dept': 'EPIDEMIOLOGY',
@@ -497,8 +498,8 @@ grant_admin_items = [
     'MARX,ZEPPO'
 ]
 
-ledger_items_qtr_1 = [
-    Ledger({
+invoice_items_qtr_1 = [
+    Invoice({
         'id': 1,
         'quarter': 20201,
         'dept': 'HEMATOLOGY',
@@ -522,7 +523,7 @@ ledger_items_qtr_1 = [
         'grant_admin': 'MARX,GROUCHO',
         'grant_admin_email': 'groucho@umich.edu'
     }),
-    Ledger({
+    Invoice({
         'id': 2,
         'quarter': 20201,
         'dept': None,
@@ -546,7 +547,7 @@ ledger_items_qtr_1 = [
         'grant_admin': None,
         'grant_admin_email': None
     }),
-    Ledger({
+    Invoice({
         'id': 3,
         'quarter': 20201,
         'dept': 'EPIDEMIOLOGY',
@@ -570,7 +571,7 @@ ledger_items_qtr_1 = [
         'grant_admin': 'MARX,CHICO',
         'grant_admin_email': 'chico@umich.edu'
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'quarter': 20201,
         'dept': None,
@@ -594,7 +595,7 @@ ledger_items_qtr_1 = [
         'grant_admin': None,
         'grant_admin_email': None
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'quarter': 20201,
         'dept': None,
@@ -618,7 +619,7 @@ ledger_items_qtr_1 = [
         'grant_admin': None,
         'grant_admin_email': None
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'quarter': 20201,
         'dept': None,
@@ -644,8 +645,8 @@ ledger_items_qtr_1 = [
     })
 ]
 
-ledger_items_qtr_2 = [
-    Ledger({
+invoice_items_qtr_2 = [
+    Invoice({
         'id': None,
         'asn_id': 2275,
         'employee': 'DIMAGGIO,JOSEPH P',
@@ -669,7 +670,7 @@ ledger_items_qtr_2 = [
         'invoice_num': None,
         'short_code': None,
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'asn_id': 2365,
         'employee': 'KALINE,ALBERT W',
@@ -693,7 +694,7 @@ ledger_items_qtr_2 = [
         'invoice_num': None,
         'short_code': None
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'asn_id': 2375,
         'employee': 'AARON,HENRY',
@@ -717,7 +718,7 @@ ledger_items_qtr_2 = [
         'invoice_num': None,
         'short_code': None,
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'asn_id': 2382,
         'employee': 'MAYS,WILLIE HOWARD JR',
@@ -741,7 +742,7 @@ ledger_items_qtr_2 = [
         'invoice_num': None,
         'short_code': None,
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'asn_id': 2283,
         'employee': 'WILLIAMS,THEODORE',
@@ -765,7 +766,7 @@ ledger_items_qtr_2 = [
         'invoice_num': None,
         'short_code': None
     }),
-    Ledger({
+    Invoice({
         'id': None,
         'asn_id': 2396,
         'employee': 'BANKS,ERNEST',
@@ -807,3 +808,390 @@ blank_details_form = {
     'grant_admin': None,
     'grant_admin_email': None
 }
+
+invoices = [
+    Invoice({
+        'id': 1,
+        'quarter': 20201,
+        'dept': 'HEMATOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K0H1001',
+        'asn_id': 2271,
+        'project': 'Prj 297',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1910',
+        'thru': '1912',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    Invoice({
+        'id': 2,
+        'quarter': 20201,
+        'dept': 'INTERNAL MEDICINE',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K0H4444',
+        'asn_id': 2272,
+        'project': 'Prj 297',
+        'employee': 'GEHRIG,HENRY LOUIS',
+        'salary': 104971,
+        'fringe': 33.5,
+        'total_day': 537.18,
+        'frum': '1907',
+        'thru': '1909',
+        'effort': 10,
+        'days': 92,
+        'amount': 4942.04,
+        'paid': 0,
+        'balance': 4942.04,
+        'short_code': '124564',
+        'grant_admin': 'MARX,HARPO',
+        'grant_admin_email': 'harpo@umich.edu'
+    }),
+    Invoice({
+        'id': 5,
+        'quarter': 20201,
+        'dept': 'MEDICINE',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K0H1005',
+        'asn_id': 2283,
+        'project': 'Prj 315',
+        'employee': 'WILLIAMS,THEODORE',
+        'salary': 114786,
+        'fringe': 35.2,
+        'total_day': 594.89,
+        'frum': '1912',
+        'thru': '1912',
+        'effort': 10,
+        'days': 31,
+        'amount': 1844.14,
+        'paid': 0,
+        'balance': 1844.14,
+        'short_code': '88776655',
+        'grant_admin': 'MARX,ZEPPO',
+        'grant_admin_email': 'zeppo@umich.edu'
+    }),
+    # Invoice({
+    #     'id': 7,
+    #     'asn_id': 2275,
+    #     'employee': 'DIMAGGIO,JOSEPH P',
+    #     'project': 'Prj 299',
+    #     'quarter': 20202,
+    #     'frum': '2002',
+    #     'thru': '2003',
+    #     'days': 60,
+    #     'salary': 74971,
+    #     'fringe': 43.9,
+    #     'effort': 45,
+    #     'total_day': 413.54,
+    #     'amount': 11165.69,
+    #     'paid': 0,
+    #     'balance': 11165.69,
+    #     'dept': 'EPIDEMIOLOGY',
+    #     'admin_approved': 1,
+    #     'va_approved': 1,
+    #     'grant_admin': 'MARX,CHICO',
+    #     'grant_admin_email': 'chico@umich.edu',
+    #     'invoice_num': 'K0H2003',
+    #     'short_code': '112233',
+    # }),
+    # Invoice({
+    #     'id': 8,
+    #     'asn_id': 2365,
+    #     'employee': 'KALINE,ALBERT W',
+    #     'project': 'Prj 309',
+    #     'quarter': 20202,
+    #     'frum': '2001',
+    #     'thru': '2003',
+    #     'days': 91,
+    #     'salary': 54321,
+    #     'fringe': 25.6,
+    #     'effort': 5,
+    #     'total_day':  261.53,
+    #     'amount': 1189.97,
+    #     'paid': 0,
+    #     'balance': 1189.97,
+    #     'dept': 'VERAM',
+    #     'admin_approved': 1,
+    #     'va_approved': 1,
+    #     'grant_admin': 'MARX,HARPO',
+    #     'grant_admin_email': 'harpo@umich.edu',
+    #     'invoice_num': 'K0H2010',
+    #     'short_code': '223344'
+    # }),
+    Invoice({
+        'id': 9,
+        'asn_id': 2375,
+        'employee': 'AARON,HENRY',
+        'project': 'Prj 309',
+        'quarter': 20194,
+        'frum': '1907',
+        'thru': '1909',
+        'days': 92,
+        'salary': 74971,
+        'fringe': 46.0,
+        'effort': 15,
+        'total_day': 419.58,
+        'amount': 5790.19,
+        'paid': 0,
+        'balance': 5790.19,
+        'dept': 'CSP',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu',
+        'invoice_num': 'K9H4129',
+        'short_code': '998877',
+    }),
+    # Invoice({
+    #     'id': 10,
+    #     'asn_id': 2382,
+    #     'employee': 'MAYS,WILLIE HOWARD JR',
+    #     'project': 'Prj 309',
+    #     'quarter': 20202,
+    #     'frum': '2002',
+    #     'thru': '2002',
+    #     'days': 29,
+    #     'salary': 142052,
+    #     'fringe': 31.7,
+    #     'effort': 10,
+    #     'total_day': 717.13,
+    #     'amount': 2079.69,
+    #     'paid': 0,
+    #     'balance': 2079.69,
+    #     'dept': 'VERAM',
+    #     'admin_approved': 1,
+    #     'va_approved': 1,
+    #     'grant_admin': 'MARX,CHICO',
+    #     'grant_admin_email': 'chico@umich.edu',
+    #     'invoice_num': 'K0H2020',
+    #     'short_code': '445566',
+    # }),
+    Invoice({
+        'id': 100,
+        'quarter': 20191,
+        'dept': 'HEMATOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K9H1001',
+        'asn_id': 1271,
+        'project': 'Prj 197',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1810',
+        'thru': '1812',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    Invoice({
+        'id': 101,
+        'quarter': 20192,
+        'dept': 'HEMATOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K9H2001',
+        'asn_id': 1271,
+        'project': 'Prj 197',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1901',
+        'thru': '1903',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    Invoice({
+        'id': 102,
+        'quarter': 20193,
+        'dept': 'HEMATOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K9H3001',
+        'asn_id': 1271,
+        'project': 'Prj 197',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1904',
+        'thru': '1906',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    Invoice({
+        'id': 112,
+        'quarter': 20193,
+        'dept': 'CARDIOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K9H3025',
+        'asn_id': 1271,
+        'project': 'Prj 199',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1904',
+        'thru': '1906',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    Invoice({
+        'id': 104,
+        'quarter': 20194,
+        'dept': 'HEMATOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K9H4001',
+        'asn_id': 1271,
+        'project': 'Prj 197',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1907',
+        'thru': '1909',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    Invoice({
+        'id': 105,
+        'quarter': 20201,
+        'dept': 'HEMATOLOGY',
+        'admin_approved': 1,
+        'va_approved': 1,
+        'invoice_num': 'K0H1001',
+        'asn_id': 1271,
+        'project': 'Prj 197',
+        'employee': 'BANKS,ERNEST',
+        'salary': 44444,
+        'fringe': 4.4,
+        'total_day': 177.86,
+        'frum': '1910',
+        'thru': '1912',
+        'effort': 45,
+        'days': 92,
+        'amount': 7363.45,
+        'paid': 0,
+        'balance': 7363.45,
+        'short_code': '123456',
+        'grant_admin': 'MARX,GROUCHO',
+        'grant_admin_email': 'groucho@umich.edu'
+    }),
+    # Invoice({
+    #     'id': 106,
+    #     'quarter': 20202,
+    #     'dept': 'HEMATOLOGY',
+    #     'admin_approved': 1,
+    #     'va_approved': 1,
+    #     'invoice_num': 'K0H2001',
+    #     'asn_id': 1271,
+    #     'project': 'Prj 197',
+    #     'employee': 'BANKS,ERNEST',
+    #     'salary': 44444,
+    #     'fringe': 4.4,
+    #     'total_day': 177.86,
+    #     'frum': '2001',
+    #     'thru': '2003',
+    #     'effort': 45,
+    #     'days': 92,
+    #     'amount': 7363.45,
+    #     'paid': 0,
+    #     'balance': 7363.45,
+    #     'short_code': '123456',
+    #     'grant_admin': 'MARX,GROUCHO',
+    #     'grant_admin_email': 'groucho@umich.edu'
+    # }),
+]
+
+# deposits = [
+#     Deposit({
+#         'id': 5555,
+#         'invoice_num': 'K9H4129',
+#         'deposit_num': 'K0A04ZI',
+#         'date': '2020-01-2',
+#         'amount': 5790.19,
+#         'fy': 19,
+#         'qtr': 4
+#     }),
+#     Deposit({
+#         'id': 6666,
+#         'invoice_num': 'K0H4444',
+#         'deposit_num': 'K0A05SY',
+#         'date': '2020-01-17',
+#         'amount': 4942.04,
+#         'fy': 19,
+#         'qtr': 4
+#     }),
+#     Deposit({
+#         'id': 7777,
+#         'invoice_num': 'K0H1005',
+#         'deposit_num': 'K0A0A04ZI',
+#         'date': '2020-01-2',
+#         'amount': 922.07,
+#         'fy': 20,
+#         'qtr': 1
+#     }),
+#     Deposit({
+#         'id': 9999,
+#         'invoice_num': 'K9H3025',
+#         'deposit_num': 'K0A0A04ZI',
+#         'date': '2020-01-2',
+#         'amount': 4059.51,
+#         'fy': 19,
+#         'qtr': 3
+#     }),
+#     Deposit({
+#         'id': 8888,
+#         'invoice_num': 'K9H1001',
+#         'deposit_num': 'K0A0A04ZI',
+#         'date': '2020-01-20',
+#         'amount': 7363.45,
+#         'fy': 19,
+#         'qtr': 1
+#     }),
+# ]

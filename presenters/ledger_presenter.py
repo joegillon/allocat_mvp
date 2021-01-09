@@ -1,225 +1,95 @@
-import globals as gbl
-import lib.month_lib as ml
-import lib.ui_lib as uil
-from dal.dao import Dao
-from models.ledger import Ledger
 from views.ledger_panel import LedgerPanel
-from event_handlers.ledger_event_handler import LedgerInteractor
+import globals as gbl
+import lib.excel_lib as xl
+from models.deposit import Deposit
+from event_handlers.ledger_event_handler import LedgerEventHandler
+
+
+MTH_PATTERN = r"^[A-Z][a-z]+ FY[0-9]{2}$"
+QTR_PATTERN = r"^[A-Z][a-z]+ FY[0-9]{2}$"
 
 
 class LedgerPresenter(object):
 
-    def __init__(self, panel):
-        self.view = LedgerPanel(panel)
-        actor = LedgerInteractor()
-        actor.install(self, self.view)
+    def __init__(self, panel=None):
+        from tests.ledger_data.test_data import invoices
 
-        self.quarter = ''
-
-        self.init_view()
+        if panel:
+            self.view = LedgerPanel(panel)
+            self.model = gbl.dataset
+            actor = LedgerEventHandler()
+            actor.install(self, self.view)
+            # self.invoices =(gbl.dataset.get_ledger_data())
+            self.invoices = invoices
+            self.full_total = 0.0
+            self.init_view()
 
     def init_view(self):
-        yr, qtr = self.get_init_quarter()
-        self.view.set_year(yr)
-        self.view.set_qtr(qtr)
 
-        self.view.load_depts([d.name for d in gbl.dataset.get_dept_data()])
-        self.view.load_grant_admins([a.name for a in gbl.dataset.get_grant_admin_data()])
+        total = 0
+        for invoice in self.invoices:
+            total += invoice.amount
+        self.full_total = total
 
-    def get_init_quarter(self):
-        from datetime import datetime
+        self.view.set_total(total)
+        self.view.set_unpaid_list(self.invoices)
 
-        today = datetime.today()
-        return today.year, ml.get_quarter(today.month)
-
-    def get_query_params(self):
-        yr = self.view.get_year()
-        qtr = self.view.get_qtr()
-        frum, thru = ml.get_quarter_interval(yr, qtr)
-        self.quarter = int('%d%d' % (yr, qtr))
-        return frum, thru
-
-    def run_query(self):
-        qtr_frum, qtr_thru = self.get_query_params()
-
-        # Get ledger records for quarter
-        ledger_rex = gbl.dataset.get_ledger_data(self.quarter)
-
-        # Get the assignment ids for the assignments already in the ledger
-        ledger_asn_ids = [rec.asn_id for rec in ledger_rex]
-
-        # Get the billable assignments for quarter
-        asns = gbl.dataset.get_asn_data(self.quarter)
-
-        # Get the assignments not already in the ledger
-        asns = [a for a in asns if a.id not in ledger_asn_ids]
-
-        # Need new ledger records for assignments not already in the ledger
-        new_rex = []
-        for asn in asns:
-            emp = gbl.dataset.get_emp_rec(asn.employee_id)
-            days = self.get_total_days_asn(qtr_frum, qtr_thru, asn.frum, asn.thru)
-            amt, day_total = self.calculate_cost(emp.salary, emp.fringe, asn.effort, days)
-            new_rec = Ledger({
-                'id': None,
-                'quarter': self.quarter,
-                'dept': None,
-                'admin_approved': 0,
-                'va_approved': 0,
-                'invoice_num': None,
-                'project': asn.project,
-                'employee': asn.employee,
-                'effort': asn.effort,
-                'salary': emp.salary,
-                'fringe': emp.fringe,
-                'total_day': day_total,
-                'days': days,
-                'amount': amt,
-                'frum': asn.frum if asn.frum > qtr_frum else qtr_frum,
-                'thru': asn.thru if asn.thru < qtr_thru else qtr_thru,
-                'paid': 0,
-                'balance': amt,
-                'short_code': None,
-                'grant_admin': None,
-                'grant_admin_email': None,
-                'asn_id': asn.id
-            })
-            new_rex.append(new_rec)
-
-        # Combine the records already in ledger with the new ones
-        model = ledger_rex + new_rex
-        gbl.dataset.set_ledger_entries(model)
-
-        # Update the view
-        self.view.load_grid(model)
-
-    def reload(self):
-        new_data = Ledger.get_rex(Dao())
-        gbl.dataset.set_ledger_data(new_data)
-        self.view.load_grid(gbl.dataset.get_ledger_data())
-        uil.show_msg('Reloaded!','Try Again')
-
-    def load_details(self):
-        item = self.view.get_selection()
-        if not item:
+    def set_total(self, attr):
+        if attr == 'All':
+            self.view.set_total(self.full_total)
             return
-        if not item.salary or not item.fringe:
-            emp_rec = gbl.dataset.get_emp_rec_by_name(item.employee)
-            item.salary = emp_rec.salary
-            if not item.salary:
-                uil.show_error('%s has no salary! Not imported?' % (item.employee,))
-            else:
-                item.fringe = emp_rec.fringe
-                item.amount, item.total_day = self.calculate_cost(
-                    item.salary, item.fringe, item.effort, item.days
-                )
-                if not item.balance:
-                    item.balance = item.amount
-        self.view.load_form(item)
 
-    def get_total_days_asn(self, qtr_frum, qtr_thru, asn_frum, asn_thru):
-        frum = asn_frum if asn_frum > qtr_frum else qtr_frum
-        thru = asn_thru if asn_thru < qtr_thru else qtr_thru
-        return ml.get_total_days(frum, thru)
+        attr = attr.replace(' ', '_').lower()
+        selection = self.view.get_unpaid_list_selection()
+        if not selection:
+            return
+        fltr = getattr(selection, attr)
+        total = 0
+        for invoice in self.invoices:
+            if getattr(invoice, attr) == fltr:
+                total += invoice.amount
 
-    def set_grant_admin_email(self, name):
-        grant_admins = gbl.dataset.get_grant_admin_data()
-        email = [x.email for x in grant_admins if x.name == name]
-        email = email[0] if email else ''
-        self.view.set_grant_admin_email(email)
-
-    def run_import(self):
-        uil.show_msg('Not yet implemented.', 'Someday!')
-
-    def run_va_emails(self):
-        uil.show_msg('Not yet implemented.', 'Someday!')
-
-    def run_ga_emails(self):
-        uil.show_msg('Not yet implemented.', 'Someday!')
-
-    def run_script(self):
-        uil.show_msg('Not yet implemented.', 'Someday!')
-
-    def update_entry(self):
-        form_vals = self.view.get_form_values()
-        obj = self.view.get_selection()
-        updatable_flds = [
-            'dept', 'admin_approved', 'va_approved', 'invoice_num',
-            'short_code', 'grant_admin', 'grant_admin_email'
-        ]
-        for fld in updatable_flds:
-            setattr(obj, fld, form_vals[fld])
-
-        if obj.id:
-            result = obj.update(Dao())
-        else:
-            result = obj.add(Dao())
-
-        self.view.reload_entry(obj)
-
-        uil.show_msg('Ledger updated!', 'Hooray')
-
-    def calculate_cost(self, salary, fringe, effort, ndays):
-        if not salary or not fringe:
-            return None, None
-        if fringe > 1:
-            fringe = round(fringe * .01, 3)
-        per_hr = (salary / 2087) * (1 + fringe)
-        per_day = per_hr * 8
-        per_asn = per_day * ndays
-        return round(per_asn * effort / 100, 2), round(per_day, 2)
-
-    def set_balance(self, paid):
-        if paid:
-            self.view.set_balance(0.0)
-        else:
-            self.view.reset_balance()
-
-    def update_entries(self):
-        from dal.dao import Dao
-        from models.ledger import Ledger
-
-        dao = Dao(stateful=True)
-
-        billing_rex = self.import_spreadsheet()
-
-        for billing_rec in list(billing_rex):
-            ledger_rec = Ledger.get_by_invoice(dao, billing_rec.invoice_num)
-            if ledger_rec:
-                ledger_rec.update_balance(dao, billing_rec.amount)
-
-        new_rex = Ledger.get_rex(dao)
-
-        dao.close()
-
-        gbl.dataset.set_ledger_data(new_rex)
-        self.init_view()
+        self.view.set_total(total)
 
     def import_spreadsheet(self):
-        import lib.excel_lib as xl
-        from models.billing_record import BillingRecord
-        from views.billing_ss_dlg import BillingSSDlg
-
         file = xl.get_file(self.view)
         if not file:
             return
 
-        wb = xl.open_wb(file)
-        sheets = wb.sheet_names()
+        inv_nums = [inv.invoice_num for inv in self.invoices]
 
-        dlg = BillingSSDlg(self.view, -1, sheets)
-        dlg.ShowModal()
-        stop_at = dlg.result
-        dlg.Destroy()
+        wb = xl.open_wb(file)
+        sh = xl.get_latest_sheet(wb)
 
         rex = []
-        last_idx = sheets.index(stop_at)
-        for idx in range(0, last_idx + 1):
-            sh = wb.sheet_by_index(idx)
+        nrows = sum(1 for _ in sh.get_rows())
+        for rownum in range(0, nrows):
+            if sh.cell_value(rownum, 1).startswith('506'):
+                deposit = Deposit(sh.row_values(rownum))
+                if deposit.invoice_num not in inv_nums:
+                    continue
+                invoice = gbl.dataset.get_invoice_rec(deposit.invoice_num)
+                s = str(invoice.quarter)
+                deposit.fy = s[2:4]
+                deposit.qtr = s[4]
+                rex.append(deposit)
 
-            nrows = sum(1 for _ in sh.get_rows())
-            for rownum in range(0, nrows):
-                if sh.cell_value(rownum, 1).startswith('506'):
-                    rex.append(BillingRecord(sh.row_values(rownum)))
+        self.view.set_deposits_list(rex)
 
-        return rex
+    def update_ledger(self):
+        from dal.dao import Dao
+        from models.invoice import Invoice
+
+        deposits = self.view.get_deposits_list()
+
+        # dao = Dao(stateful=True)
+        removals = []
+        for deposit in deposits:
+            invoice = gbl.dataset.get_invoice_rec(deposit.invoice_num)
+            invoice.balance -= deposit.amount
+            if invoice.balance == 0:
+                invoice.paid = True
+                removals.append(invoice.invoice_num)
+        gbl.dataset.remove_invoices(removals)
+        self.view.refresh_invoices()
+        # dao.close()

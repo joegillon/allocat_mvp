@@ -1,7 +1,7 @@
 from modulefinder import ModuleFinder
 
 finder = ModuleFinder()
-finder.run_script('ledger.py')
+finder.run_script('billing.py')
 
 print('Loaded modules:')
 for name, mod in finder.modules.items():

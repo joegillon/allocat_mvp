@@ -1,7 +1,7 @@
 import copy
 
 
-class Ledger(object):
+class Invoice(object):
 
     def __init__(self, d=None):
         self.id = None
@@ -77,7 +77,7 @@ class Ledger(object):
         #        "INNER JOIN employees ON assignments.employee_id=employees.id "
         #        "WHERE quarter=? AND paid=?")
         rex = dao.execute(sql)
-        return [Ledger(rec) for rec in rex] if rex else []
+        return [Invoice(rec) for rec in rex] if rex else []
 
     def add(self, dao):
         self_copy = copy.copy(self)
@@ -125,7 +125,7 @@ class Ledger(object):
     def get_by_invoice(dao, invoice_num):
         sql = "SELECT * FROM ledger WHERE invoice_num=?"
         rex = dao.execute(sql, (invoice_num,))
-        return Ledger(rex[0]) if rex else None
+        return Invoice(rex[0]) if rex else None
 
     def update_balance(self, dao, amount):
         self.balance = round(self.balance - amount, 2)

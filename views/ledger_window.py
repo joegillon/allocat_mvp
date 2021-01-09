@@ -1,11 +1,11 @@
 import wx
 import globals as gbl
-from presenters.ledger_presenter import LedgerPresenter
+from presenters.invoice_presenter import InvoicePresenter
 from presenters.import_presenter import ImportPresenter
 from presenters.email_presenter import EmailPresenter
 from presenters.script_presenter import ScriptPresenter
 from presenters.data_mgt_presenter import DataMgtPresenter
-from presenters.billing_presenter import BillingPresenter
+from presenters.ledger_presenter import LedgerPresenter
 
 
 class LedgerWindow(wx.Frame):
@@ -17,9 +17,9 @@ class LedgerWindow(wx.Frame):
 
         notebook = wx.Notebook(self)
 
+        self.billing_presenter = InvoicePresenter(notebook)
         self.ledger_presenter = LedgerPresenter(notebook)
         self.import_presenter = ImportPresenter(notebook)
-        # self.billing_presenter = BillingPresenter(notebook)
         self.email_presenter = EmailPresenter(notebook)
         self.script_presenter = ScriptPresenter(notebook)
         self.data_mgt_presenter = DataMgtPresenter(notebook)
@@ -33,11 +33,11 @@ class LedgerWindow(wx.Frame):
         icon_list.Add(wx.Bitmap('images/E-mail.bmp', wx.BITMAP_TYPE_BMP))
         icon_list.Add(wx.Bitmap('images/Script.bmp', wx.BITMAP_TYPE_BMP))
         icon_list.Add(wx.Bitmap('images/Database.png', wx.BITMAP_TYPE_PNG))
-        # icon_list.Add(wx.Bitmap('images/Billing.png', wx.BITMAP_TYPE_PNG))
+        icon_list.Add(wx.Bitmap('images/Billing.png', wx.BITMAP_TYPE_PNG))
         notebook.AssignImageList(icon_list)
-        notebook.AddPage(self.ledger_presenter.view, 'Ledger', select=True, imageId=0)
+        notebook.AddPage(self.billing_presenter.view, 'Invoices', select=True, imageId=0)
         notebook.AddPage(self.import_presenter.view, 'Import Salaries', imageId=1)
-        # notebook.AddPage(self.billing_presenter.view, 'Billing Report', imageId=5)
         notebook.AddPage(self.email_presenter.view, 'Email Approvals', imageId=2)
         notebook.AddPage(self.script_presenter.view, 'Write Script', imageId=3)
+        notebook.AddPage(self.ledger_presenter.view, 'Ledger', imageId=5)
         notebook.AddPage(self.data_mgt_presenter.view, 'Manage Data', imageId=4)
