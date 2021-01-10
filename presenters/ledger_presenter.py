@@ -12,42 +12,31 @@ QTR_PATTERN = r"^[A-Z][a-z]+ FY[0-9]{2}$"
 class LedgerPresenter(object):
 
     def __init__(self, panel=None):
-        from tests.ledger_data.test_data import invoices
-
         if panel:
             self.view = LedgerPanel(panel)
             self.model = gbl.dataset
             actor = LedgerEventHandler()
             actor.install(self, self.view)
-            # self.invoices =(gbl.dataset.get_ledger_data())
-            self.invoices = invoices
-            self.full_total = 0.0
             self.init_view()
 
     def init_view(self):
+        invoices = gbl.dataset.get_ledger_data()
+        self.view.set_unpaid_list(invoices)
+        self.set_total(invoices, 'All')
 
+    def set_total(self, invoices, attr):
         total = 0
-        for invoice in self.invoices:
+
+        if attr != 'All':
+            attr = attr.replace(' ', '_').lower()
+            selection = self.view.get_unpaid_list_selection()
+            if not selection:
+                return
+            fltr = getattr(selection, attr)
+            invoices = [invoice for invoice in invoices if getattr(invoice, attr) == fltr]
+
+        for invoice in invoices:
             total += invoice.amount
-        self.full_total = total
-
-        self.view.set_total(total)
-        self.view.set_unpaid_list(self.invoices)
-
-    def set_total(self, attr):
-        if attr == 'All':
-            self.view.set_total(self.full_total)
-            return
-
-        attr = attr.replace(' ', '_').lower()
-        selection = self.view.get_unpaid_list_selection()
-        if not selection:
-            return
-        fltr = getattr(selection, attr)
-        total = 0
-        for invoice in self.invoices:
-            if getattr(invoice, attr) == fltr:
-                total += invoice.amount
 
         self.view.set_total(total)
 
@@ -56,7 +45,7 @@ class LedgerPresenter(object):
         if not file:
             return
 
-        inv_nums = [inv.invoice_num for inv in self.invoices]
+        inv_nums = [inv.invoice_num for inv in gbl.dataset.get_ledger_data()]
 
         wb = xl.open_wb(file)
         sh = xl.get_latest_sheet(wb)
@@ -92,4 +81,5 @@ class LedgerPresenter(object):
                 removals.append(invoice.invoice_num)
         gbl.dataset.remove_invoices(removals)
         self.view.refresh_invoices()
+        self.set_total(gbl.dataset.get_ledger_data(), 'All')
         # dao.close()
