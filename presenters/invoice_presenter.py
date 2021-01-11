@@ -43,7 +43,7 @@ class InvoicePresenter(object):
         qtr_frum, qtr_thru = self.get_query_params()
 
         # Get ledger records for quarter
-        ledger_rex = gbl.dataset.get_ledger_data(self.quarter)
+        ledger_rex = gbl.dataset.get_unsent_invoices(self.quarter)
 
         # Get the assignment ids for the assignments already in the ledger
         ledger_asn_ids = [rec.asn_id for rec in ledger_rex]
@@ -88,16 +88,10 @@ class InvoicePresenter(object):
 
         # Combine the records already in ledger with the new ones
         model = ledger_rex + new_rex
-        gbl.dataset.set_ledger_entries(model)
+        gbl.dataset.set_unsent_invoices(model)
 
         # Update the view
         self.view.load_grid(model)
-
-    def reload(self):
-        new_data = Invoice.get_rex(Dao())
-        gbl.dataset.set_ledger_data(new_data)
-        self.view.load_grid(gbl.dataset.get_ledger_data())
-        uil.show_msg('Reloaded!','Try Again')
 
     def load_details(self):
         item = self.view.get_selection()

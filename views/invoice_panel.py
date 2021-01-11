@@ -22,7 +22,7 @@ class InvoicePanel(wx.Panel):
 
     def build_list_panel(self, parent):
         panel = wx.Panel(
-            parent, wx.ID_ANY, wx.DefaultPosition, size=(680, 500)
+            parent, wx.ID_ANY, wx.DefaultPosition, size=(600, 400)
         )
         panel.SetBackgroundColour(wx.Colour(gbl.COLOR_SCHEME.tbBg))
         layout = wx.BoxSizer(wx.VERTICAL)
@@ -71,7 +71,7 @@ class InvoicePanel(wx.Panel):
         layout = wx.BoxSizer(wx.HORIZONTAL)
 
         self.list_ctrl = olv.ObjectListView(panel, wx.ID_ANY,
-                                            size=wx.Size(680, 775),
+                                            size=wx.Size(600, 775),
                                             style=wx.LC_REPORT | wx.SUNKEN_BORDER)
 
         ok_img = wx.Bitmap('images/Good mark.bmp', wx.BITMAP_TYPE_BMP)

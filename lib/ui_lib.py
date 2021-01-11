@@ -224,3 +224,22 @@ class MonthCtrl(masked.TextCtrl):
                                 choices=choices,
                                 choiceRequired=True)
         self.SetFont(wx.Font(9, 70, 90, 90))
+
+
+class NavigationToolbar(wx.Panel):
+    def __init__(self, *args, **kwargs):
+        super(NavigationToolbar, self).__init__(*args, **kwargs)
+
+        layout = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.first_btn = wx.Button(self, wx.ID_ANY, label='<<')
+        self.prev_btn = wx.Button(self, wx.ID_ANY, label='<')
+        self.next_btn = wx.Button(self, wx.ID_ANY, label='>')
+        self.last_btn = wx.Button(self, wx.ID_ANY, label='>>')
+
+        layout.Add(self.first_btn, 0, wx.ALL, 5)
+        layout.Add(self.prev_btn, 0, wx.ALL, 5)
+        layout.Add(self.next_btn, 0, wx.ALL, 5)
+        layout.Add(self.last_btn, 0, wx.ALL, 5)
+
+        self.SetSizerAndFit(layout)

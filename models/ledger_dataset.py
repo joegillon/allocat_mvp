@@ -7,14 +7,14 @@ class LedgerDataSet(object):
         self._asn_rex = []
         self._dept_rex = []
         self._grant_admin_rex = []
-        self._ledger_rex = []       # Rex in DB
-        self._ledger_entries = []   # Working model
+        self._invoices_sent = []
+        self._invoices_unsent = []
 
         self.build_dataset()
 
     def _get_data(self):
         from dal.dao import Dao
-        from tests.ledger_data.test_data import invoices
+        # from tests.ledger_data.test_data import invoices
 
         from models.employee import Employee
         from models.department import Department
@@ -26,8 +26,9 @@ class LedgerDataSet(object):
         self._emp_rex = Employee.get_all(dao)
         self._dept_rex = Department.get_all(dao)
         self._grant_admin_rex = GrantAdmin.get_all(dao)
-        # self._ledger_rex = Invoice.get_rex(dao)
-        self._ledger_rex = invoices
+        invoices_unpaid = Invoice.get_rex(dao)
+        self._invoices_sent = [invoice for invoice in invoices_unpaid if invoice.sent]
+        self.invoices_unsent = [invoice for invoice in invoices_unpaid if not invoice.sent]
         self._asn_rex = Assignment.get_billables(dao)
         dao.close()
 
@@ -52,16 +53,32 @@ class LedgerDataSet(object):
     def get_grant_admin_data(self):
         return self._grant_admin_rex
 
-    def get_ledger_data(self, quarter=None):
+    def get_sent_invoices(self, quarter=None):
         if quarter:
-            return [rec for rec in self._ledger_rex if rec.quarter == quarter]
-        return self._ledger_rex
+            return [rec for rec in self._invoices_sent if rec.quarter == quarter]
+        return self._invoices_sent
 
-    def set_ledger_entries(self, entries):
-        self._ledger_entries = entries
+    def get_sent_invoice(self, inv_num):
+        return next((rec for rec in self._invoices_sent if rec.invoice_num == inv_num), None)
 
-    def get_ledger_entries(self):
-        return self._ledger_entries
+    def remove_sent_invoices(self, inv_nums):
+        self._invoices_sent = [rec for rec in self._invoices_sent if rec.invoice_num not in inv_nums]
+
+    def set_unsent_invoices(self, invoices):
+        self._invoices_unsent = invoices
+
+    def get_unsent_invoices(self, quarter=None):
+        if quarter:
+            return [rec for rec in self.invoices_unsent if rec.quarter == quarter]
+        return self.invoices_unsent
+
+    def get_unsent_invoice(self, inv_num):
+        return next((rec for rec in self._invoices_unsent if rec.invoice_num == inv_num), None)
+
+    def send_invoice(self, inv_num):
+        invoice = self.get_unsent_invoice(inv_num)
+        self._invoices_sent.append(invoice)
+        self._invoices_unsent = [rec for rec in self._invoices_unsent if rec.invoice_num != inv_num]
 
     def set_asn_data(self, asns):
         self._asn_rex = asns
@@ -77,8 +94,3 @@ class LedgerDataSet(object):
             return [a for a in self._asn_rex if ml.is_in_span(a.frum, a.thru, frum, thru)]
         return self._asn_rex
 
-    def get_invoice_rec(self, inv_num):
-        return next((rec for rec in self._ledger_rex if rec.invoice_num == inv_num), None)
-
-    def remove_invoices(self, inv_nums):
-        self._ledger_rex = [rec for rec in self._ledger_rex if rec.invoice_num not in inv_nums]

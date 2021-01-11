@@ -20,7 +20,7 @@ class LedgerPresenter(object):
             self.init_view()
 
     def init_view(self):
-        invoices = gbl.dataset.get_ledger_data()
+        invoices = gbl.dataset.get_sent_invoices()
         self.view.set_unpaid_list(invoices)
         self.set_total(invoices, 'All')
 
@@ -35,17 +35,17 @@ class LedgerPresenter(object):
             fltr = getattr(selection, attr)
             invoices = [invoice for invoice in invoices if getattr(invoice, attr) == fltr]
 
-        for invoice in invoices:
-            total += invoice.amount
-
-        self.view.set_total(total)
+        # for invoice in invoices:
+        #     total += invoice.amount
+        #
+        # self.view.set_total(total)
 
     def import_spreadsheet(self):
         file = xl.get_file(self.view)
         if not file:
             return
 
-        inv_nums = [inv.invoice_num for inv in gbl.dataset.get_ledger_data()]
+        inv_nums = [inv.invoice_num for inv in gbl.dataset.get_sent_invoices()]
 
         wb = xl.open_wb(file)
         sh = xl.get_latest_sheet(wb)
@@ -79,7 +79,7 @@ class LedgerPresenter(object):
             if invoice.balance == 0:
                 invoice.paid = True
                 removals.append(invoice.invoice_num)
-        gbl.dataset.remove_invoices(removals)
+        gbl.dataset.remove_sent_invoices(removals)
         self.view.refresh_invoices()
-        self.set_total(gbl.dataset.get_ledger_data(), 'All')
+        self.set_total(gbl.dataset.get_sent_invoices(), 'All')
         # dao.close()
