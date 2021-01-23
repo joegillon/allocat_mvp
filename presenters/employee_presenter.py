@@ -20,7 +20,7 @@ class EmployeePresenter(Presenter):
         pass
 
     def load_details(self):
-        item = self.view.get_selection()
+        item = self.view.get_invoice_selection()
         if item:
             self.view.set_name(item.name)
             self.view.set_fte(item.fte)
@@ -60,7 +60,7 @@ class EmployeePresenter(Presenter):
         import lib.validator_lib as vl
 
         values = self.get_form_values()
-        emp = self.view.get_selection()
+        emp = self.view.get_invoice_selection()
         emp_id = emp.id if emp else 0
 
         emp_match = vl.EmployeeMatch(emp_id, gbl.dataset.emp_names)

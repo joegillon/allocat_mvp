@@ -53,10 +53,10 @@ class Presenter(object):
         self.refresh_list()
 
     def set_selection(self, idx):
-        self.view.set_selection(idx)
+        self.view.set_invoice_selection(idx)
 
     def get_selection(self):
-        return self.view.get_selection()
+        return self.view.get_invoice_selection()
 
     def apply_filter(self, ctrl, c, target):
         self.view.clear_details()
@@ -71,14 +71,14 @@ class Presenter(object):
         the_list.SetFilter(olv.Filter.TextSearch(
             the_list, columns=[col], text=target))
         the_list.RepopulateList()
-        self.view.set_selection(0)
+        self.view.set_invoice_selection(0)
 
     def cancel_filter(self, ctrl):
         ctrl.Clear()
         the_list = self.view.list_ctrl
         the_list.SetFilter(None)
         the_list.RepopulateList()
-        self.view.set_selection(0)
+        self.view.set_invoice_selection(0)
 
     def clear(self):
         self.view.clear_details()
@@ -148,14 +148,14 @@ class Presenter(object):
         self.view.set_details_active(True, self.model_name)
 
     def refresh_asn_list(self):
-        me = self.view.get_selection()
+        me = self.view.get_invoice_selection()
         self.view.set_asn_list(me.asns)
 
     def set_asn_selection(self, idx):
-        self.view.set_selection(idx)
+        self.view.set_invoice_selection(idx)
 
     def get_asn_selection(self):
-        return self.view.get_selection()
+        return self.view.get_invoice_selection()
 
     def add_asn(self):
         idx = self.view.get_selected_idx()
@@ -171,7 +171,7 @@ class Presenter(object):
 
     def edit_asn(self, asn):
         idx = self.view.get_selected_idx()
-        owner = self.view.get_selection()
+        owner = self.view.get_invoice_selection()
         assignee = self.get_assignee_str(asn)
         dlg = AsnDlg(self.view, -1, 'Assignment Details', owner, assignee, asn)
         self.asn_presenter = dlg.presenter

@@ -57,7 +57,7 @@ class EventHandler(object):
             self.presenter.drop(action)
 
     def on_list_select(self, evt):
-        self.presenter.load_details()
+        self.presenter.load_form()
 
     def on_asn_add(self, evt):
         self.presenter.add_asn()

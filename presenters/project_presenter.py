@@ -23,7 +23,7 @@ class ProjectPresenter(Presenter):
         self.view.load_pm(managers)
 
     def load_details(self):
-        item = self.view.get_selection()
+        item = self.view.get_invoice_selection()
         if item:
             self.view.set_name(item.name)
             self.view.set_full_name(item.full_name)
@@ -59,7 +59,7 @@ class ProjectPresenter(Presenter):
         import lib.month_lib as ml
 
         values = self.get_form_values()
-        prj = self.view.get_selection()
+        prj = self.view.get_invoice_selection()
         prj_id = prj.id if prj else 0
 
         prj_match = vl.ProjectMatch(prj_id, gbl.dataset.prj_names)

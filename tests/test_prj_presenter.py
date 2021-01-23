@@ -638,7 +638,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Check model and list have been updated
         model = gbl.dataset.get_prj_rec(316)
-        item = view.get_selection()
+        item = view.get_work_list_selection()
         self.assertEqual(model, item)
         self.assertEqual(view.list_ctrl.GetItemCount(), 9)
         item_idx = view.get_selected_idx()
@@ -661,7 +661,7 @@ class TestProjectPresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         prj = model[model_idx]
-        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(view.get_work_list_selection(), prj)
         self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
         self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
 
@@ -725,7 +725,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Check model and list have been updated
         updated_prj = gbl.dataset.get_prj_rec(309)
-        item = view.get_selection()
+        item = view.get_work_list_selection()
         self.assertEqual(updated_prj, item)
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
         item_idx = view.get_selected_idx()
@@ -750,7 +750,7 @@ class TestProjectPresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         prj = gbl.dataset.get_prj_rec(309)
-        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(view.get_work_list_selection(), prj)
         self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
         self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
 
@@ -811,7 +811,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         # Check model and list have been updated
         model = gbl.dataset.get_prj_rec(309)
-        item = view.get_selection()
+        item = view.get_work_list_selection()
         self.assertEqual(model, item)
         self.assertEqual(view.list_ctrl.GetItemCount(), 8)
         item_idx = view.get_selected_idx()
@@ -836,7 +836,7 @@ class TestProjectPresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         prj = gbl.dataset.get_prj_rec(309)
-        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(view.get_work_list_selection(), prj)
         self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
         self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
 
@@ -873,7 +873,7 @@ class TestProjectPresenter(unittest.TestCase):
         mock_popup.assert_called_once_with(view, 'Drop selected project?')
 
         # Check no change
-        self.assertEqual(view.get_selection(), prj)
+        self.assertEqual(view.get_work_list_selection(), prj)
         self.assertEqual(list_ctrl.GetItemText(model_idx, 1), '08/19')
         self.assertEqual(list_ctrl.GetItemText(model_idx, 2), '09/20')
 
@@ -1027,7 +1027,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         with patch('views.asn_dlg.AsnDlg.ShowModal') as mock_modal:
             click_button(view.add_asn_btn)
@@ -1059,7 +1059,7 @@ class TestProjectPresenter(unittest.TestCase):
 
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         with patch('views.asn_dlg.AsnDlg.ShowModal') as mock_modal:
             dbl_click_list_ctrl(asn_list_ctrl, 2)
@@ -1091,7 +1091,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Select project
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         # Check assignments
         expected = gbl.dataset.get_prj_rec(309).asns
@@ -1114,7 +1114,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Select project
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         # Check assignments
         expected = gbl.dataset.get_prj_rec(309).asns
@@ -1139,7 +1139,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Select project
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         # Check assignments
         before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]
@@ -1174,7 +1174,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Select project
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         # Check assignments
         before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]
@@ -1209,7 +1209,7 @@ class TestProjectPresenter(unittest.TestCase):
         # Select project
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_prj_rec(309))
+        self.assertEqual(view.get_work_list_selection(), gbl.dataset.get_prj_rec(309))
 
         # Check assignments
         before_asns = [a for a in gbl.dataset.get_prj_rec(309).asns]

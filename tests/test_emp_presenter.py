@@ -59,7 +59,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -84,7 +84,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -109,7 +109,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -134,7 +134,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -159,7 +159,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -184,7 +184,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -209,7 +209,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -234,7 +234,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -259,7 +259,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         # Check list
-        self.assertEqual(view.get_selection(), model[model_idx])
+        self.assertEqual(view.get_invoice_selection(), model[model_idx])
 
         # Check form
         expected = {
@@ -640,7 +640,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check model and list have been updated
         new_emp = gbl.dataset.get_emp_rec(45)
-        item = view.get_selection()
+        item = view.get_invoice_selection()
         self.assertEqual(new_emp, item)
         self.assertEqual(view.list_ctrl.GetItemCount(), 14)
 
@@ -668,7 +668,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         emp = model[model_idx]
-        self.assertEqual(view.get_selection(), emp)
+        self.assertEqual(view.get_invoice_selection(), emp)
 
         self.assertEqual(view.get_save_button_label(), 'Update Employee')
 
@@ -716,7 +716,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         # Check model and list have been updated
         updated_emp = gbl.dataset.get_emp_rec(2)
-        item = view.get_selection()
+        item = view.get_invoice_selection()
         self.assertEqual(updated_emp, item)
         self.assertEqual(view.list_ctrl.GetItemCount(), 13)
 
@@ -737,7 +737,7 @@ class TestEmployeePresenter(unittest.TestCase):
         click_list_ctrl(list_ctrl, model_idx)
 
         emp = gbl.dataset.get_emp_rec(2)
-        self.assertEqual(view.get_selection(), emp)
+        self.assertEqual(view.get_invoice_selection(), emp)
 
         self.assertEqual(view.get_save_button_label(), 'Update Employee')
 
@@ -764,7 +764,7 @@ class TestEmployeePresenter(unittest.TestCase):
         mock_popup.assert_called_once_with(view, 'Drop selected employee?')
 
         # Check no change
-        self.assertEqual(view.get_selection(), emp)
+        self.assertEqual(view.get_invoice_selection(), emp)
 
         # Check details
         expected = {
@@ -890,7 +890,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         model_idx = 3
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(5))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(5))
 
         with patch('views.asn_dlg.AsnDlg.ShowModal') as mock_modal:
             click_button(view.add_asn_btn)
@@ -922,7 +922,7 @@ class TestEmployeePresenter(unittest.TestCase):
 
         model_idx = 3
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(5))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(5))
 
         with patch('views.asn_dlg.AsnDlg.ShowModal') as mock_modal:
             dbl_click_list_ctrl(asn_list_ctrl, 1)
@@ -951,7 +951,7 @@ class TestEmployeePresenter(unittest.TestCase):
         # Select employee
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(16))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(16))
 
         # Check assignments
         expected = gbl.dataset.get_emp_rec(16).asns
@@ -974,7 +974,7 @@ class TestEmployeePresenter(unittest.TestCase):
         # Select project
         model_idx = 4
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(16))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(16))
 
         # Check assignments
         expected = gbl.dataset.get_emp_rec(16).asns
@@ -999,7 +999,7 @@ class TestEmployeePresenter(unittest.TestCase):
         # Select project
         model_idx = 3
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(5))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(5))
 
         # Check assignments
         before_asns = [a for a in gbl.dataset.get_emp_rec(5).asns]
@@ -1034,7 +1034,7 @@ class TestEmployeePresenter(unittest.TestCase):
         # Select project
         model_idx = 3
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(5))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(5))
 
         # Check assignments
         before_asns = [a for a in gbl.dataset.get_emp_rec(5).asns]
@@ -1069,7 +1069,7 @@ class TestEmployeePresenter(unittest.TestCase):
         # Select project
         model_idx = 0
         click_list_ctrl(list_ctrl, model_idx)
-        self.assertEqual(view.get_selection(), gbl.dataset.get_emp_rec(44))
+        self.assertEqual(view.get_invoice_selection(), gbl.dataset.get_emp_rec(44))
 
         # Check assignments
         before_asns = [a for a in gbl.dataset.get_emp_rec(44).asns]

@@ -102,7 +102,7 @@ class AssignmentPanel(wx.Panel):
             self.assignee_layout.Add(assignee, 0, wx.ALL | wx.EXPAND, 5)
 
     def get_assignee(self):
-        return None if type(self.assignee) == str else self.assignee.get_selection()
+        return None if type(self.assignee) == str else self.assignee.get_work_list_selection()
 
     def set_frum(self, value):
         self.frum_ctrl.SetValue(ml.prettify(value))

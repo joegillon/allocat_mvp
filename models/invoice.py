@@ -108,7 +108,7 @@ class Invoice(object):
         for fld in [
             'id', 'quarter', 'asn_id',
             'project', 'employee', 'salary', 'fringe', 'total_day', 'effort', 'frum', 'thru',
-            'days', 'amount', 'paid', 'balance'
+            'days', 'paid'
         ]:
             delattr(self_copy, fld)
         return vars(self_copy)

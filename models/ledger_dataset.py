@@ -28,7 +28,7 @@ class LedgerDataSet(object):
         self._grant_admin_rex = GrantAdmin.get_all(dao)
         invoices_unpaid = Invoice.get_rex(dao)
         self._invoices_sent = [invoice for invoice in invoices_unpaid if invoice.sent]
-        self.invoices_unsent = [invoice for invoice in invoices_unpaid if not invoice.sent]
+        self._invoices_unsent = [invoice for invoice in invoices_unpaid if not invoice.sent]
         self._asn_rex = Assignment.get_billables(dao)
         dao.close()
 
@@ -69,8 +69,8 @@ class LedgerDataSet(object):
 
     def get_unsent_invoices(self, quarter=None):
         if quarter:
-            return [rec for rec in self.invoices_unsent if rec.quarter == quarter]
-        return self.invoices_unsent
+            return [rec for rec in self._invoices_unsent if rec.quarter == quarter]
+        return self._invoices_unsent
 
     def get_unsent_invoice(self, inv_num):
         return next((rec for rec in self._invoices_unsent if rec.invoice_num == inv_num), None)

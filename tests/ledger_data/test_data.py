@@ -521,7 +521,8 @@ invoice_items_qtr_1 = [
         'balance': 7363.45,
         'short_code': '123456',
         'grant_admin': 'MARX,GROUCHO',
-        'grant_admin_email': 'groucho@umich.edu'
+        'grant_admin_email': 'groucho@umich.edu',
+        'sent': 0
     }),
     Invoice({
         'id': 2,
@@ -545,7 +546,8 @@ invoice_items_qtr_1 = [
         'balance': 4942.04,
         'short_code': None,
         'grant_admin': None,
-        'grant_admin_email': None
+        'grant_admin_email': None,
+        'sent': 0
     }),
     Invoice({
         'id': 3,
@@ -569,7 +571,8 @@ invoice_items_qtr_1 = [
         'balance': None,
         'short_code': '556677',
         'grant_admin': 'MARX,CHICO',
-        'grant_admin_email': 'chico@umich.edu'
+        'grant_admin_email': 'chico@umich.edu',
+        'sent': 0
     }),
     Invoice({
         'id': None,
@@ -593,7 +596,8 @@ invoice_items_qtr_1 = [
         'balance': None,
         'short_code': None,
         'grant_admin': None,
-        'grant_admin_email': None
+        'grant_admin_email': None,
+        'sent': 0
     }),
     Invoice({
         'id': None,
@@ -617,7 +621,8 @@ invoice_items_qtr_1 = [
         'balance': 1844.14,
         'short_code': None,
         'grant_admin': None,
-        'grant_admin_email': None
+        'grant_admin_email': None,
+        'sent': 0
     }),
     Invoice({
         'id': None,
@@ -641,7 +646,8 @@ invoice_items_qtr_1 = [
         'balance': 3272.65,
         'short_code': None,
         'grant_admin': None,
-        'grant_admin_email': None
+        'grant_admin_email': None,
+        'sent': 0
     })
 ]
 

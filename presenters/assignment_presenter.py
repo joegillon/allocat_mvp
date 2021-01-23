@@ -84,14 +84,14 @@ class AssignmentPresenter(object):
             if isinstance(self.assignee, str):
                 employee_id = self.asn.employee_id
             else:
-                emp = self.assignee.get_selection()
+                emp = self.assignee.get_invoice_selection()
                 employee_id = emp.id if emp else None
         else:
             employee_id = self.owner.id
             if isinstance(self.assignee, str):
                 project_id = self.asn.project_id
             else:
-                prj = self.assignee.get_selection()
+                prj = self.assignee.get_invoice_selection()
                 project_id = prj.id if prj else None
 
         return {
